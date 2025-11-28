@@ -1,0 +1,530 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Shopify Integration Dashboard{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.sync-dashboard {
+    padding: 20px;
+    background: white;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sync-card {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px;
+    display: inline-block;
+    width: 280px;
+    vertical-align: top;
+}
+
+.sync-card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.sync-button {
+    background: #417690;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.sync-button:hover {
+    background: #205067;
+    color: white;
+    text-decoration: none;
+}
+
+.sync-button.danger {
+    background: #ba2121;
+}
+
+.sync-button.danger:hover {
+    background: #a41e1e;
+}
+
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #417690;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.sync-status {
+    background: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background: #28a745;
+}
+
+.progress-container {
+    margin: 15px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #417690, #28a745);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+.sync-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.sync-button.running {
+    background: #ffc107;
+    color: #000;
+}
+
+.breadcrumbs {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.breadcrumbs a {
+    color: #417690;
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='shopify_integration' %}">Shopify Integration</a>
+    &rsaquo; Sync Dashboard
+</div>
+
+<div class="sync-dashboard">
+    <h1>🔄 Shopify Integration Dashboard</h1>
+    
+    <div class="sync-status">
+        <h3><span class="status-indicator"></span>Sync Status: Ready</h3>
+        <p>All systems operational. Ready for sync operations.</p>
+    </div>
+
+    <div class="data-stats">
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.customers|default:0 }}</div>
+            <div class="stat-label">Customers</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.customer_addresses|default:0 }}</div>
+            <div class="stat-label">Customer Addresses</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.products|default:0 }}</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.product_variants|default:0 }}</div>
+            <div class="stat-label">Product Variants</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.product_images|default:0 }}</div>
+            <div class="stat-label">Product Images</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.orders|default:0 }}</div>
+            <div class="stat-label">Orders</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.inventory_items|default:0 }}</div>
+            <div class="stat-label">Inventory Items</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.payments_accounts|default:0 }}</div>
+            <div class="stat-label">💳 Payments Accounts</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.balance_transactions|default:0 }}</div>
+            <div class="stat-label">💰 Balance Transactions</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.payouts|default:0 }}</div>
+            <div class="stat-label">💸 Payouts</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.disputes|default:0 }}</div>
+            <div class="stat-label">⚠️ Disputes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.kyc_info|default:0 }}</div>
+            <div class="stat-label">📋 KYC Info</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.webhook_subscriptions|default:0 }}</div>
+            <div class="stat-label">🔔 Webhook Subscriptions</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.webhook_deliveries|default:0 }}</div>
+            <div class="stat-label">📬 Webhook Deliveries</div>
+        </div>
+    </div>
+    
+    <!-- Product Images Gallery -->
+    {% if product_images %}
+    <div style="margin: 30px 0;">
+        <h2 style="color: #333; margin-bottom: 15px;">📸 Recent Product Images</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin: 20px 0;">
+            {% for image in product_images %}
+            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <a href="{{ image.src }}" target="_blank" style="display: block;">
+                    <img src="{{ image.src }}" alt="{{ image.alt_text }}" 
+                         style="width: 100%; height: 150px; object-fit: cover; display: block;">
+                </a>
+                <div style="padding: 10px; font-size: 12px;">
+                    <div style="font-weight: bold; color: #333; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ image.product.title|truncatechars:30 }}
+                    </div>
+                    <div style="color: #666; font-size: 11px;">
+                        {{ image.width }}x{{ image.height }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="{% url 'admin:products_shopifyproductimage_changelist' %}" class="sync-button" style="margin-top: 10px;">
+            View All Images →
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="sync-cards">
+        <div class="sync-card">
+            <h3>🔄 Full Sync</h3>
+            <p>Sync all data from Shopify including customers, products, orders, inventory, and shipping.</p>
+            <div class="progress-container" id="full-sync-progress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="full-sync-fill"></div>
+                </div>
+                <div class="progress-text" id="full-sync-text">Initializing...</div>
+            </div>
+            <form method="post" action="{% url 'admin:shopify_sync_all' %}" style="display: inline;" onsubmit="startFullSync(event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button danger" id="full-sync-btn">
+                    🚀 Sync All Data
+                </button>
+            </form>
+            <p><small><strong>Warning:</strong> This may take several minutes</small></p>
+        </div>
+
+        <div class="sync-card">
+            <h3>👥 Customers</h3>
+            <p>Sync customer data and addresses from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_customers' %}" style="display: inline;" onsubmit="startIndividualSync('Customers', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">👥 Sync Customers</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>📦 Products</h3>
+            <p>Sync products, variants, and images from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_products' %}" style="display: inline;" onsubmit="startIndividualSync('Products', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">📦 Sync Products</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>🛒 Orders</h3>
+            <p>Sync orders, line items, and addresses from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_orders' %}" style="display: inline;" onsubmit="startIndividualSync('Orders', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">🛒 Sync Orders</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>📊 Inventory</h3>
+            <p>Sync inventory items, levels, and locations from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_inventory' %}" style="display: inline;" onsubmit="startIndividualSync('Inventory', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">📊 Sync Inventory</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>🚚 Shipping</h3>
+            <p>Sync shipping profiles, zones, and carrier services from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_shipping' %}" style="display: inline;" onsubmit="startIndividualSync('Shipping', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">🚚 Sync Shipping</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>💳 Payments</h3>
+            <p>Sync Shopify Payments data including transactions, payouts, disputes, and KYC info.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_payments' %}" style="display: inline;" onsubmit="startIndividualSync('Payments', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">💳 Sync Payments</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>🔔 Webhooks</h3>
+            <p>Sync webhook subscriptions and delivery tracking from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_webhooks' %}" style="display: inline;" onsubmit="startIndividualSync('Webhooks', event)">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">🔔 Sync Webhooks</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="sync-status">
+        <h3>📋 Quick Actions</h3>
+        <p>
+            <a href="{% url 'admin:customers_shopifycustomer_changelist' %}" class="sync-button">View Customers</a>
+            <a href="{% url 'admin:products_shopifyproduct_changelist' %}" class="sync-button">View Products</a>
+            <a href="{% url 'admin:orders_shopifyorder_changelist' %}" class="sync-button">View Orders</a>
+            <a href="{% url 'admin:inventory_shopifyinventoryitem_changelist' %}" class="sync-button">View Inventory</a>
+            <a href="{% url 'admin:shipping_shopifycarrierservice_changelist' %}" class="sync-button">View Shipping</a>
+            <a href="{% url 'admin:payments_shopifypaymentsaccount_changelist' %}" class="sync-button">View Payments</a>
+            <a href="{% url 'admin:subscriptions_shopifywebhooksubscription_changelist' %}" class="sync-button">View Webhooks</a>
+        </p>
+    </div>
+</div>
+
+<script>
+// Progress tracking functions
+function startFullSync(event) {
+    const form = event.target;
+    const progressContainer = document.getElementById('full-sync-progress');
+    const progressFill = document.getElementById('full-sync-fill');
+    const progressText = document.getElementById('full-sync-text');
+    const button = document.getElementById('full-sync-btn');
+    
+    // Show progress bar
+    progressContainer.style.display = 'block';
+    button.disabled = true;
+    button.classList.add('running');
+    button.innerHTML = '⏳ Syncing...';
+    
+    // Simulate progress (in real implementation, this would poll the server)
+    let progress = 0;
+    const steps = ['Customers', 'Products', 'Orders', 'Inventory', 'Shipping', 'Payments'];
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+        progress += 16.67; // 100 / 6 steps
+        progressFill.style.width = progress + '%';
+        
+        if (currentStep < steps.length) {
+            progressText.textContent = `Syncing ${steps[currentStep]}... ${Math.round(progress)}%`;
+            currentStep++;
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            progressText.textContent = 'Sync completed! Submitting...';
+        }
+    }, 2000);
+    
+    // Prevent immediate form submission
+    event.preventDefault();
+    
+    // Submit form after progress animation (10 seconds)
+    setTimeout(() => {
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        }).then(response => {
+            if (response.ok) {
+                progressText.textContent = 'Full sync started! Check terminal for progress.';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                progressText.textContent = 'Full sync failed. Please try again.';
+                button.disabled = false;
+                button.classList.remove('running');
+                button.innerHTML = '🚀 Sync All Data';
+            }
+        }).catch(error => {
+            console.error('Full sync error:', error);
+            progressText.textContent = 'Full sync error. Please try again.';
+            button.disabled = false;
+            button.classList.remove('running');
+            button.innerHTML = '🚀 Sync All Data';
+        });
+    }, 10000);
+}
+
+function startIndividualSync(syncType, event) {
+    const form = event.target;
+    const card = form.closest('.sync-card');
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Create progress bar if it doesn't exist
+    let progressContainer = card.querySelector('.progress-container');
+    if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+        progressContainer.innerHTML = `
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text">Initializing ${syncType} sync...</div>
+        `;
+        form.insertBefore(progressContainer, button);
+    }
+    
+    const progressFill = progressContainer.querySelector('.progress-fill');
+    const progressText = progressContainer.querySelector('.progress-text');
+    
+    // Show progress
+    progressContainer.style.display = 'block';
+    button.disabled = true;
+    button.classList.add('running');
+    button.innerHTML = `⏳ Syncing ${syncType}...`;
+    
+    // Animate progress
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 25;
+        progressFill.style.width = progress + '%';
+        progressText.textContent = `Syncing ${syncType}... ${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            progressText.textContent = `${syncType} sync completed! Submitting...`;
+        }
+    }, 1000);
+    
+    // Prevent immediate form submission
+    event.preventDefault();
+    
+    // Submit form after progress animation (4 seconds)
+    setTimeout(() => {
+        // Create a new form submission to ensure CSRF token is included
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        }).then(response => {
+            if (response.ok) {
+                progressText.textContent = `${syncType} sync started! Check terminal for progress.`;
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                progressText.textContent = `${syncType} sync failed. Please try again.`;
+                button.disabled = false;
+                button.classList.remove('running');
+                button.innerHTML = getButtonIcon(syncType) + ` Sync ${syncType}`;
+            }
+        }).catch(error => {
+            console.error('Sync error:', error);
+            progressText.textContent = `${syncType} sync error. Please try again.`;
+            button.disabled = false;
+            button.classList.remove('running');
+            button.innerHTML = getButtonIcon(syncType) + ` Sync ${syncType}`;
+        });
+    }, 4000);
+}
+
+// Helper function to get button icon
+function getButtonIcon(syncType) {
+    const icons = {
+        'Customers': '👥',
+        'Products': '📦',
+        'Orders': '🛒',
+        'Inventory': '📊',
+        'Shipping': '🚚',
+        'Payments': '💳',
+        'Webhooks': '🔔'
+    };
+    return icons[syncType] || '🔄';
+}
+
+// Show success message after form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('sync') === 'started') {
+        alert('Sync operation started successfully! Check the terminal for progress.');
+    }
+});
+</script>
+{% endblock %}

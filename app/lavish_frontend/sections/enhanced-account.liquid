@@ -1,0 +1,2617 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'enhanced-account.css' | asset_url | stylesheet_tag }}
+
+<script>
+  const customerId = {{ customer.id | json }};
+</script>
+
+<div class="customer account section-{{ section.id }}-padding" style="max-width: none !important; width: 100% !important;">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <h1 class="account-title" style="font-size: 2rem; margin: 0;">My Account</h1>
+    <div class="burger-icon" onclick="toggleMobileSidebar()" style="margin-left: auto; cursor: pointer;">
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- Mobile Sidebar -->
+  <div class="account-sidebar mobile">
+    <button class="mobile-sidebar-close" onclick="closeMobileSidebar()">&times;</button>
+    <h3>{{ customer.first_name | default: 'My' }} Account</h3>
+    <ul class="sidebar-nav">
+      <li>
+        <a href="#overview" class="nav-link active" data-tab="overview" onclick="closeMobileSidebar(); showTab('overview');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+          </svg>
+          Overview
+        </a>
+      </li>
+      <li>
+        <a href="#orders" class="nav-link" data-tab="orders" onclick="closeMobileSidebar(); showTab('orders');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+          </svg>
+          Orders
+        </a>
+      </li>
+      <li>
+        <a href="#subscriptions" class="nav-link" data-tab="subscriptions" onclick="closeMobileSidebar(); showTab('subscriptions');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          Subscriptions
+        </a>
+      </li>
+      <li>
+        <a href="#addresses" class="nav-link" data-tab="addresses" onclick="closeMobileSidebar(); showTab('addresses');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          Addresses
+        </a>
+      </li>
+      <li>
+        <a href="#payment-methods" class="nav-link" data-tab="payment-methods" onclick="closeMobileSidebar(); showTab('payment-methods');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+          </svg>
+          Payment Methods
+        </a>
+      </li>
+      <li>
+        <a href="#personal-info" class="nav-link" data-tab="personal-info" onclick="closeMobileSidebar(); showTab('personal-info');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 2h2v2h-2V4zm1 16c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S10.83 20 10 20z"/>
+          </svg>
+          Personal Information
+        </a>
+      </li>
+      <li>
+        <a href="#password" class="nav-link" data-tab="password" onclick="closeMobileSidebar(); showTab('password');">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+          </svg>
+          Password
+        </a>
+      </li>
+
+    </ul>
+  </div>
+
+  <div class="page-width" style="max-width: none !important; width: 100% !important;">
+    <div class="account-container">
+      <!-- Sidebar Navigation -->
+      <div class="account-sidebar">
+        <h3>{{ customer.first_name | default: 'My' }} Account</h3>
+        <ul class="sidebar-nav">
+          <li>
+            <a href="#overview" class="nav-link active" data-tab="overview">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+              </svg>
+              Overview
+            </a>
+          </li>
+          <li>
+            <a href="#orders" class="nav-link" data-tab="orders">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+              </svg>
+              Orders
+            </a>
+          </li>
+          <li>
+            <a href="#subscriptions" class="nav-link" data-tab="subscriptions">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Subscriptions
+            </a>
+          </li>
+          <li>
+            <a href="#addresses" class="nav-link" data-tab="addresses">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              Addresses
+            </a>
+          </li>
+          <li>
+            <a href="#payment-methods" class="nav-link" data-tab="payment-methods">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+              </svg>
+              Payment Methods
+            </a>
+          </li>
+          <li>
+            <a href="#personal-info" class="nav-link" data-tab="personal-info">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 2h2v2h-2V4zm1 16c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S10.83 20 10 20z"/>
+              </svg>
+              Personal Information
+            </a>
+          </li>
+          <li>
+            <a href="#password" class="nav-link" data-tab="password">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+              </svg>
+              Password
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="account-content">
+        <div class="account-header">
+          <h1 class="account-title">Welcome back, {{ customer.first_name | default: 'Customer' }}!</h1>
+          <a href="{{ routes.account_logout_url }}" class="logout-link">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Logout
+          </a>
+        </div>
+
+        <!-- Django Sync Status -->
+        <div class="django-sync-status" style="background-color: rgba(var(--color-foreground), 0.04) !important;">
+          <strong>Django Integration:</strong> <span id="django-status">Checking connection...</span>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+          <h2>Account Overview</h2>
+          <div class="form-row">
+            <div>
+              <h3>Personal Information</h3>
+              <p><strong>Name:</strong> {{ customer.first_name }} {{ customer.last_name }}</p>
+              <p><strong>Email:</strong> {{ customer.email }}</p>
+            </div>
+            <div>
+              <h3>Account Details</h3>
+              <p><strong>Member since:</strong> {{ customer.created_at | date: '%B %d, %Y' }}</p>
+              <p><strong>Total orders:</strong> {{ customer.orders_count }}</p>
+            </div>
+          </div>
+          
+          <!-- Subscription Overview Section -->
+          <div style="margin-top: 3rem; padding-top: 2rem; border-top: 0.1rem solid rgba(var(--color-foreground), 0.2);">
+            <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1.5rem;">🔄 My Subscriptions</h3>
+            
+            <!-- Active Subscription 1 -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+              <div style="flex: 1; min-width: 250px;">
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Lavish Library Monthly Box</h3>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.4rem;"><strong>Next renewal:</strong> July 4, 2025</p>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.4rem;"><strong>Skips Reset On:</strong> January 1, 2026</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: nowrap; justify-content: flex-end; flex-shrink: 0;">
+                <button onclick="showTab('subscriptions')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                  ⚙️ Manage
+                </button>
+                <button onclick="skipNextPayment('1933365')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                  ⏭️ Skip
+                </button>
+              </div>
+            </div>
+            
+            <!-- Active Subscription 2 -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+              <div style="flex: 1; min-width: 250px;">
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Fantasy Deluxe Package</h3>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.4rem;"><strong>Next renewal:</strong> August 15, 2025</p>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.4rem;"><strong>Skips Reset On:</strong> January 1, 2026</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: nowrap; justify-content: flex-end; flex-shrink: 0;">
+                <button onclick="showTab('subscriptions')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                  ⚙️ Manage
+                </button>
+                <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                  ⏭️ Skip
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Tab -->
+        <div id="user-profile" class="tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h2>User Profile</h2>
+            <h3 style="color: rgba(var(--color-foreground), 0.75); font-size: 1.6rem; margin-top: 0.5rem;">{{ customer.first_name | default: 'User' }} {{ customer.last_name | default: 'Profile' }}</h3>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+            <div style="text-align: center; padding: 1rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <span style="font-size: 2rem; font-weight: 600; color: rgba(var(--color-button), var(--alpha-button-background)); display: block;">{{ customer.orders_count | default: 0 }}</span>
+              <span style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.75);">Orders</span>
+            </div>
+            <div style="text-align: center; padding: 1rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <span style="font-size: 2rem; font-weight: 600; color: rgba(var(--color-button), var(--alpha-button-background)); display: block;">{{ customer.total_spent | money | default: '$0.00' }}</span>
+              <span style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.75);">Spent</span>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 2rem;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">🏆 Achievements</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              {% if customer.orders_count > 0 %}
+                <span style="background-color: rgba(var(--color-button), 0.1); color: rgba(var(--color-button), 0.8); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; border: 0.1rem solid rgba(var(--color-button), 0.3);">First Purchase</span>
+              {% endif %}
+              {% if customer.orders_count >= 5 %}
+                <span style="background-color: rgba(var(--color-button), 0.1); color: rgba(var(--color-button), 0.8); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; border: 0.1rem solid rgba(var(--color-button), 0.3);">Loyal Customer</span>
+              {% endif %}
+              <span style="background-color: rgba(var(--color-button), 0.1); color: rgba(var(--color-button), 0.8); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; border: 0.1rem solid rgba(var(--color-button), 0.3);">Verified Email</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div style="background-color: rgb(var(--color-background)); padding: 1.5rem; border-radius: var(--media-radius); border: 0.1rem solid rgba(var(--color-foreground), 0.1);">
+              <div style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05rem;">Member Since</div>
+              <div style="font-size: 1.4rem; color: rgb(var(--color-foreground)); font-weight: 500;">{{ customer.created_at | date: '%B %d, %Y' | default: 'Unknown' }}</div>
+            </div>
+            <div style="background-color: rgb(var(--color-background)); padding: 1.5rem; border-radius: var(--media-radius); border: 0.1rem solid rgba(var(--color-foreground), 0.1);">
+              <div style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05rem;">Account Status</div>
+              <div style="font-size: 1.4rem; color: #4C5151; font-weight: 500;">✅ Active & Verified</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information Tab -->
+        <div id="personal-info" class="tab-content">
+          <h2>Personal Information</h2>
+          <div class="personal-info-container">
+            <form id="personal-info-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ customer.first_name }}" required>
+              </div>
+              <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ customer.last_name }}" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" value="{{ customer.email }}" required>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="phone-input">
+                  <select id="phone_country_code" name="phone_country_code">
+                    <option value="">Please select</option>
+                  </select>
+                  <input type="tel" id="phone" name="phone" value="{{ customer.phone }}" placeholder="Enter phone number">
+                </div>
+              </div>
+            </div>
+            <div class="button-container" style="margin-top: 2rem;">
+              <button type="submit" class="btn-primary" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1.2rem 2.4rem; border-radius: var(--buttons-radius); font-size: 1.4rem; cursor: pointer;">Update Information</button>
+            </div>
+          </form>
+        </div>
+        </div>
+
+        <!-- Password Tab -->
+        <div id="password" class="tab-content">
+          <h2>Change Password</h2>
+          <form id="password-form">
+            <div class="form-group">
+              <label for="current_password">Current Password</label>
+              <input type="password" id="current_password" name="current_password" required>
+            </div>
+            <div class="form-group">
+              <label for="new_password">New Password</label>
+              <input type="password" id="new_password" name="new_password" required>
+            </div>
+            <div class="form-group">
+              <label for="confirm_password">Confirm New Password</label>
+              <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <button type="submit" class="btn-primary" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1.2rem 2.4rem; border-radius: var(--buttons-radius); cursor: pointer;">Change Password</button>
+          </form>
+        </div>
+
+        <!-- Addresses Tab -->
+        <div id="addresses" class="tab-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem;">My Addresses</h2>
+            <button onclick="openAddressWizard()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem;">
+              ✚ Add New Address
+            </button>
+          </div>
+          
+          <div class="addresses-grid" style="display: grid; gap: 2rem;">
+            <!-- Sample Address 1 - Default -->
+            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem; position: relative; border: 0.2rem solid rgba(var(--color-button), 0.3);">
+              <div style="position: absolute; top: 1rem; right: 1rem;">
+                <span style="background-color: #FFF6EA; color: #4C5151; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1rem; font-weight: 600;">DEFAULT</span>
+              </div>
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Home Address</h3>
+              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
+                <p style="margin: 0.3rem 0;">*** ****** ******* ****</p>
+                <p style="margin: 0.3rem 0;">********* **</p>
+                <p style="margin: 0.3rem 0;">London, England SW** ***</p>
+                <p style="margin: 0.3rem 0;">United Kingdom</p>
+                <p style="margin: 0.3rem 0;"><strong>Phone:</strong> +** ** **** 0958</p>
+              </div>
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                  <button onclick="editAddress('addr_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                    ✏️ Edit
+                  </button>
+                  <button onclick="setDefaultAddress('addr_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;" disabled>
+                    ⭐ Default
+                  </button>
+                </div>
+                <div>
+                  <button onclick="showDeleteModal('address', 'addr_1', 'Home Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sample Address 2 -->
+            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Work Address</h3>
+              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
+                <p style="margin: 0.3rem 0;">*** ******** ********</p>
+                <p style="margin: 0.3rem 0;">***** ***</p>
+                <p style="margin: 0.3rem 0;">Manchester, England M* ***</p>
+                <p style="margin: 0.3rem 0;">United Kingdom</p>
+                <p style="margin: 0.3rem 0;">Phone: +** *** *** 4567</p>
+              </div>
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                  <button onclick="editAddress('addr_2')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
+                    ✏️ Edit
+                  </button>
+                  <button onclick="setDefaultAddress('addr_2')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 01rem;">
+                    ⭐ Set Default
+                  </button>
+                </div>
+                <div>
+                  <button onclick="showDeleteModal('address', 'addr_2', 'Work Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sample Address 3 -->
+            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Gift Address</h3>
+              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
+                <p style="margin: 0.3rem 0;">*** ****** ******</p>
+                <p style="margin: 0.3rem 0;">Birmingham, England B* ***</p>
+                <p style="margin: 0.3rem 0;">United Kingdom</p>
+                <p style="margin: 0.3rem 0;">Phone: +** *** *** 7890</p>
+              </div>
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                  <button onclick="editAddress('addr_3')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    ✏️ Edit
+                  </button>
+                  <button onclick="setDefaultAddress('addr_3')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    ⭐ Set Default
+                  </button>
+                </div>
+                <div>
+                  <button onclick="showDeleteModal('address', 'addr_3', 'Gift Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {% comment %} Dynamic addresses from Shopify {% endcomment %}
+            {% for address in customer.addresses %}
+              <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
+                <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">{{ address.first_name }} {{ address.last_name }}</h4>
+                <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
+                  <p style="margin: 0.3rem 0;">{{ address.address1 }}</p>
+                  {% if address.address2 != blank %}
+                    <p style="margin: 0.3rem 0;">{{ address.address2 }}</p>
+                  {% endif %}
+                  <p style="margin: 0.3rem 0;">{{ address.city }}, {{ address.province }} {{ address.zip }}</p>
+                  <p style="margin: 0.3rem 0;">{{ address.country }}</p>
+                  {% if address.phone != blank %}
+                    <p style="margin: 0.3rem 0;">Phone: {{ address.phone }}</p>
+                  {% endif %}
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                  <div>
+                    <button onclick="editAddress('{{ address.id }}')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                      ✏️ Edit
+                    </button>
+                    <button onclick="setDefaultAddress('{{ address.id }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                      ⭐ Set Default
+                    </button>
+                  </div>
+                  <div>
+                    <button onclick="showDeleteModal('address', '{{ address.id }}', '{{ address.first_name }} {{ address.last_name }}')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Payment Methods Tab -->
+        <div id="payment-methods" class="tab-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem;">Payment Methods</h2>
+            <button onclick="openPaymentModal('add')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem;">
+              ✚ Add Payment Method
+            </button>
+          </div>
+
+          <div style="display: grid; gap: 2rem;" class="payment-methods-grid">
+            <!-- Sample Payment Method 1 - Default -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem; position: relative; border: 0.2rem solid rgba(var(--color-button), 0.3);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                  <!-- Visa Card Icon -->
+                  <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #1a1f71 0%, #0f4c75 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                    VISA
+                  </div>
+                  <div>
+                    <div style="text-align: right;">
+                    <span style="background-color: #FFF6EA; color: #4C5151; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1rem; font-weight: 600;">DEFAULT</span>
+                </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="margin-bottom: 1.5rem;">
+              ` <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">•••• •••• •••• 4242</h4>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">Expires 12/28</p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Cardholder:</strong> John Doe
+                </p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Billing Address:</strong> 123 Lavish ******, London, SW** ***
+                </p>
+              </div>
+              
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="openPaymentModal('edit', 'card_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  ✏️ Edit
+                </button>
+                <button onclick="setDefaultPayment('card_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;" disabled>
+                  ⭐ Default
+                </button>
+                <button onclick="showDeleteModal('payment', 'card_1', 'Visa ending in 4242')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Sample Payment Method 2 -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                  <!-- Mastercard Icon -->
+                  <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #eb001b 0%, #f79e1b 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                    MC
+                  </div>
+                </div>
+              </div>
+              
+              <div style="margin-bottom: 1.5rem;">
+                <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">•••• •••• •••• 5555</h4>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">Expires 08/27</p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Cardholder:</strong> John Doe
+                </p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Billing Address:</strong> 456 Business ******, Manchester, M* ***
+                </p>
+              </div>
+              
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="openPaymentModal('edit', 'card_2')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  ✏️ Edit
+                </button>
+                <button onclick="setDefaultPayment('card_2')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  ⭐ Set Default
+                </button>
+                <button onclick="showDeleteModal('payment', 'card_2', 'Mastercard ending in 5555')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Sample Payment Method 3 - PayPal -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
+              <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <!-- PayPal Icon -->
+                <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #0070ba 0%, #003087 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px;">
+                  PayPal
+                </div>
+              </div>
+              
+              <div style="margin-bottom: 1.5rem;">
+                <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">john.doe@email.com</h4>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">PayPal Account</p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Account Status:</strong> <span style="color: #28a745;">✓ Verified</span>
+                </p>
+                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
+                  <strong>Connected:</strong> March 15, 2024
+                </p>
+              </div>
+              
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="openPaymentModal('edit', 'paypal_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  ✏️ Edit
+                </button>
+                <button onclick="setDefaultPayment('paypal_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  ⭐ Set Default
+                </button>
+                <button onclick="showDeleteModal('payment', 'paypal_1', 'PayPal Account')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscriptions Tab -->
+        <div id="subscriptions" class="tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h2>My Subscriptions</h2>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <!-- Active Subscriptions -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); padding: 0;">
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; padding: 1rem;">
+                ✅ Active Subscriptions
+              </h3>
+              
+              <!-- Subscription Item 1 -->
+              <div style="background-color: rgb(var(--color-background)); padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                  <div style="flex: 1;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">Fantasy Deluxe Package</h3>
+                    <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Subscription #1944521</p>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="background-color: #28a745; color: white; padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; font-weight: 600;">ACTIVE</span>
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Start Date</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">January 15, 2024</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Next Payment</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">August 15, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Last Order</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">July 15, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Skips Remaining</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">2</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Skip/Unskip Deadline</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">July 30, 2025</div>
+                  </div>
+                </div>
+
+                <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">💰 Pricing Details</h3>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.3rem;">Fantasy Deluxe Box + Goodies</span>
+                    <span style="font-size: 1.3rem;">£45.00</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.3rem;">Shipping (Express)</span>
+                    <span style="font-size: 1.3rem;">£12.50</span>
+                  </div>
+                  <hr style="border: none; border-top: 0.1rem solid rgba(var(--color-foreground), 0.2); margin: 1rem 0;">
+                  <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 1.4rem;">
+                    <span style="font-size: 1.4rem;">Total per month</span>
+                    <span style="font-size: 1.4rem;">£57.50</span>
+                  </div>
+                </div>
+
+                <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 1.5rem;">📅</span>
+                    <div>
+                      <div style="font-weight: 600; color: rgb(var(--color-foreground)); margin-bottom: 0.3rem; font-size: 1.4rem;">Address Change Deadline</div>
+                      <div style="color: rgba(var(--color-foreground), 0.8); font-size: 1.1rem;">15th of each month</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    ⏭️ Skip
+                  </button>
+                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    📍 Address
+                  </button>
+                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    💳 Payment
+                  </button>
+                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    ❌ Cancel
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subscription Item 2 -->
+              <div style="background-color: rgb(var(--color-background)); padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                  <div style="flex: 1;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">Fantasy Deluxe Package</h3>
+                    <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Subscription #1944521</p>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="background-color: #28a745; color: white; padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; font-weight: 600;">ACTIVE</span>
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Start Date</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">January 15, 2024</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Next Payment</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">August 15, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Last Order</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">July 15, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Skips Remaining</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">2</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Skip/Unskip Deadline</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">July 30, 2025</div>
+                  </div>
+                </div>
+
+                <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">💰 Pricing Details</h3>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.3rem;">Fantasy Deluxe Box + Goodies</span>
+                    <span style="font-size: 1.3rem;">£45.00</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.3rem;">Shipping (Express)</span>
+                    <span style="font-size: 1.3rem;">£12.50</span>
+                  </div>
+                  <hr style="border: none; border-top: 0.1rem solid rgba(var(--color-foreground), 0.2); margin: 1rem 0;">
+                  <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 1.4rem;">
+                    <span style="font-size: 1.4rem;">Total per month</span>
+                    <span style="font-size: 1.4rem;">£57.50</span>
+                  </div>
+                </div>
+
+                <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 1.5rem;">📅</span>
+                    <div>
+                      <div style="font-weight: 600; color: rgb(var(--color-foreground)); margin-bottom: 0.3rem; font-size: 1.4rem;">Address Change Deadline</div>
+                      <div style="color: rgba(var(--color-foreground), 0.8); font-size: 1.1rem;">15th of each month</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    ⏭️ Skip
+                  </button>
+                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    📍 Address
+                  </button>
+                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    💳 Payment
+                  </button>
+                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                    ❌ Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paused/Cancelled Subscriptions -->
+            <div style="background-color: rgba(var(--color-foreground), 0.04); padding: 0;">
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; padding: 1rem;">
+                ⏸️ Paused & Cancelled Subscriptions
+              </h3>
+              
+              <div style="background-color: rgb(var(--color-background)); padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                  <div style="flex: 1;">
+                    <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Romance Monthly Collection</h4>
+                    <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Subscription #1822156</p>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="background-color: #6c757d; color: white; padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem; font-weight: 600;">CANCELLED</span>
+                  </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Start Date</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">March 10, 2024</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Cancelled Date</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">June 10, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Last Order</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">May 10, 2025</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total Orders</div>
+                    <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">15</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                  <button onclick="viewSubscriptionHistory('1822156')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                    📋 View History
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state">
+            <div class="empty-icon">✅</div>
+            <h4>All Caught Up!</h4>
+            <p>You have no other cancelled orders.</p>
+          </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content">
+          <div class="orders-container">
+            <h2>My Orders</h2>
+            
+            <!-- Order Sub-tabs -->
+            <div class="order-tabs">
+              <!-- Mobile Dropdown Navigation -->
+              <div class="mobile-order-nav">
+                <select id="mobile-order-tab-select" class="mobile-order-tab-select" onchange="showOrderSubtab(this.value)">
+                  <option value="upcoming">📅 Upcoming Orders</option>
+                  <option value="all">📋 All Orders</option>
+                  <option value="cancelled">❌ Cancelled</option>
+                </select>
+              </div>
+              <!-- Desktop Navigation -->
+              <div class="desktop-order-nav">
+                <button class="order-subtab active" onclick="showOrderSubtab('upcoming')">
+                  📅 Upcoming Orders
+                </button>
+                <button class="order-subtab" onclick="showOrderSubtab('all')">
+                  📋 All Orders
+                </button>
+                <button class="order-subtab" onclick="showOrderSubtab('cancelled')">
+                  ❌ Cancelled
+                </button>
+              </div>
+            </div>
+
+            <!-- Upcoming Orders -->
+            <div id="upcoming-orders" class="order-subtab-content active">
+              <div class="orders-grid">
+                <!-- Sample Upcoming Order 1 -->
+                <div class="order-card upcoming subscription-card">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1004 - July Monthly Box</h5>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: July 15, 2025 • Processing in 3 days</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <span class="order-status upcoming">UPCOMING</span>
+                    </div>
+                  </div>
+                  
+                  <div class="subscription-grid">
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Standard (3-5 days)</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£37.90</div>
+                    </div>
+                  </div>
+
+                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
+                      <li>Fantasy Romance Collection (3 books)</li>
+                      <li>Exclusive Lavish Library Bookmark</li>
+                      <li>Author-signed postcard</li>
+                      <li>Monthly reading guide</li>
+                      <li>Surprise bonus item</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="order-actions">
+                    <div>
+                      <button onclick="editUpcomingOrder('upcoming-1')" class="btn-primary">✏️ Edit</button>
+                      <button onclick="skipUpcomingOrder('upcoming-1')" class="btn-secondary">⏭️ Skip This Box</button>
+                    </div>
+                    <div>
+                      <button onclick="viewOrderDetails('upcoming-1')" class="btn-outline">👁️ View</button>
+                      <button onclick="cancelUpcomingOrder('upcoming-1')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sample Upcoming Order 2 -->
+                <div class="order-card scheduled subscription-card">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1005 - August Deluxe Box</h5>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: August 15, 2025</p>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Scheduled for next month</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <span class="order-status scheduled">SCHEDULED</span>
+                    </div>
+                  </div>
+                  
+                  <div class="subscription-grid">
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Express (1-2 days)</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£57.50</div>
+                    </div>
+                  </div>
+
+                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
+                        <li>Mystery Thriller Collection (4 books)</li>
+                        <li>Exclusive hardcover edition</li>
+                        <li>Premium leather bookmark set</li>
+                        <li>Author interview magazine</li>
+                        <li>Limited edition book sleeve</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="order-actions">
+                    <div>
+                      <button onclick="editUpcomingOrder('upcoming-2')" class="btn-primary">✏️ Edit</button>
+                      <button onclick="skipUpcomingOrder('upcoming-2')" class="btn-secondary">⏭️ Skip This Box</button>
+                    </div>
+                    <div>
+                      <button onclick="viewOrderDetails('upcoming-2')" class="btn-outline">👁️ View</button>
+                      <button onclick="cancelUpcomingOrder('upcoming-2')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sample Upcoming Order 3 -->
+                <div class="order-card pending subscription-card">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1006 - September Special Edition</h5>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: September 15, 2025 </p>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Awaiting confirmation</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <span class="order-status pending">PENDING</span>
+                    </div>
+                  </div>
+                  
+                  <div class="subscription-grid">
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Standard (3-5 days)</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
+                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£42.90</div>
+                    </div>
+                  </div>
+
+                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
+                        <li>Sci-Fi Adventure Pack (3 books)</li>
+                        <li>Limited edition poster set</li>
+                        <li>Collectible character pins</li>
+                        <li>Digital audiobook access</li>
+                        <li>Exclusive author Q&A video</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="order-actions">
+                    <div>
+                      <button onclick="editUpcomingOrder('upcoming-3')" class="btn-primary">✏️ Edit</button>
+                      <button onclick="skipUpcomingOrder('upcoming-3')" class="btn-secondary">⏭️ Skip This Box</button>
+                    </div>
+                    <div>
+                      <button onclick="viewOrderDetails('upcoming-3')" class="btn-outline">👁️ View</button>
+                      <button onclick="cancelUpcomingOrder('upcoming-3')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sample Upcoming Order 4 -->
+                <div class="order-card upcoming">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">📦 Order #1415</h5>
+                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: July 20, 2025</p>
+                    </div>
+                    <div style="text-align: right;">
+                      <span class="order-status upcoming">UPCOMING</span>
+                    </div>
+                  </div>
+                  
+                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
+                      <li>Ice Planet Barbarians Holographic Bookmarks - by CONKY (x1)</li>
+                      <li>Ice Planet Barbarians Stickers - by CONKY (x1)</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="order-actions">
+                    <div>
+                      <button onclick="editUpcomingOrder('upcoming-4')" class="btn-primary">✏️ Edit</button>
+                      <button onclick="viewOrderDetails('upcoming-4')" class="btn-outline">👁️ View</button>
+                    </div>
+                    <div>
+                      <button onclick="cancelUpcomingOrder('upcoming-4')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <h4>All Caught Up!</h4>
+                <p>These are all your upcoming orders. New orders will appear here as they're scheduled.</p>
+              </div>
+            </div>
+
+            <!-- All Orders -->
+            <div id="all-orders" class="order-subtab-content">
+              <div class="orders-table-container">
+                <!-- Search and Filter Controls -->
+                <div class="table-controls">
+                  <div class="search-filter-row">
+                    <div class="search-box">
+                      <i class="search-icon">🔍</i>
+                      <input type="text" id="orderSearch" placeholder="Search orders..." class="search-input">
+                    </div>
+                    <div class="filter-box">
+                      <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <select id="fulfillmentFilter" class="filter-select">
+                        <option value="">All Fulfillment</option>
+                        <option value="fulfilled">Fulfilled</option>
+                        <option value="processing">Processing</option>
+                        <option value="unfulfilled">Unfulfilled</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="table-responsive">
+                  <table class="orders-table" id="ordersTable">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Status</th>
+                        <th>Fulfillment</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                      <!-- Sample Order 1 -->
+                      <tr class="order-row" data-order-id="1003">
+                        <td data-label="Order"><a href="#" class="order-link">#1003</a></td>
+                        <td data-label="Date" class="order-date">June 15, 2025</td>
+                        <td data-label="Items" class="order-items">Lavish Library Monthly Box</td>
+                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
+                        <td data-label="Fulfillment"><span class="status-badge processing">Processing</span></td>
+                        <td data-label="Total" class="order-total">£37.90</td>
+                        <td class="actions-cell">
+                          <div class="action-dropdown">
+                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1003')">
+                              <i class="more-icon">⋯</i>
+                            </div>
+                            <div id="actions-1003" class="action-menu">
+                              <a href="#" onclick="viewOrderDetails('1003')" class="action-item">
+                                <i class="action-icon">👁️</i> View Details
+                              </a>
+                              <a href="#" onclick="editOrder('1003')" class="action-item">
+                                <i class="action-icon">✏️</i> Edit Order
+                              </a>
+                              <a href="#" onclick="trackOrder('1003')" class="action-item">
+                                <i class="action-icon">📦</i> Track Order
+                              </a>
+                              <a href="#" onclick="downloadInvoice('1003')" class="action-item">
+                                <i class="action-icon">📄</i> Download Invoice
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Sample Order 2 -->
+                      <tr class="order-row" data-order-id="1002">
+                        <td data-label="Order"><a href="#" class="order-link">#1002</a></td>
+                        <td data-label="Date" class="order-date">May 20, 2025</td>
+                        <td data-label="Items" class="order-items">Fantasy Deluxe Package</td>
+                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
+                        <td data-label="Fulfillment"><span class="status-badge fulfilled">Fulfilled</span></td>
+                        <td data-label="Total" class="order-total">£57.50</td>
+                        <td class="actions-cell">
+                          <div class="action-dropdown">
+                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1002')">
+                              <i class="more-icon">⋯</i>
+                            </div>
+                            <div id="actions-1002" class="action-menu">
+                              <a href="#" onclick="viewOrderDetails('1002')" class="action-item">
+                                <i class="action-icon">👁️</i> View Details
+                              </a>
+                              <a href="#" onclick="writeReview('1002')" class="action-item">
+                                <i class="action-icon">⭐</i> Write Review
+                              </a>
+                              <a href="#" onclick="trackOrder('1002')" class="action-item">
+                                <i class="action-icon">📦</i> Track Order
+                              </a>
+                              <a href="#" onclick="downloadInvoice('1002')" class="action-item">
+                                <i class="action-icon">📄</i> Download Invoice
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Sample Order 3 -->
+                      <tr class="order-row" data-order-id="1001">
+                        <td data-label="Order"><a href="#" class="order-link">#1001</a></td>
+                        <td data-label="Date" class="order-date">April 25, 2025</td>
+                        <td data-label="Items" class="order-items">Romance Collection + Extras</td>
+                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
+                        <td data-label="Fulfillment"><span class="status-badge delivered">Delivered</span></td>
+                        <td data-label="Total" class="order-total">£42.90</td>
+                        <td class="actions-cell">
+                          <div class="action-dropdown">
+                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1001')">
+                              <i class="more-icon">⋯</i>
+                            </div>
+                            <div id="actions-1001" class="action-menu">
+                              <a href="#" onclick="viewOrderDetails('1001')" class="action-item">
+                                <i class="action-icon">👁️</i> View Details
+                              </a>
+                              <a href="#" onclick="writeReview('1001')" class="action-item">
+                                <i class="action-icon">⭐</i> Write Review
+                              </a>
+                              <a href="#" onclick="reorderItems('1001')" class="action-item">
+                                <i class="action-icon">🔄</i> Reorder Items
+                              </a>
+                              <a href="#" onclick="downloadInvoice('1001')" class="action-item">
+                                <i class="action-icon">📄</i> Download Invoice
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Sample Order 4 -->
+                      <tr class="order-row" data-order-id="1000">
+                        <td data-label="Order"><a href="#" class="order-link">#1000</a></td>
+                        <td data-label="Date" class="order-date">March 30, 2025</td>
+                        <td data-label="Items" class="order-items">Starter Bundle</td>
+                        <td data-label="Status"><span class="status-badge pending">Pending</span></td>
+                        <td data-label="Fulfillment"><span class="status-badge unfulfilled">Unfulfilled</span></td>
+                        <td data-label="Total" class="order-total">£29.90</td>
+                        <td class="actions-cell">
+                          <div class="action-dropdown">
+                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1000')">
+                              <i class="more-icon">⋯</i>
+                            </div>
+                            <div id="actions-1000" class="action-menu">
+                              <a href="#" onclick="viewOrderDetails('1000')" class="action-item">
+                                <i class="action-icon">👁️</i> View Details
+                              </a>
+                              <a href="#" onclick="cancelOrder('1000')" class="action-item">
+                                <i class="action-icon">❌</i> Cancel Order
+                              </a>
+                              <a href="#" onclick="downloadInvoice('1000')" class="action-item">
+                                <i class="action-icon">📄</i> Download Invoice
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Sample Cancelled Order -->
+                      <tr class="order-row" data-order-id="998">
+                        <td data-label="Order"><a href="#" class="order-link">#998</a></td>
+                        <td data-label="Date" class="order-date">February 15, 2025</td>
+                        <td data-label="Items" class="order-items">Lavish Library Monthly Box</td>
+                        <td data-label="Status"><span class="status-badge cancelled">Cancelled</span></td>
+                        <td data-label="Fulfillment"><span class="status-badge unfulfilled">Unfulfilled</span></td>
+                        <td data-label="Total" class="order-total">£37.90</td>
+                        <td class="actions-cell">
+                          <div class="action-dropdown">
+                            <div class="action-toggle" onclick="toggleActionDropdown('actions-998')">
+                              <i class="more-icon">⋯</i>
+                            </div>
+                            <div id="actions-998" class="action-menu">
+                              <a href="#" onclick="viewOrderDetails('998')" class="action-item">
+                                <i class="action-icon">👁️</i> View Details
+                              </a>
+                              <a href="#" onclick="downloadInvoice('998')" class="action-item">
+                                <i class="action-icon">📄</i> Download Invoice
+                              </a>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {% comment %} Dynamic orders from Shopify {% endcomment %}
+                      {% for order in customer.orders %}
+                        <tr class="order-row" data-order-id="{{ order.id }}">
+                          <td data-label="Order"><a href="{{ order.customer_url }}" class="order-link">#{{ order.name }}</a></td>
+                          <td data-label="Date" class="order-date">{{ order.created_at | date: format: 'date' }}</td>
+                          <td data-label="Items" class="order-items">{{ order.line_items.size }} items</td>
+                          <td data-label="Status">
+                            <span class="status-badge {% if order.financial_status == 'paid' %}paid{% elsif order.financial_status == 'pending' %}pending{% else %}other{% endif %}">
+                              {{ order.financial_status_label }}
+                            </span>
+                          </td>
+                          <td data-label="Fulfillment">
+                            <span class="status-badge {% if order.fulfillment_status == 'fulfilled' %}fulfilled{% elsif order.fulfillment_status == 'partial' %}partial{% else %}unfulfilled{% endif %}">
+                              {{ order.fulfillment_status_label | default: 'Unfulfilled' }}
+                            </span>
+                          </td>
+                          <td data-label="Total" class="order-total">{{ order.total_price | money }}</td>
+                          <td class="actions-cell">
+                            <div class="action-dropdown">
+                              <div class="action-toggle" onclick="toggleActionDropdown('actions-{{ order.id }}')">
+                                <i class="more-icon">⋯</i>
+                              </div>
+                              <div id="actions-{{ order.id }}" class="action-menu">
+                                <a href="#" onclick="viewOrderDetails('{{ order.id }}')" class="action-item">
+                                  <i class="action-icon">👁️</i> View Details
+                                </a>
+                                <a href="#" onclick="downloadInvoice('{{ order.id }}')" class="action-item">
+                                  <i class="action-icon">📄</i> Download Invoice
+                                </a>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+
+                {% if customer.orders.size == 0 %}
+                  <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h4>No Orders Yet</h4>
+                    <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Cancelled Orders -->
+            <div id="cancelled-orders" class="order-subtab-content">
+              <div class="orders-grid">
+                <!-- Cancelled Order 1 -->
+                <div class="order-card cancelled">
+                  <div class="order-header">
+                    <div class="order-info">
+                      <h4>Order #998 - February 15, 2025</h4>
+                      <p>Lavish Library Monthly Box - £37.90</p>
+                    </div>
+                    <span class="order-status cancelled">CANCELLED</span>
+                  </div>
+                  <div class="order-meta">
+                    <div class="meta-item">
+                      <span class="meta-label">Cancelled Date</span>
+                      <span class="meta-value">February 10, 2025</span>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Reason</span>
+                      <span class="meta-value">Customer Request</span>
+                    </div>
+                  </div>
+                  <div class="order-actions">
+                    <button onclick="viewOrderDetails('998')" class="btn-primary">👁️ View Details</button>
+                  </div>
+                </div>
+
+                <!-- Cancelled Order 2 -->
+                <div class="order-card cancelled">
+                  <div class="order-header">
+                    <div class="order-info">
+                      <h4>Order #1004 - July 15, 2025</h4>
+                      <p>Lavish Library Monthly Box - £37.90</p>
+                    </div>
+                    <span class="order-status cancelled">CANCELLED</span>
+                  </div>
+                  <div class="order-meta">
+                    <div class="meta-item">
+                      <span class="meta-label">Cancelled Date</span>
+                      <span class="meta-value">July 1, 2025</span>
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Reason</span>
+                      <span class="meta-value">Skipped</span>
+                    </div>
+                  </div>
+                  <div class="order-actions">
+                    <button onclick="viewOrderDetails('1004')" class="btn-primary">👁️ View Details</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <h4>All Caught Up!</h4>
+                <p>You have no other cancelled orders.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirmation-title">⚠️ Confirm Action</h2>
+        <button class="modal-close" onclick="closeConfirmationModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="text-align: center; padding: 2rem 0;">
+          <div id="confirmation-icon" style="font-size: 4rem; margin-bottom: 1rem;"></div>
+          <p id="confirmation-message" style="color: rgba(var(--color-foreground), 0.8); margin-bottom: 2rem; font-size: 1.4rem;">
+            Are you sure you want to proceed?
+          </p>
+          
+          <div id="confirmation-warning" style="background-color: rgba(220, 53, 69, 0.1); border-left: 0.4rem solid #dc3545; padding: 1.5rem; border-radius: var(--media-radius); margin-bottom: 2rem; text-align: left;">
+            <h4 style="color: #dc3545; margin-bottom: 0.5rem;">⚠️ Warning</h4>
+            <p id="confirmation-warning-message" style="color: rgba(var(--color-foreground), 0.8); margin: 0; font-size: 1.2rem;">
+              This action is permanent and cannot be reversed.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeConfirmationModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; margin-right: 1rem;">
+          Cancel
+        </button>
+        <button id="confirmation-button" class="btn-danger" style="background-color: #910F3F; color: white; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Method Modal -->
+  <div id="payment-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="payment-modal-title">💳 Add Payment Method</h2>
+        <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="payment-form">
+          <!-- Payment Method Type Selection -->
+          <div style="margin-bottom: 2rem;">
+            <label style="display: block; margin-bottom: 0.8rem; font-weight: 600; color: rgb(var(--color-foreground));">Payment Method Type</label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+              <label style="display: flex; align-items: center; padding: 1rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="payment_type" value="card" checked style="margin-right: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                  <div style="width: 40px; height: 25px; background: linear-gradient(135deg, #1a1f71 0%, #0f4c75 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">CARD</div>
+                  <span>Credit/Debit Card</span>
+                </div>
+              </label>
+              <label style="display: flex; align-items: center; padding: 1rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="payment_type" value="paypal" style="margin-right: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                  <div style="width: 40px; height: 25px; background: linear-gradient(135deg, #0070ba 0%, #003087 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 8px;">PayPal</div>
+                  <span>PayPal</span>
+                </div>
+              </label>
+              <label style="display: flex; align-items: center; padding: 1rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); cursor: pointer; transition: all 0.3s ease;">
+                <input type="radio" name="payment_type" value="afterpay" style="margin-right: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                  <div style="width: 40px; height: 25px; background: linear-gradient(135deg, #b6004c 0%, #ff6b9d 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 8px;">AfterPay</div>
+                  <span>AfterPay</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Card Details Section -->
+          <div id="card-details" style="display: block;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="card_number">Card Number *</label>
+                <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));">
+              </div>
+              <div class="form-group">
+                <label for="card_name">Cardholder Name *</label>
+                <input type="text" id="card_name" name="card_name" placeholder="John Doe" required style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));">
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="expiry_month">Expiry Month *</label>
+                <select id="expiry_month" name="expiry_month" required style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));">
+                  <option value="">Month</option>
+                  <option value="01">01 - January</option>
+                  <option value="02">02 - February</option>
+                  <option value="03">03 - March</option>
+                  <option value="04">04 - April</option>
+                  <option value="05">05 - May</option>
+                  <option value="06">06 - June</option>
+                  <option value="07">07 - July</option>
+                  <option value="08">08 - August</option>
+                  <option value="09">09 - September</option>
+                  <option value="10">10 - October</option>
+                  <option value="11">11 - November</option>
+                  <option value="12">12 - December</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="expiry_year">Expiry Year *</label>
+                <select id="expiry_year" name="expiry_year" required style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));">
+                  <option value="">Year</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                  <option value="2031">2031</option>
+                  <option value="2032">2032</option>
+                  <option value="2033">2033</option>
+                  <option value="2034">2034</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="cvv">CVV *</label>
+                <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));">
+              </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div style="margin-bottom: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                <input type="checkbox" id="same_as_shipping" name="same_as_shipping" checked>
+                <span>Use default address for billing</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- PayPal Section -->
+          <div id="paypal-details" style="display: none;">
+            <div style="text-align: center; padding: 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <div style="width: 80px; height: 50px; background: linear-gradient(135deg, #0070ba 0%, #003087 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; margin: 0 auto 1rem;">
+                PayPal
+              </div>
+              <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Connect PayPal Account</h4>
+              <p style="color: rgba(var(--color-foreground), 0.8); margin-bottom: 2rem;">
+                You'll be redirected to PayPal to securely connect your account.
+              </p>
+              <button type="button" onclick="connectPayPal()" style="background-color: #0070ba; color: white; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+                Connect with PayPal
+              </button>
+            </div>
+          </div>
+
+          <!-- Set as Default -->
+          <div style="margin-top: 2rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="set_default_payment" name="set_default_payment">
+              <span>Set as default payment method</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closePaymentModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; margin-right: 1rem;">
+          Cancel
+        </button>
+        <button type="submit" form="payment-form" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          💾 Save Payment Method
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Address Modal -->
+  <div id="edit-address-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ Edit Address</h2>
+        <button class="modal-close" onclick="closeEditAddressModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="edit-address-form">
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit_addr_nickname">Address Nickname (e.g. Home, Work, Gift)</label>
+            <input type="text" id="edit_addr_nickname" name="nickname" placeholder="Home" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="edit_addr_first_name">First Name *</label>
+              <input type="text" id="edit_addr_first_name" name="first_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+            <div class="form-group">
+              <label for="edit_addr_last_name">Last Name *</label>
+              <input type="text" id="edit_addr_last_name" name="last_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit_addr_address1">Address Line 1 *</label>
+            <input type="text" id="edit_addr_address1" name="address1" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit_addr_address2">Address Line 2</label>
+            <input type="text" id="edit_addr_address2" name="address2" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit_addr_country">Country *</label>
+            <select id="edit_addr_country" name="country" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+              <option value="">Loading countries...</option>
+            </select>
+          </div>
+
+          <div class="address-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="edit_addr_province">State/Province *</label>
+              <select id="edit_addr_province" name="province" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select country first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_addr_city">City *</label>
+              <select id="edit_addr_city" name="city" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select state first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_addr_zip">ZIP/Postal Code *</label>
+              <input type="text" id="edit_addr_zip" name="zip" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.8rem; margin-bottom: 1.5rem; align-items: center;">
+            <div class="form-group">
+              <label for="edit_addr_country_code">Country Code</label>
+              <select id="edit_addr_country_code" name="country_code" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+86">🇨🇳 +86</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_addr_phone">Phone Number</label>
+              <input type="tel" id="edit_addr_phone" name="phone" placeholder="e.g., 555-123-4567" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit_addr_instructions">Special Delivery Instructions (Optional)</label>
+            <textarea id="edit_addr_instructions" name="instructions" placeholder="e.g., Leave at front door, Ring bell twice, etc." style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); min-height: 100px; resize: vertical; font-size: 1.4rem;"></textarea>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="edit_set_default" name="set_default">
+              <span>Set as default address</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeEditAddressModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; margin-right: 1rem;">
+          Cancel
+        </button>
+        <button onclick="saveEditedAddress(); return false;" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          💾 Update Address
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Order Modal -->
+  <div id="edit-order-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ Edit Order</h2>
+        <button class="modal-close" onclick="closeEditOrderModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="background-color: rgba(var(--color-button), 0.1); border-left: 0.4rem solid rgba(var(--color-button), 0.8); padding: 1.5rem; border-radius: var(--media-radius); margin-bottom: 2rem;">
+          <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem;">ℹ️ Edit Your Upcoming Order</h4>
+          <p style="color: rgba(var(--color-foreground), 0.8); margin: 0; font-size: 1.2rem;">
+            Update your shipping address and delivery or cancel your order.
+          </p>
+        </div>
+
+        <div style="display: grid; gap: 2rem;">
+          <!-- Order Items -->
+          <div>
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Order Items</h4>
+            <div id="edit-order-items" style="display: grid; gap: 1rem;">
+              <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                  <div style="flex: 1;">
+                    <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem;">Lavish Library Monthly Box</h5>
+                    <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">Qty: 1 • £37.90</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Address -->
+          <div>
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📍 Shipping Address</h4>
+            <select id="edit-order-address" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); margin-bottom: 1rem;">
+              <option value="addr_1">Home Address - 123 Lavish Library Lane, London SW1A 1AA</option>
+              <option value="addr_2">Work Address - 456 Business Avenue, Manchester M1 1AA</option>
+              <option value="addr_3">Gift Address - 789 Gift Street, Birmingham B1 1AA</option>
+            </select>
+          </div>
+
+          <!-- Delivery Preferences -->
+          <div>
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">🚚 Delivery Preferences</h4>
+            <select id="edit-order-delivery" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground));" disabled>
+              <option value="standard">Standard (3-5 business days) - Free</option>
+              <option value="express">Express (1-2 business days) - £5.00</option>
+              <option value="next-day">Next Day Delivery - £10.00</option>
+            </select>
+          </div>
+
+          <!-- Special Instructions -->
+          <div>
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📝 Special Instructions</h4>
+            <textarea placeholder="Add any special delivery instructions..." style="width: 100%; min-height: 100px; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); resize: vertical;"></textarea>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeEditOrderModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">
+          Cancel
+        </button>
+        <button onclick="saveOrderChanges()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          💾 Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <!-- Order Details Modal -->
+  <div id="order-details-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="order-details-title">📦 Order Details</h2>
+        <button class="modal-close" onclick="closeOrderDetailsModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="display: grid; gap: 2rem;">
+          <!-- Order Information -->
+          <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem;">
+            <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Order Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+              <div>
+                <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem;">Order Number</div>
+                <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;" id="order-detail-number">#1003</div>
+              </div>
+              <div>
+                <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem;">Order Date</div>
+                <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;" id="order-detail-date">June 15, 2025</div>
+              </div>
+              <div>
+                <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem;">Payment Status</div>
+                <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;" id="order-detail-payment">
+                  <span style="background-color: #28a745; color: white; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem;">Paid</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem;">Fulfillment Status</div>
+                <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight:  500;" id="order-detail-fulfillment">
+                  <span style="background-color: #ffc107; color: #000; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1.1rem;">Processing</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div>
+            <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items</h3>
+            <div id="order-detail-items" style="display: grid; gap: 1rem;">
+              <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Lavish Library Monthly Box</div>
+                  <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75);">Qty: 1</div>
+                </div>
+                <div style="font-size: 1.4rem; color: rgb(var(--color-foreground)); font-weight: 600;">£37.90</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping & Billing -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+            <div>
+              <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📍 Shipping Address</h4>
+              <div id="order-detail-shipping" style="color: rgba(var(--color-foreground), 0.8); font-size: 1.2rem; line-height: 1.6;">
+                <div>123 Lavish Library Lane</div>
+                <div>London, SW1A 1AA</div>
+                <div>United Kingdom</div>
+              </div>
+            </div>
+            <div>
+              <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">💳 Payment Method</h4>
+              <div id="order-detail-payment-method" style="color: rgba(var(--color-foreground), 0.8); font-size: 1.2rem; line-height: 1.6;">
+                <div>Visa ending in 4242</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Total -->
+          <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span style="color: rgba(var(--color-foreground), 0.8);">Subtotal</span>
+              <span style="color: rgb(var(--color-foreground));" id="order-detail-subtotal">£32.90</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span style="color: rgba(var(--color-foreground), 0.8);">Shipping</span>
+              <span style="color: rgb(var(--color-foreground));" id="order-detail-shipping-cost">£5.00</span>
+            </div>
+            <hr style="border: none; border-top: 0.1rem solid rgba(var(--color-foreground), 0.2); margin: 1rem 0;">
+            <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 1.4rem;">
+              <span style="color: rgb(var(--color-foreground));">Total</span>
+              <span style="color: rgb(var(--color-foreground));" id="order-detail-total">£37.90</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeOrderDetailsModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">
+          Close
+        </button>
+        <button onclick="trackOrder()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          📦 Track Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Skip Next Payment Modal -->
+  <div id="skip-payment-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">⏭️ Skip Next Payment</h2>
+        <button class="modal-close" onclick="closeSkipPaymentModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="text-align: center; padding: 2rem 0;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">⏭️</div>
+          <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Skip Next Payment?</h3>
+          <p style="color: rgba(var(--color-foreground), 0.8); margin-bottom: 1.5rem; font-size: 1.4rem;" id="skip-payment-message">
+            Are you sure you want to skip your next payment for <strong id="skip-subscription-name">Lavish Library Monthly Box</strong>?
+          </p>
+          
+          <div style="background-color: rgba(var(--color-button), 0.1); border-left: 0.4rem solid rgba(var(--color-button), 0.8); padding: 1.5rem; border-radius: var(--media-radius); margin-bottom: 2rem; text-align: left;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem;">⚠️ What happens when you skip:</h4>
+            <ul style="color: rgba(var(--color-foreground), 0.8); margin: 0; padding-left: 1.5rem;">
+              <li>Your next scheduled payment will be postponed</li>
+              <li>You won't receive a box for that month</li>
+              <li>Your subscription will resume the following month</li>
+              <li>You have <strong id="skips-remaining">4 skips remaining</strong> this year</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 2rem;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📅 Updated Schedule</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+              <div>
+                <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">Current Next Payment</div>
+                <div style="color: rgb(var(--color-foreground)); font-weight: 600; font-size: 1.3rem;">July 4, 2025</div>
+              </div>
+              <div>
+                <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">New Next Payment</div>
+                <div style="color: rgba(var(--color-button), var(--alpha-button-background)); font-weight: 600; font-size: 1.3rem;">August 4, 2025</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeSkipPaymentModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; margin-right: 1rem;">
+          Keep Box
+        </button>
+        <button onclick="confirmSkipPayment()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          ⏭️ Skip This Box
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Payment Modal -->
+  <div id="change-payment-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">💳 Change Payment Method</h2>
+        <button class="modal-close" onclick="closeChangePaymentModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="margin-bottom: 2rem;">
+          <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem;" id="change-payment-subscription">Lavish Library Monthly Box</h3>
+          <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1.5rem;">Select a payment method for this subscription</p>
+        </div>
+
+        <div style="display: grid; gap: 1.5rem;">
+          <!-- Current Payment Methods -->
+          <div>
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">💳 Your Payment Methods</h4>
+            
+            <!-- Payment Method 1 -->
+            <label style="display: flex; align-items: center; padding: 1.5rem; border: 0.2rem solid rgba(var(--color-button), 0.3); border-radius: var(--inputs-radius); cursor: pointer; margin-bottom: 1rem; background-color: rgba(var(--color-button), 0.05);">
+              <input type="radio" name="payment_method" value="card_1" checked style="margin-right: 1rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                <div style="width: 50px; height: 32px; background: linear-gradient(135deg, #1a1f71 0%, #0f4c75 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                  VISA
+                </div>
+                <div>
+                  <div style="color: rgb(var(--color-foreground)); font-weight: 600;">•••• •••• •••• 4242</div>
+                  <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">Expires 12/28</div>
+                </div>
+              </div>
+              <div style="background-color: rgba(var(--color-button), var(--alpha-button-background)); color: rgb(var(--color-button-text)); padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1rem; font-weight: 600;">
+                CURRENT
+              </div>
+            </label>
+
+            <!-- Payment Method 2 -->
+            <label style="display: flex; align-items: center; padding: 1.5rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); cursor: pointer; margin-bottom: 1rem;">
+              <input type="radio" name="payment_method" value="card_2" style="margin-right: 1rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                <div style="width: 50px; height: 32px; background: linear-gradient(135deg, #eb001b 0%, #f79e1b 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;">
+                  MC
+                </div>
+                <div>
+                  <div style="color: rgb(var(--color-foreground)); font-weight: 600;">•••• •••• •••• 5555</div>
+                  <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">Expires 08/27</div>
+                </div>
+              </div>
+            </label>
+
+            <!-- Payment Method 3 -->
+            <label style="display: flex; align-items: center; padding: 1.5rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); cursor: pointer; margin-bottom: 1rem;">
+              <input type="radio" name="payment_method" value="paypal_1" style="margin-right: 1rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                <div style="width: 50px; height: 32px; background: linear-gradient(135deg, #0070ba 0%, #003087 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 9px;">
+                  PayPal
+                </div>
+                <div>
+                  <div style="color: rgb(var(--color-foreground)); font-weight: 600;">john.doe@email.com</div>
+                  <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">PayPal Account</div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Add New Payment Method -->
+          <div style="text-align: center; padding: 1.5rem; border: 0.2rem dashed rgba(var(--color-foreground), 0.3); border-radius: var(--inputs-radius);">
+            <button onclick="openPaymentModal('add')" style="background-color: transparent; color: rgba(var(--color-button), var(--alpha-button-background)); border: none; cursor: pointer; font-size: 1.3rem;">
+              ➕ Add New Payment Method
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeChangePaymentModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; margin-right: 1rem;">
+          Cancel
+        </button>
+        <button onclick="savePaymentChange()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          💾 Update Payment Method
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Subscription Modal -->
+  <div id="cancel-subscription-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">❌ Cancel Subscription</h2>
+        <button class="modal-close" onclick="closeCancelSubscriptionModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="text-align: center; padding: 2rem 0;">
+          <div style="font-size: 4rem; margin-bottom: 1rem; color: #dc3545;">❌</div>
+          <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Cancel Subscription?</h3>
+          <p style="color: rgba(var(--color-foreground), 0.8); margin-bottom: 2rem; font-size: 1.4rem;" id="cancel-subscription-message">
+            Are you sure you want to cancel your <strong id="cancel-subscription-name">Lavish Library Monthly Box</strong> subscription?
+          </p>
+          
+          <div style="background-color: rgba(#dc3545, 0.1); border-left: 0.4rem solid #dc3545; padding: 1.5rem; border-radius: var(--media-radius); margin-bottom: 2rem; text-align: left;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem;">⚠️ What happens when you cancel:</h4>
+            <ul style="color: rgba(var(--color-foreground), 0.8); margin: 0; padding-left: 1.5rem;">
+              <li>Your subscription will end after your current billing period</li>
+              <li>You'll continue to receive boxes until <strong>July 4, 2025</strong></li>
+              <li>No future payments will be charged</li>
+              <li>You can reactivate anytime before the end date</li>
+            </ul>
+          </div>
+
+          <!-- Cancellation Reason -->
+          <div style="text-align: left; margin-bottom: 2rem;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📝 Help us improve (optional)</h4>
+            <select style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); margin-bottom: 1rem;">
+              <option value="">Select a reason...</option>
+              <option value="too_expensive">Too expensive</option>
+              <option value="not_enough_variety">Not enough variety</option>
+              <option value="books_not_my_taste">Books not my taste</option>
+              <option value="shipping_issues">Shipping issues</option>
+              <option value="temporary_pause">Temporary pause needed</option>
+              <option value="other">Other</option>
+            </select>
+            <textarea placeholder="Additional feedback (optional)..." style="width: 100%; min-height: 80px; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); resize: vertical;"></textarea>
+          </div>
+
+          <!-- Alternative Options -->
+          <div style="background-color: rgba(var(--color-button), 0.1); border-radius: var(--media-radius); padding: 1.5rem; text-align: left;">
+            <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">💡 Before you go, consider these options:</h4>
+            <div style="display: grid; gap: 0.3rem;">
+              <button onclick="pauseInstead()" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                ⏸️ Pause for 1-3 months instead
+              </button>
+              <button onclick="changeFrequency()" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
+                📅 Change to every 2 months
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer" style="gap: 0.5rem;">
+        <button onclick="closeCancelSubscriptionModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem;">
+          Keep Subscription
+        </button>
+        <button onclick="confirmCancellation()" style="background-color: #910F3F; color: white; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          ❌ Cancel Subscription
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Notification System -->
+  <div id="notification-container" style="position: fixed; top: 2rem; right: 2rem; z-index: 10000; max-width: 400px;">
+    <!-- Notifications will be dynamically added here -->
+  </div>
+
+  <!-- MFA Setup Modal -->
+  <div id="mfa-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">🔐 Multi-Factor Authentication Setup</h2>
+        <button class="modal-close" onclick="closeMFAModal()">&times;</button>
+      </div>
+      
+      <div class="wizard-steps">
+        <div class="wizard-step">
+          <div class="step-circle active" id="step-1-circle">1</div>
+        </div>
+        <div class="step-line" id="step-1-line"></div>
+        <div class="wizard-step">
+          <div class="step-circle" id="step-2-circle">2</div>
+        </div>
+        <div class="step-line" id="step-2-line"></div>
+        <div class="wizard-step">
+          <div class="step-circle" id="step-3-circle">3</div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div class="wizard-content">
+          <!-- Step 1: Download App -->
+          <div id="mfa-step-1" class="wizard-step-content active">
+            <h3>📱 Download Authenticator App</h3>
+            <p>Install a compatible authenticator app on your mobile device:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+              <div style="text-align: center; padding: 1.5rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                <strong>Google Authenticator</strong><br>
+                <small>iOS & Android</small>
+              </div>
+              <div style="text-align: center; padding: 1.5rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔐</div>
+                <strong>Microsoft Authenticator</strong><br>
+                <small>iOS & Android</small>
+              </div>
+              <div style="text-align: center; padding: 1.5rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</div>
+                <strong>Authy</strong><br>
+                <small>iOS & Android</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Scan QR Code -->
+          <div id="mfa-step-2" class="wizard-step-content">
+            <h3>📷 Scan QR Code</h3>
+            <p>Open your authenticator app and scan this QR code:</p>
+            <div style="text-align: center; margin: 2rem 0;">
+              <div style="width: 200px; height: 200px; background-color: rgba(var(--color-foreground), 0.1); border: 0.2rem dashed rgba(var(--color-foreground), 0.3); border-radius: var(--media-radius); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.2rem; color: rgba(var(--color-foreground), 0.6);">
+                📱 QR Code<br><small>Generated dynamically</small>
+              </div>
+              <p><strong>Manual Entry Key:</strong></p>
+              <div style="background: rgba(var(--color-foreground), 0.1); padding: 1rem; border-radius: var(--buttons-radius); font-family: monospace; font-size: 1.4rem; letter-spacing: 0.2rem; margin: 1rem 0;">
+                JBSWY3DPEHPK3PXP
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Verify -->
+          <div id="mfa-step-3" class="wizard-step-content">
+            <h3>✅ Verify Setup</h3>
+            <p>Enter the 6-digit code from your authenticator app:</p>
+            <div style="text-align: center; margin: 2rem 0;">
+              <div style="display: flex; justify-content: center; gap: 1rem; margin: 2rem 0;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+                <input type="text" class="mfa-setup-digit" maxlength="1" pattern="[0-9]" style="width: 4rem; height: 4rem; border: 0.2rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); font-size: 2rem; text-align: center; font-family: monospace;">
+              </div>
+              <div id="mfa-verify-message" style="margin: 1rem 0; min-height: 2rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeMFAModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Cancel</button>
+        <button id="mfa-prev-btn" class="btn-secondary" onclick="previousMFAStep()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; display: none;">Previous</button>
+        <button id="mfa-next-btn" class="btn-primary" onclick="nextMFAStep()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Modal -->
+  <div id="address-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">📍 Add New Address</h2>
+        <button class="modal-close" onclick="closeAddressModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="address-form">
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="addr_nickname">Address Nickname (e.g. Home, Work, Gift)</label>
+            <input type="text" id="addr_nickname" name="nickname" placeholder="Home" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="addr_first_name">First Name *</label>
+              <input type="text" id="addr_first_name" name="first_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+            <div class="form-group">
+              <label for="addr_last_name">Last Name *</label>
+              <input type="text" id="addr_last_name" name="last_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="addr_address1">Address Line 1 *</label>
+            <input type="text" id="addr_address1" name="address1" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="addr_address2">Address Line 2</label>
+            <input type="text" id="addr_address2" name="address2" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="addr_country">Country *</label>
+            <select id="addr_country" name="country" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+              <option value="">Loading countries...</option>
+            </select>
+          </div>
+
+          <div class="address-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="addr_province">State/Province *</label>
+              <select id="addr_province" name="province" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select country first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="addr_city">City *</label>
+              <select id="addr_city" name="city" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select state first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="addr_zip">ZIP/Postal Code *</label>
+              <input type="text" id="addr_zip" name="zip" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.8rem; margin-bottom: 1.5rem; align-items: center;">
+            <div class="form-group">
+              <label for="addr_country_code">Country Code</label>
+              <select id="addr_country_code" name="country_code" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Loading...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="addr_phone">Phone Number</label>
+              <input type="tel" id="addr_phone" name="phone" placeholder="e.g., 555-123-4567" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="addr_instructions">Special Delivery Instructions (Optional)</label>
+            <textarea id="addr_instructions" name="instructions" placeholder="e.g., Leave at front door, Ring bell twice, etc." style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); min-height: 100px; resize: vertical; font-size: 1.4rem;"></textarea>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="set_default" name="set_default">
+              <span>Set as default address</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeAddressModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem;">
+          Cancel
+        </button>
+        <button onclick="saveNewAddress()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          📍 Save Address
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Update Confirmation Modal -->
+  <div id="address-update-confirm-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">📍 Update Address</h2>
+        <button class="modal-close" onclick="closeAddressUpdateConfirmModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div style="text-align: center; padding: 1rem 0;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+          <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Address Updated Successfully!</h3>
+          <p style="color: rgba(var(--color-foreground), 0.8); margin-bottom: 2rem; font-size: 1.4rem;">
+            Would you like to update this address for all existing orders as well?
+          </p>
+        </div>
+      </div>
+      
+      <div class="modal-footer" style="gap: 0.5rem;">
+        <button onclick="updateAddressOnly()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem;">
+          No, Address Only
+        </button>
+        <button onclick="updateAddressForOrders()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          📦 Yes, Update All Orders
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Address Modal for Subscriptions -->
+  <div id="change-address-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">📍 Change Address For This Box ONLY </h2>
+        <button class="modal-close" onclick="closeChangeAddressModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="change-address-form">
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="change_addr_nickname">Address Nickname (e.g. Home, Work, Gift)</label>
+            <input type="text" id="change_addr_nickname" name="nickname" placeholder="Home" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="change_addr_first_name">First Name *</label>
+              <input type="text" id="change_addr_first_name" name="first_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+            <div class="form-group">
+              <label for="change_addr_last_name">Last Name *</label>
+              <input type="text" id="change_addr_last_name" name="last_name" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="change_addr_address1">Address Line 1 *</label>
+            <input type="text" id="change_addr_address1" name="address1" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="change_addr_address2">Address Line 2</label>
+            <input type="text" id="change_addr_address2" name="address2" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="change_addr_country">Country *</label>
+            <select id="change_addr_country" name="country" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+              <option value="">Loading countries...</option>
+            </select>
+          </div>
+
+          <div class="address-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="change_addr_province">State/Province *</label>
+              <select id="change_addr_province" name="province" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select country first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="change_addr_city">City *</label>
+              <select id="change_addr_city" name="city" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Select state first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="change_addr_zip">ZIP/Postal Code *</label>
+              <input type="text" id="change_addr_zip" name="zip" required style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 120px 1fr; gap: 0.8rem; margin-bottom: 1.5rem; align-items: center;">
+            <div class="form-group">
+              <label for="change_addr_country_code">Country Code</label>
+              <select id="change_addr_country_code" name="country_code" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+                <option value="">Loading...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="change_addr_phone">Phone Number</label>
+              <input type="tel" id="change_addr_phone" name="phone" placeholder="e.g., 555-123-4567" style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); font-size: 1.4rem;">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="change_addr_instructions">Special Delivery Instructions (Optional)</label>
+            <textarea id="change_addr_instructions" name="instructions" placeholder="e.g., Leave at front door, Ring bell twice, etc." style="width: 100%; padding: 1.2rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); background-color: rgb(var(--color-background)); color: rgb(var(--color-foreground)); min-height: 100px; resize: vertical; font-size: 1.4rem;"></textarea>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="add_to_addresses" name="add_to_addresses">
+              <span>Add to addresses</span>
+            </label>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="change_set_default" name="set_default">
+              <span>Set as default address</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeChangeAddressModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem;">
+          Cancel
+        </button>
+        <button onclick="saveChangedAddress()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.3rem; font-weight: 600;">
+          📍 Update Address
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Order Modal -->
+  <div id="edit-order-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ Edit Order</h2>
+        <button class="modal-close" onclick="closeEditOrderModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="order-edit-form">
+          <div class="form-section">
+            <h3>Shipping Address</h3>
+            <div class="form-group">
+              <label for="edit-order-name">Full Name</label>
+              <input type="text" id="edit-order-name" value="John Doe" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+            </div>
+            <div class="form-group">
+              <label for="edit-order-address">Address</label>
+              <input type="text" id="edit-order-address" value="123 Main St, London, UK" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+            </div>
+            <div class="form-group">
+              <label for="edit-order-instructions">Special Instructions</label>
+              <textarea id="edit-order-instructions" placeholder="Leave at front door" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); min-height: 80px;"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Delivery Options</h3>
+            <div class="form-group">
+              <label for="edit-order-delivery">Delivery Method</label>
+              <select id="edit-order-delivery" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+                <option value="standard">Standard (3-5 days)</option>
+                <option value="express">Express (1-2 days)</option>
+                <option value="overnight">Overnight</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeEditOrderModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Cancel</button>
+        <button onclick="saveOrderChanges()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Track Order Modal -->
+  <div id="track-order-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">📦 Track Order</h2>
+        <button class="modal-close" onclick="closeTrackOrderModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="tracking-info">
+          <div class="tracking-header">
+            <h3>Order #1003</h3>
+            <p class="tracking-status">In Transit</p>
+          </div>
+          
+          <div class="tracking-timeline">
+            <div class="tracking-step completed">
+              <div class="step-icon">✓</div>
+              <div class="step-content">
+                <h4>Ordered</h4>
+                <p>June 15, 2025 - 2:30 PM</p>
+              </div>
+            </div>
+            
+            <div class="tracking-step active">
+              <div class="step-icon">📦</div>
+              <div class="step-content">
+                <h4>In Transit</h4>
+                <p>June 16, 2025 - 10:15 AM</p>
+              </div>
+            </div>
+            
+            <div class="tracking-step">
+              <div class="step-icon">�</div>
+              <div class="step-content">
+                <h4>Out For Delivery</h4>
+                <p>June 17, 2025 - 8:00 AM</p>
+                <small>Expected delivery: Today</small>
+              </div>
+            </div>
+            
+            <div class="tracking-step">
+              <div class="step-icon">🏠</div>
+              <div class="step-content">
+                <h4>Delivered</h4>
+                <p>Pending</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tracking-details">
+            <h4>Tracking Number</h4>
+            <p>UK1234567890</p>
+            <button onclick="copyTrackingNumber()" style="background-color: rgba(var(--color-foreground), 0.1); border: none; padding: 0.5rem 1rem; border-radius: var(--buttons-radius); cursor: pointer;">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeTrackOrderModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Write Review Modal -->
+  <div id="write-review-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">⭐ Write a Review</h2>
+        <button class="modal-close" onclick="closeWriteReviewModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="review-form">
+          <div class="form-section">
+            <h3>Order #1002 - Fantasy Deluxe Package</h3>
+            <div class="rating-section">
+              <label>Overall Rating</label>
+              <div class="star-rating">
+                <span class="star" onclick="setRating(1)">⭐</span>
+                <span class="star" onclick="setRating(2)">⭐</span>
+                <span class="star" onclick="setRating(3)">⭐</span>
+                <span class="star" onclick="setRating(4)">⭐</span>
+                <span class="star" onclick="setRating(5)">⭐</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="form-group">
+              <label for="review-title">Review Title</label>
+              <input type="text" id="review-title" placeholder="Amazing experience!" style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+            </div>
+            
+            <div class="form-group">
+              <label for="review-content">Your Review</label>
+              <textarea id="review-content" placeholder="Tell us about your experience..." style="width: 100%; padding: 1rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius); min-height: 120px;"></textarea>
+            </div>
+
+            <div  style="margin-top: 2rem;">
+            <label style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="checkbox" id="recommend-product">
+              <span>I would recommend this to a friend</span>
+            </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeWriteReviewModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Cancel</button>
+        <button onclick="submitReview()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">⭐ Submit Review</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reorder Items Modal -->
+  <div id="reorder-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">🔄 Reorder Items</h2>
+        <button class="modal-close" onclick="closeReorderModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="reorder-content">
+          <h3>Previous Order Items</h3>
+          <div class="reorder-items">
+            <div class="reorder-item">
+              <div class="item-info">
+                <h4>Fantasy Romance Collection</h4>
+                <p>3 books + exclusive bookmark</p>
+                <span class="item-price">£29.90</span>
+              </div>
+              <div class="item-quantity">
+                <label>Quantity:</label>
+                <input type="number" value="1" min="0" max="10" style="width: 60px; padding: 0.5rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+              </div>
+            </div>
+            
+            <div class="reorder-item">
+              <div class="item-info">
+                <h4>Author-signed postcard</h4>
+                <p>Limited edition collectible</p>
+                <span class="item-price">£5.00</span>
+              </div>
+              <div class="item-quantity">
+                <label>Quantity:</label>
+                <input type="number" value="1" min="0" max="10" style="width: 60px; padding: 0.5rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+              </div>
+            </div>
+            
+            <div class="reorder-item">
+              <div class="item-info">
+                <h4>Monthly reading guide</h4>
+                <p>Digital download + physical copy</p>
+                <span class="item-price">£3.00</span>
+              </div>
+              <div class="item-quantity">
+                <label>Quantity:</label>
+                <input type="number" value="1" min="0" max="10" style="width: 60px; padding: 0.5rem; border: 0.1rem solid rgba(var(--color-foreground), 0.2); border-radius: var(--inputs-radius);">
+              </div>
+            </div>
+          </div>
+          
+          <div class="reorder-summary">
+            <div class="summary-line">
+              <span>Subtotal:</span>
+              <span>£37.90</span>
+            </div>
+            <div class="summary-line">
+              <span>Shipping:</span>
+              <span>£4.99</span>
+            </div>
+            <div class="summary-line total">
+              <span>Total:</span>
+              <span>£42.89</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeReorderModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Cancel</button>
+        <button onclick="addToCart()" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">🛒 Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Order Modal -->
+  <div id="cancel-order-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">❌ Cancel Order</h2>
+        <button class="modal-close" onclick="closeCancelOrderModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel this order?</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeCancelOrderModal()" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Keep Order</button>
+        <button onclick="confirmCancelOrder()" style="background-color: #910F3F; color: white; border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer;">Cancel Order</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Enhanced Customer Account",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Enhanced Customer Account"
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+  const customerId = {{ customer.id | json }};
+</script>
+
+{{ 'enhanced-account.js' | asset_url | script_tag }}

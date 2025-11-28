@@ -1,0 +1,190 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .camera-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .camera-view {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0 auto 20px;
+        }
+        
+        #video-feed {
+            width: 100%;
+            height: auto;
+            background-color: #f7f7f7;
+        }
+        
+        #capture-btn {
+            margin-bottom: 20px;
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        .capture-preview {
+            margin-top: 20px;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            display: none;
+        }
+        
+        .capture-preview img {
+            max-width: 320px;
+            border-radius: 4px;
+        }
+        
+        .manual-upload {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='accounts' %}">{% trans 'Accounts' %}</a>
+    &rsaquo; <a href="{% url 'admin:accounts_facialidentity_changelist' %}">{% trans 'Facial Identities' %}</a>
+    &rsaquo; {% trans 'Capture Face' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{% trans "Capture Face for" %} {{ user.username }}</h1>
+    
+    <div class="camera-container">
+        <h2>{% trans "Live Camera Capture" %}</h2>
+        <p class="help">
+            {% trans "Position the user's face clearly in the camera view, ensuring good lighting and a neutral expression." %}
+        </p>
+        
+        <div class="camera-view">
+            <video id="video-feed" autoplay playsinline></video>
+        </div>
+        
+        <button type="button" id="capture-btn" class="default">{% trans "Capture Photo" %}</button>
+        <canvas id="canvas"></canvas>
+        
+        <div id="capture-preview" class="capture-preview">
+            <h3>{% trans "Preview" %}</h3>
+            <img id="capture-img" src="" alt="Captured face">
+            <br><br>
+            <form method="post" id="capture-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="facial_image" id="facial_image_data">
+                <button type="submit" class="default">{% trans "Use this image" %}</button>
+                <button type="button" id="retry-btn">{% trans "Retry capture" %}</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="manual-upload">
+        <h2>{% trans "Manual Upload" %}</h2>
+        <p class="help">
+            {% trans "Alternatively, upload a clear front-facing image of the user." %}
+        </p>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="{% trans 'Upload Image' %}" class="default">
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('video-feed');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const capturePreview = document.getElementById('capture-preview');
+        const captureImg = document.getElementById('capture-img');
+        const retryBtn = document.getElementById('retry-btn');
+        const captureForm = document.getElementById('capture-form');
+        const facialImageData = document.getElementById('facial_image_data');
+        
+        let stream = null;
+        
+        // Start camera
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: "user"
+                    } 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                alert("Could not access the camera. Please check camera permissions.");
+            }
+        }
+        
+        // Capture photo
+        captureBtn.addEventListener('click', function() {
+            if (!stream) {
+                alert("Camera not available. Please ensure your camera is connected and permissions are granted.");
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to data URL (JPEG format)
+            const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+            
+            // Display preview
+            captureImg.src = dataURL;
+            capturePreview.style.display = 'block';
+            
+            // Set form data
+            facialImageData.value = dataURL;
+            
+            // Convert data URL for form submission
+            fetch(dataURL)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], "captured-face.jpg", { type: "image/jpeg" });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.querySelector('input[name="facial_image"]').files = dataTransfer.files;
+                });
+        });
+        
+        // Retry capture
+        retryBtn.addEventListener('click', function() {
+            capturePreview.style.display = 'none';
+        });
+        
+        // Clean up when leaving page
+        window.addEventListener('beforeunload', function() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+        
+        // Start camera on page load
+        startCamera();
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavish Library - Account System Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .demo-title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .demo-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 5px 0;
+            color: #666;
+        }
+        .feature-list li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        .demo-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+            margin: 10px;
+        }
+        .demo-link:hover {
+            transform: translateY(-2px);
+        }
+        .status-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .tech-stack {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .tech-stack h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tech-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <div class="status-badge">✅ LIVE DEMO READY</div>
+            <h1 class="demo-title">📚 Lavish Library</h1>
+            <p class="demo-subtitle">Complete Account Management System - Client Demo</p>
+            
+            <div style="margin: 30px 0;">
+                <a href="http://127.0.0.1:9292/account" class="demo-link" target="_blank">
+                    🚀 View Live Account System
+                </a>
+                <a href="debug-account-system.html" class="demo-link" target="_blank">
+                    🔧 Debug Version
+                </a>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3 class="feature-title">Address Management</h3>
+                <ul class="feature-list">
+                    <li>3 sample addresses with different types</li>
+                    <li>Default address highlighting</li>
+                    <li>Edit address modal with pre-filled data</li>
+                    <li>Delete confirmation with warnings</li>
+                    <li>Set default functionality</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💳</div>
+                <h3 class="feature-title">Payment Methods</h3>
+                <ul class="feature-list">
+                    <li>Modern 2024 e-commerce design</li>
+                    <li>Credit card & PayPal support</li>
+                    <li>Authentic card brand styling</li>
+                    <li>Add/Edit/Delete modals</li>
+                    <li>Security notices & validation</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📦</div>
+                <h3 class="feature-title">Order Management</h3>
+                <ul class="feature-list">
+                    <li>Sub-tabs: Upcoming, All, Delivered</li>
+                    <li>Detailed upcoming orders with items</li>
+                    <li>Professional status badges</li>
+                    <li>Order actions & tracking</li>
+                    <li>Sample order data for demo</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3 class="feature-title">Subscription Management</h3>
+                <ul class="feature-list">
+                    <li>Active & paused subscriptions</li>
+                    <li>Change payment redirects to Payment tab</li>
+                    <li>Skip, cancel, reactivate options</li>
+                    <li>Detailed pricing breakdowns</li>
+                    <li>Subscription history access</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3 class="feature-title">Security Features</h3>
+                <ul class="feature-list">
+                    <li>Multi-Factor Authentication setup</li>
+                    <li>Password change functionality</li>
+                    <li>Profile information management</li>
+                    <li>Secure payment processing</li>
+                    <li>Privacy & security notices</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">Modern Design</h3>
+                <ul class="feature-list">
+                    <li>2024 e-commerce styling standards</li>
+                    <li>Custom notification system (no browser alerts)</li>
+                    <li>Responsive mobile-friendly design</li>
+                    <li>Professional modal interfaces</li>
+                    <li>Consistent theme integration</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h3>🛠️ Technical Implementation</h3>
+            <div class="tech-tags">
+                <span class="tech-tag">Shopify Liquid</span>
+                <span class="tech-tag">Modern JavaScript</span>
+                <span class="tech-tag">CSS Grid & Flexbox</span>
+                <span class="tech-tag">Django Integration Ready</span>
+                <span class="tech-tag">Mobile Responsive</span>
+                <span class="tech-tag">Custom Notifications</span>
+                <span class="tech-tag">Form Validation</span>
+                <span class="tech-tag">Modal System</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f8f9fa; border-radius: 15px;">
+            <h3 style="color: #333; margin-bottom: 15px;">🎯 Ready for Client Testing</h3>
+            <p style="color: #666; margin-bottom: 20px;">
+                All features are fully functional with sample data. The system provides a complete modern e-commerce account management experience.
+            </p>
+            <p style="color: #666; font-size: 0.9rem;">
+                <strong>Note:</strong> Browser alert warnings have been eliminated - all notifications now use custom toast messages.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

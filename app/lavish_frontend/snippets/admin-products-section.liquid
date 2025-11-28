@@ -1,0 +1,299 @@
+{% comment %}
+  Admin Products Section
+  Based on Django ShopifyProduct admin with enhanced UI
+{% endcomment %}
+
+<div class="admin-content-section">
+  <div class="admin-table-header">
+    <h2 class="section-title">Product Management</h2>
+    <div class="admin-table-controls">
+      <input type="text" class="admin-search" placeholder="Search products..." id="product-search">
+      <select class="admin-filter-select" id="product-filter">
+        <option value="">All Products</option>
+        <option value="active">Active</option>
+        <option value="draft">Draft</option>
+        <option value="archived">Archived</option>
+      </select>
+      <select class="admin-filter-select" id="product-vendor-filter">
+        <option value="">All Vendors</option>
+        <option value="lavish-library">Lavish Library</option>
+        <option value="partner-brands">Partner Brands</option>
+      </select>
+      <select class="admin-filter-select" id="product-per-page">
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+        <option value="150">150 per page</option>
+        <option value="200">200 per page</option>
+      </select>
+      <button class="admin-btn" onclick="syncAllProducts()">
+        🔄 Sync All
+      </button>
+      <button class="admin-btn secondary" onclick="addNewProduct()">
+        ➕ Add Product
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table" id="products-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="select-all-products" onchange="toggleAllProducts()">
+          </th>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Vendor</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Variants</th>
+          <th>Inventory</th>
+          <th>Last Synced</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="products-table-body">
+        <!-- Data will be loaded from Django backend -->
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">
+            <div id="products-loading">🔄 Loading product data from Django...</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="admin-pagination">
+      <div class="pagination-info">
+        Showing <strong>1-50</strong> of <strong>98</strong> products
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" disabled>← Previous</button>
+        <span style="color: #4C5151; font-weight: 600;">Page 1 of 2</span>
+        <button class="pagination-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load real product data from Django
+  async function loadProductsData() {
+    try {
+      console.log('Loading products from Django backend...');
+      
+      if (!window.djangoIntegration) {
+        throw new Error('Django integration not available');
+      }
+      
+      // Fetch products from Django API
+      const response = await window.djangoIntegration.makeRequest('/products/');
+      
+      if (response && response.results) {
+        renderProductsTable(response.results);
+        updateProductsPagination(response);
+      } else {
+        throw new Error('Invalid response format');
+      }
+      
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      document.getElementById('products-table-body').innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: #dc3545;">
+            ❌ Failed to load product data. Please check Django backend connection.
+          </td>
+        </tr>
+      `;
+    }
+  }
+  
+  function renderProductsTable(products) {
+    const tbody = document.getElementById('products-table-body');
+    
+    if (!products || products.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">
+            No products found.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    tbody.innerHTML = products.map(product => `
+      <tr>
+        <td><input type="checkbox" class="product-checkbox" value="${product.id}"></td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <img src="${getProductImage(product)}" alt="Product" style="border-radius: 4px; width: 50px; height: 50px; object-fit: cover;">
+            <div>
+              <strong>${product.title}</strong><br>
+              <small style="color: rgba(var(--color-foreground), 0.6);">ID: ${product.shopify_id || product.id}</small>
+            </div>
+          </div>
+        </td>
+        <td>${product.handle || 'N/A'}</td>
+        <td>${product.vendor || 'Unknown'}</td>
+        <td>${product.product_type || 'N/A'}</td>
+        <td><span class="status-badge ${getStatusBadgeClass(product.status)}">${product.status || 'Unknown'}</span></td>
+        <td><span class="status-badge status-verified">${product.variants_count || 0} Variants</span></td>
+        <td><span class="status-badge ${getInventoryBadgeClass(product.inventory_total)}">${getInventoryText(product.inventory_total)}</span></td>
+        <td>${formatDate(product.last_synced) || 'Never'}</td>
+        <td>
+          <div class="admin-table-actions">
+            <button class="admin-table-btn edit" onclick="editProduct(${product.id})">✏️ Edit</button>
+            <button class="admin-table-btn sync" onclick="syncProduct(${product.id})">🔄 Sync</button>
+            <button class="admin-table-btn" style="background: #17a2b8; color: white;" onclick="viewProduct(${product.id})">👁️ View</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  
+  function getProductImage(product) {
+    // Use first image if available, otherwise placeholder
+    if (product.images && product.images.length > 0) {
+      return product.images[0].src;
+    }
+    return 'https://via.placeholder.com/50x50/4C5151/FFF6EA?text=📚';
+  }
+  
+  function getStatusBadgeClass(status) {
+    switch(status?.toLowerCase()) {
+      case 'active': return 'status-enabled';
+      case 'draft': return 'status-pending';
+      case 'archived': return 'status-disabled';
+      default: return 'status-pending';
+    }
+  }
+  
+  function getInventoryBadgeClass(total) {
+    if (!total || total === 0) return 'status-disabled';
+    if (total < 10) return 'status-pending';
+    return 'status-enabled';
+  }
+  
+  function getInventoryText(total) {
+    if (!total || total === 0) return 'Out of Stock (0)';
+    if (total < 10) return `Low Stock (${total})`;
+    return `In Stock (${total})`;
+  }
+  
+  function updateProductsPagination(response) {
+    const paginationInfo = document.querySelector('.pagination-info');
+    if (paginationInfo && response.count) {
+      const start = ((response.current_page || 1) - 1) * (response.page_size || 50) + 1;
+      const end = Math.min(start + (response.results?.length || 0) - 1, response.count);
+      paginationInfo.innerHTML = `Showing <strong>${start}-${end}</strong> of <strong>${response.count}</strong> products`;
+    }
+  }
+
+  // Product management functions
+  function toggleAllProducts() {
+    const selectAll = document.getElementById('select-all-products');
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+  }
+
+  function editProduct(productId) {
+    console.log('Editing product:', productId);
+    alert(`Edit product ${productId} - This would open a product edit form`);
+  }
+
+  function syncProduct(productId) {
+    console.log('Syncing product:', productId);
+    if (window.djangoIntegration) {
+      window.djangoIntegration.makeRequest(`/products/${productId}/sync/`, 'POST')
+        .then(response => {
+          if (response.success) {
+            alert('Product synced successfully!');
+          } else {
+            alert('Sync failed: ' + response.message);
+          }
+        })
+        .catch(error => {
+          alert('Sync error: ' + error.message);
+        });
+    }
+  }
+
+  function viewProduct(productId) {
+    console.log('Viewing product:', productId);
+    // Open product in new tab or modal
+    window.open(`/products/product-${productId}`, '_blank');
+  }
+
+  function syncAllProducts() {
+    if (confirm('This will sync all products with Shopify. Continue?')) {
+      console.log('Syncing all products...');
+      if (window.djangoIntegration) {
+        window.djangoIntegration.makeRequest('/products/sync-all/', 'POST')
+          .then(response => {
+            alert('Bulk product sync completed: ' + response.message);
+          })
+          .catch(error => {
+            alert('Bulk sync failed: ' + error.message);
+          });
+      }
+    }
+  }
+
+  function addNewProduct() {
+    console.log('Adding new product...');
+    alert('Add new product - This would open a product creation form');
+  }
+
+  // Search and filter functionality for products
+  document.getElementById('product-search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#products-table-body tr');
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('product-filter').addEventListener('change', function(e) {
+    const filter = e.target.value;
+    const rows = document.querySelectorAll('#products-table-body tr');
+    
+    rows.forEach(row => {
+      if (!filter) {
+        row.style.display = '';
+        return;
+      }
+      
+      const statusBadges = row.querySelectorAll('.status-badge');
+      let shouldShow = false;
+      
+      statusBadges.forEach(badge => {
+        if (filter === 'active' && badge.textContent.includes('Active')) shouldShow = true;
+        if (filter === 'draft' && badge.textContent.includes('Draft')) shouldShow = true;
+        if (filter === 'archived' && badge.textContent.includes('Archived')) shouldShow = true;
+      });
+      
+      row.style.display = shouldShow ? '' : 'none';
+    });
+  });
+
+  document.getElementById('product-vendor-filter').addEventListener('change', function(e) {
+    const filter = e.target.value;
+    const rows = document.querySelectorAll('#products-table-body tr');
+    
+    rows.forEach(row => {
+      if (!filter) {
+        row.style.display = '';
+        return;
+      }
+      
+      const vendorCell = row.cells[3]; // Vendor column
+      const shouldShow = vendorCell.textContent.toLowerCase().includes(filter.replace('-', ' '));
+      row.style.display = shouldShow ? '' : 'none';
+    });
+  });
+</script>

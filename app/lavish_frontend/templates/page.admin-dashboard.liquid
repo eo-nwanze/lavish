@@ -1,0 +1,434 @@
+{% comment %}
+  Admin Dashboard - Main Layout
+  Inspired by Django Admin with Lavish Library styling
+{% endcomment %}
+
+<style>
+  .admin-dashboard {
+    display: flex;
+    min-height: 100vh;
+    background-color: rgb(var(--color-background));
+    font-family: var(--font-body-family);
+  }
+
+  .admin-sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #4C5151 0%, #3a3f3f 100%);
+    color: #FFF6EA;
+    padding: 2rem 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+
+  .admin-main {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    background-color: rgba(var(--color-foreground), 0.02);
+  }
+
+  .admin-header {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--media-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    border-left: 4px solid #4C5151;
+  }
+
+  .admin-nav-group {
+    margin-bottom: 2rem;
+  }
+
+  .admin-nav-title {
+    color: #FFF6EA;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0 2rem 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 246, 234, 0.2);
+    margin-bottom: 1rem;
+  }
+
+  .admin-nav-item {
+    display: block;
+    color: rgba(255, 246, 234, 0.8);
+    text-decoration: none;
+    padding: 1rem 2rem;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .admin-nav-item:hover,
+  .admin-nav-item.active {
+    background-color: rgba(255, 246, 234, 0.1);
+    color: #FFF6EA;
+    border-left-color: #FFF6EA;
+  }
+
+  .admin-nav-item .icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+  }
+
+  .admin-content-section {
+    background: white;
+    border-radius: var(--media-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    background: linear-gradient(135deg, #4C5151 0%, #3a3f3f 100%);
+    color: #FFF6EA;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .section-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .admin-btn {
+    background: #FFF6EA;
+    color: #4C5151;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--buttons-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .admin-btn:hover {
+    background: rgba(255, 246, 234, 0.9);
+    transform: translateY(-1px);
+  }
+
+  .admin-btn.secondary {
+    background: transparent;
+    color: #FFF6EA;
+    border: 1px solid rgba(255, 246, 234, 0.3);
+  }
+
+  .admin-btn.secondary:hover {
+    background: rgba(255, 246, 234, 0.1);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: var(--media-radius);
+    text-align: center;
+    border-left: 4px solid #4C5151;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #4C5151;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: rgba(var(--color-foreground), 0.7);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    .admin-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .admin-sidebar.mobile-open {
+      transform: translateX(0);
+    }
+    
+    .admin-main {
+      margin-left: 0;
+    }
+  }
+</style>
+
+<div class="admin-dashboard">
+  <!-- Sidebar Navigation -->
+  <nav class="admin-sidebar">
+    <div style="padding: 0 2rem 2rem; text-align: center; border-bottom: 1px solid rgba(255, 246, 234, 0.2); margin-bottom: 2rem;">
+      <h2 style="color: #FFF6EA; margin: 0; font-size: 1.5rem;">Lavish Library</h2>
+      <p style="color: rgba(255, 246, 234, 0.7); margin: 0.5rem 0 0; font-size: 0.9rem;">Admin Dashboard</p>
+    </div>
+
+    <div class="admin-nav-group">
+      <div class="admin-nav-title">Core Management</div>
+      <a href="#dashboard" class="admin-nav-item active" onclick="showSection('dashboard')">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="#accounts" class="admin-nav-item" onclick="showSection('accounts')">
+        <span class="icon">👥</span> Accounts
+      </a>
+      <a href="#customers" class="admin-nav-item" onclick="showSection('customers')">
+        <span class="icon">🛍️</span> Customers
+      </a>
+    </div>
+
+    <div class="admin-nav-group">
+      <div class="admin-nav-title">Commerce</div>
+      <a href="#products" class="admin-nav-item" onclick="showSection('products')">
+        <span class="icon">📦</span> Products
+      </a>
+      <a href="#orders" class="admin-nav-item" onclick="showSection('orders')">
+        <span class="icon">🛒</span> Orders
+      </a>
+      <a href="#inventory" class="admin-nav-item" onclick="showSection('inventory')">
+        <span class="icon">📋</span> Inventory
+      </a>
+    </div>
+
+    <div class="admin-nav-group">
+      <div class="admin-nav-title">Operations</div>
+      <a href="#shipping" class="admin-nav-item" onclick="showSection('shipping')">
+        <span class="icon">🚚</span> Shipping
+      </a>
+      <a href="#subscriptions" class="admin-nav-item" onclick="showSection('subscriptions')">
+        <span class="icon">🔄</span> Subscriptions
+      </a>
+      <a href="#shopify-sync" class="admin-nav-item" onclick="showSection('shopify-sync')">
+        <span class="icon">🔗</span> Shopify Sync
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="admin-main">
+    <!-- Dashboard Overview Section -->
+    <div id="dashboard-section" class="admin-section active">
+      <div class="admin-header">
+        <h1 style="margin: 0; color: #4C5151; font-size: 2.5rem;">Admin Dashboard</h1>
+        <p style="margin: 0.5rem 0 0; color: rgba(var(--color-foreground), 0.7);">
+          Welcome to the Lavish Library administration panel. Manage your store data with ease.
+        </p>
+      </div>
+
+      <div class="admin-content-section">
+        <div class="section-header">
+          <h2 class="section-title">System Overview</h2>
+          <div class="section-actions">
+            <button class="admin-btn secondary" onclick="refreshDashboard()">
+              🔄 Refresh Data
+            </button>
+            <a href="http://127.0.0.1:8000/admin/" target="_blank" class="admin-btn">
+              ⚙️ Django Admin
+            </a>
+          </div>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-customers">1,270</div>
+            <div class="stat-label">Total Customers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-products">98</div>
+            <div class="stat-label">Products</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="total-orders">50</div>
+            <div class="stat-label">Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="inventory-items">461</div>
+            <div class="stat-label">Inventory Items</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder sections for other admin areas -->
+    <div id="accounts-section" class="admin-section" style="display: none;">
+      {% render 'admin-accounts-section' %}
+    </div>
+
+    <div id="customers-section" class="admin-section" style="display: none;">
+      {% render 'admin-customers-section' %}
+    </div>
+
+    <div id="products-section" class="admin-section" style="display: none;">
+      {% render 'admin-products-section' %}
+    </div>
+
+    <div id="orders-section" class="admin-section" style="display: none;">
+      {% render 'admin-orders-section' %}
+    </div>
+
+    <div id="inventory-section" class="admin-section" style="display: none;">
+      {% render 'admin-inventory-section' %}
+    </div>
+
+    <div id="shipping-section" class="admin-section" style="display: none;">
+      {% render 'admin-shipping-section' %}
+    </div>
+
+    <div id="subscriptions-section" class="admin-section" style="display: none;">
+      {% render 'admin-subscriptions-section' %}
+    </div>
+
+    <div id="shopify-sync-section" class="admin-section" style="display: none;">
+      {% render 'admin-shopify-sync-section' %}
+    </div>
+  </main>
+</div>
+
+<script>
+  // Admin Dashboard Navigation
+  function showSection(sectionName) {
+    // Hide all sections
+    document.querySelectorAll('.admin-section').forEach(section => {
+      section.style.display = 'none';
+    });
+    
+    // Remove active class from all nav items
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Show selected section
+    const targetSection = document.getElementById(sectionName + '-section');
+    if (targetSection) {
+      targetSection.style.display = 'block';
+      
+      // Load data for the specific section
+      setTimeout(() => {
+        loadSectionData(sectionName);
+      }, 100);
+    }
+    
+    // Add active class to clicked nav item
+    event.target.classList.add('active');
+    
+    // Update URL hash
+    window.location.hash = sectionName;
+  }
+  
+  // Load data for specific sections
+  function loadSectionData(sectionName) {
+    switch(sectionName) {
+      case 'customers':
+        if (typeof loadCustomersData === 'function') {
+          loadCustomersData();
+        }
+        break;
+      case 'products':
+        if (typeof loadProductsData === 'function') {
+          loadProductsData();
+        }
+        break;
+      case 'accounts':
+        if (typeof loadAccountsData === 'function') {
+          loadAccountsData();
+        }
+        break;
+      case 'orders':
+        if (typeof loadOrdersData === 'function') {
+          loadOrdersData();
+        }
+        break;
+      case 'inventory':
+        if (typeof loadInventoryData === 'function') {
+          loadInventoryData();
+        }
+        break;
+      default:
+        console.log(`No data loader for section: ${sectionName}`);
+    }
+  }
+
+  // Load section from URL hash on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash.substring(1);
+    if (hash && document.getElementById(hash + '-section')) {
+      showSection(hash);
+    }
+  });
+
+  // Refresh dashboard data from Django backend
+  async function refreshDashboard() {
+    try {
+      console.log('Fetching dashboard data from Django...');
+      
+      if (window.djangoIntegration) {
+        // Fetch statistics from Django admin
+        const [customerStats, productStats, orderStats, inventoryStats] = await Promise.all([
+          window.djangoIntegration.makeRequest('/customers/'),
+          window.djangoIntegration.makeRequest('/products/'),
+          window.djangoIntegration.makeRequest('/orders/'),
+          window.djangoIntegration.makeRequest('/inventory/')
+        ]);
+        
+        // Update dashboard statistics
+        if (customerStats && customerStats.count !== undefined) {
+          document.getElementById('total-customers').textContent = customerStats.count;
+        }
+        if (productStats && productStats.count !== undefined) {
+          document.getElementById('total-products').textContent = productStats.count;
+        }
+        if (orderStats && orderStats.count !== undefined) {
+          document.getElementById('total-orders').textContent = orderStats.count;
+        }
+        if (inventoryStats && inventoryStats.count !== undefined) {
+          document.getElementById('inventory-items').textContent = inventoryStats.count;
+        }
+        
+        console.log('Dashboard data loaded successfully');
+      } else {
+        console.warn('Django integration not available, using fallback data');
+        // Fallback to static data if Django is not available
+        document.getElementById('total-customers').textContent = '1,270';
+        document.getElementById('total-products').textContent = '98';
+        document.getElementById('total-orders').textContent = '50';
+        document.getElementById('inventory-items').textContent = '461';
+      }
+    } catch (error) {
+      console.error('Failed to refresh dashboard:', error);
+      // Show error state
+      document.querySelectorAll('.stat-number').forEach(el => {
+        el.textContent = 'Error';
+        el.style.color = '#dc3545';
+      });
+    }
+  }
+
+  // Initialize dashboard when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Django integration to be ready
+    setTimeout(() => {
+      refreshDashboard();
+    }, 1000);
+  });
+</script>

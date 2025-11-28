@@ -1,0 +1,477 @@
+{% comment %}
+  Admin Customers Section
+  Based on Django ShopifyCustomer admin with enhanced UI
+{% endcomment %}
+
+<style>
+  .admin-table-container {
+    background: white;
+    border-radius: var(--media-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+
+  .admin-table-header {
+    background: linear-gradient(135deg, #4C5151 0%, #3a3f3f 100%);
+    color: #FFF6EA;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .admin-table-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .admin-search {
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(255, 246, 234, 0.3);
+    border-radius: var(--inputs-radius);
+    background: rgba(255, 246, 234, 0.1);
+    color: #FFF6EA;
+    min-width: 250px;
+  }
+
+  .admin-search::placeholder {
+    color: rgba(255, 246, 234, 0.7);
+  }
+
+  .admin-filter-select {
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(255, 246, 234, 0.3);
+    border-radius: var(--inputs-radius);
+    background: rgba(255, 246, 234, 0.1);
+    color: #FFF6EA;
+    min-width: 150px;
+  }
+
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.3rem;
+  }
+
+  .admin-table th {
+    background: rgba(var(--color-foreground), 0.05);
+    padding: 1.5rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #4C5151;
+    border-bottom: 2px solid rgba(var(--color-foreground), 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .admin-table td {
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid rgba(var(--color-foreground), 0.1);
+    vertical-align: middle;
+  }
+
+  .admin-table tr:hover {
+    background-color: rgba(var(--color-foreground), 0.02);
+  }
+
+  .admin-table-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .admin-table-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--buttons-radius);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .admin-table-btn.edit {
+    background: #FFF6EA;
+    color: #4C5151;
+  }
+
+  .admin-table-btn.delete {
+    background: #dc3545;
+    color: white;
+  }
+
+  .admin-table-btn.sync {
+    background: #28a745;
+    color: white;
+  }
+
+  .admin-table-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .admin-pagination {
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(var(--color-foreground), 0.02);
+    border-top: 1px solid rgba(var(--color-foreground), 0.1);
+  }
+
+  .pagination-info {
+    color: rgba(var(--color-foreground), 0.7);
+    font-size: 1.2rem;
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .pagination-btn {
+    padding: 0.8rem 1.2rem;
+    border: 1px solid rgba(var(--color-foreground), 0.3);
+    background: white;
+    color: #4C5151;
+    border-radius: var(--buttons-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background: #4C5151;
+    color: #FFF6EA;
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-enabled { background: #d4edda; color: #155724; }
+  .status-disabled { background: #f8d7da; color: #721c24; }
+  .status-verified { background: #cce5ff; color: #004085; }
+  .status-pending { background: #fff3cd; color: #856404; }
+</style>
+
+<div class="admin-content-section">
+  <div class="admin-table-header">
+    <h2 class="section-title">Customer Management</h2>
+    <div class="admin-table-controls">
+      <input type="text" class="admin-search" placeholder="Search customers..." id="customer-search">
+      <select class="admin-filter-select" id="customer-filter">
+        <option value="">All Customers</option>
+        <option value="enabled">Enabled</option>
+        <option value="disabled">Disabled</option>
+        <option value="verified">Email Verified</option>
+        <option value="mfa">MFA Enabled</option>
+      </select>
+      <select class="admin-filter-select" id="customer-per-page">
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+        <option value="150">150 per page</option>
+        <option value="200">200 per page</option>
+      </select>
+      <button class="admin-btn" onclick="syncAllCustomers()">
+        🔄 Sync All
+      </button>
+      <button class="admin-btn secondary" onclick="exportCustomers()">
+        📊 Export
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table" id="customers-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="select-all-customers" onchange="toggleAllCustomers()">
+          </th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Orders</th>
+          <th>Status</th>
+          <th>Email Verified</th>
+          <th>MFA</th>
+          <th>Last Synced</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="customers-table-body">
+        <!-- Data will be loaded from Django backend -->
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">
+            <div id="customers-loading">🔄 Loading customer data from Django...</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="admin-pagination">
+      <div class="pagination-info">
+        Showing <strong>1-50</strong> of <strong>1,270</strong> customers
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" disabled>← Previous</button>
+        <span style="color: #4C5151; font-weight: 600;">Page 1 of 26</span>
+        <button class="pagination-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load real customer data from Django
+  async function loadCustomersData() {
+    try {
+      console.log('Loading customers from Django backend...');
+      
+      if (!window.djangoIntegration) {
+        throw new Error('Django integration not available');
+      }
+      
+      // Fetch customers from Django API
+      const response = await window.djangoIntegration.makeRequest('/customers/');
+      
+      if (response && response.results) {
+        renderCustomersTable(response.results);
+        updateCustomersPagination(response);
+      } else {
+        throw new Error('Invalid response format');
+      }
+      
+    } catch (error) {
+      console.error('Failed to load customers:', error);
+      document.getElementById('customers-table-body').innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: #dc3545;">
+            ❌ Failed to load customer data. Please check Django backend connection.
+          </td>
+        </tr>
+      `;
+    }
+  }
+  
+  function renderCustomersTable(customers) {
+    const tbody = document.getElementById('customers-table-body');
+    
+    if (!customers || customers.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 2rem; color: rgba(var(--color-foreground), 0.6);">
+            No customers found.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    tbody.innerHTML = customers.map(customer => `
+      <tr>
+        <td><input type="checkbox" class="customer-checkbox" value="${customer.id}"></td>
+        <td>
+          <div>
+            <strong>${customer.first_name} ${customer.last_name}</strong><br>
+            <small style="color: rgba(var(--color-foreground), 0.6);">ID: ${customer.shopify_id || customer.id}</small>
+          </div>
+        </td>
+        <td>${customer.email}</td>
+        <td>${customer.phone || 'N/A'}</td>
+        <td><span class="status-badge ${getOrdersBadgeClass(customer.number_of_orders)}">${customer.number_of_orders || 0} Orders</span></td>
+        <td><span class="status-badge ${customer.state === 'enabled' ? 'status-enabled' : 'status-disabled'}">${customer.state || 'Unknown'}</span></td>
+        <td><span class="status-badge ${customer.verified_email ? 'status-verified' : 'status-pending'}">${customer.verified_email ? '✓ Verified' : '✗ Pending'}</span></td>
+        <td><span class="status-badge ${customer.tax_exempt ? 'status-enabled' : 'status-disabled'}">${customer.tax_exempt ? '✓ Tax Exempt' : '✗ Regular'}</span></td>
+        <td>${formatDate(customer.last_synced) || 'Never'}</td>
+        <td>
+          <div class="admin-table-actions">
+            <button class="admin-table-btn edit" onclick="editCustomer(${customer.id})">✏️ Edit</button>
+            <button class="admin-table-btn sync" onclick="syncCustomer(${customer.id})">🔄 Sync</button>
+            <button class="admin-table-btn delete" onclick="deleteCustomer(${customer.id})">🗑️ Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  
+  function getOrdersBadgeClass(orderCount) {
+    if (orderCount >= 10) return 'status-verified';
+    if (orderCount >= 5) return 'status-enabled';
+    return 'status-pending';
+  }
+  
+  function formatDate(dateString) {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  }
+  
+  function updateCustomersPagination(response) {
+    const paginationInfo = document.querySelector('.pagination-info');
+    if (paginationInfo && response.count) {
+      const start = ((response.current_page || 1) - 1) * (response.page_size || 50) + 1;
+      const end = Math.min(start + (response.results?.length || 0) - 1, response.count);
+      paginationInfo.innerHTML = `Showing <strong>${start}-${end}</strong> of <strong>${response.count}</strong> customers`;
+    }
+  }
+
+  // Customer management functions
+  function toggleAllCustomers() {
+    const selectAll = document.getElementById('select-all-customers');
+    const checkboxes = document.querySelectorAll('.customer-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+  }
+
+  function editCustomer(customerId) {
+    // Open edit modal or redirect to edit page
+    console.log('Editing customer:', customerId);
+    // In real implementation, this would open a modal or redirect
+    alert(`Edit customer ${customerId} - This would open an edit form`);
+  }
+
+  function syncCustomer(customerId) {
+    // Sync individual customer with Shopify
+    console.log('Syncing customer:', customerId);
+    if (window.djangoIntegration) {
+      window.djangoIntegration.makeRequest(`/customers/${customerId}/sync/`, 'POST')
+        .then(response => {
+          if (response.success) {
+            alert('Customer synced successfully!');
+            // Refresh the table row
+          } else {
+            alert('Sync failed: ' + response.message);
+          }
+        })
+        .catch(error => {
+          alert('Sync error: ' + error.message);
+        });
+    }
+  }
+
+  function deleteCustomer(customerId) {
+    if (confirm('Are you sure you want to delete this customer?')) {
+      console.log('Deleting customer:', customerId);
+      // In real implementation, make API call to delete
+      alert(`Delete customer ${customerId} - This would delete the customer`);
+    }
+  }
+
+  function syncAllCustomers() {
+    if (confirm('This will sync all customers with Shopify. Continue?')) {
+      console.log('Syncing all customers...');
+      if (window.djangoIntegration) {
+        window.djangoIntegration.makeRequest('/customers/sync-all/', 'POST')
+          .then(response => {
+            alert('Bulk sync completed: ' + response.message);
+            // Refresh the table
+          })
+          .catch(error => {
+            alert('Bulk sync failed: ' + error.message);
+          });
+      }
+    }
+  }
+
+  function exportCustomers() {
+    console.log('Exporting customers...');
+    // In real implementation, generate and download CSV/Excel
+    alert('Export functionality - This would download a CSV file');
+  }
+
+  // Search and filter functionality
+  document.getElementById('customer-search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#customers-table-body tr');
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('customer-filter').addEventListener('change', function(e) {
+    const filter = e.target.value;
+    const rows = document.querySelectorAll('#customers-table-body tr');
+    
+    rows.forEach(row => {
+      if (!filter) {
+        row.style.display = '';
+        return;
+      }
+      
+      const statusBadges = row.querySelectorAll('.status-badge');
+      let shouldShow = false;
+      
+      statusBadges.forEach(badge => {
+        if (filter === 'enabled' && badge.classList.contains('status-enabled')) shouldShow = true;
+        if (filter === 'disabled' && badge.classList.contains('status-disabled')) shouldShow = true;
+        if (filter === 'verified' && badge.classList.contains('status-verified')) shouldShow = true;
+        if (filter === 'mfa' && badge.textContent.includes('✓ Enabled')) shouldShow = true;
+      });
+      
+      row.style.display = shouldShow ? '' : 'none';
+    });
+  });
+
+  // Per page selection
+  document.getElementById('customer-per-page').addEventListener('change', function(e) {
+    const perPage = e.target.value;
+    console.log('Changing items per page to:', perPage);
+    // Reload customers with new page size
+    loadCustomersData();
+  });
+
+  // Initialize customers data when this section is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load customers when the customers section becomes visible
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const customersSection = document.getElementById('customers-section');
+          if (customersSection && customersSection.style.display !== 'none') {
+            // Section is now visible, load data
+            setTimeout(() => {
+              loadCustomersData();
+            }, 500);
+            observer.disconnect(); // Stop observing once loaded
+          }
+        }
+      });
+    });
+    
+    const customersSection = document.getElementById('customers-section');
+    if (customersSection) {
+      observer.observe(customersSection, { attributes: true });
+    }
+  });
+</script>

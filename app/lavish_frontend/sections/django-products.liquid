@@ -1,0 +1,334 @@
+{% comment %}
+  Django Products Section for Crave Theme
+  Displays products with real-time data from Django backend
+{% endcomment %}
+
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .django-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--grid-desktop-horizontal-spacing);
+    margin-top: 2rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .django-products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--grid-mobile-horizontal-spacing);
+    }
+  }
+
+  .django-product-card {
+    position: relative;
+    border: var(--product-card-border-width) solid rgba(var(--color-foreground), var(--product-card-border-opacity));
+    border-radius: var(--product-card-corner-radius);
+    padding: var(--product-card-image-padding);
+    background-color: rgb(var(--color-background));
+    box-shadow: 0 0 0 calc(var(--product-card-border-width) * 2) rgb(var(--color-background)),
+                var(--product-card-shadow-horizontal-offset) var(--product-card-shadow-vertical-offset) var(--product-card-shadow-blur-radius) rgba(var(--color-shadow), var(--product-card-shadow-opacity));
+  }
+
+  .django-product-card__image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: calc(var(--product-card-corner-radius) - var(--product-card-image-padding));
+  }
+
+  .django-product-card__info {
+    padding: 1rem 0;
+    text-align: var(--product-card-text-alignment);
+  }
+
+  .django-product-card__title {
+    font-size: 1.4rem;
+    font-weight: var(--font-heading-weight);
+    margin: 0 0 0.5rem 0;
+    color: rgb(var(--color-foreground));
+  }
+
+  .django-product-card__price {
+    font-size: 1.3rem;
+    color: rgb(var(--color-foreground));
+    margin: 0.5rem 0;
+  }
+
+  .django-product-card__inventory {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.7);
+    margin: 0.5rem 0;
+  }
+
+  .django-product-card__button {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .django-loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(var(--color-foreground), 0.7);
+  }
+
+  .django-error {
+    text-align: center;
+    padding: 2rem;
+    color: rgb(var(--color-foreground));
+    background-color: rgba(var(--color-foreground), 0.05);
+    border-radius: var(--media-radius);
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <div class="section-{{ section.id }}-padding">
+    <div class="page-width">
+      {%- unless section.settings.title == blank -%}
+        <div class="title-wrapper-with-link title-wrapper--self-padded-mobile title-wrapper--no-top-margin">
+          <h2 id="SectionHeading-{{ section.id }}" class="title inline-richtext {{ section.settings.heading_size }}">
+            {{ section.settings.title }}
+          </h2>
+        </div>
+      {%- endunless -%}
+
+      {%- unless section.settings.description == blank -%}
+        <div class="collection__description rte">
+          {{ section.settings.description }}
+        </div>
+      {%- endunless -%}
+
+      <div id="django-products-{{ section.id }}" class="django-products-container">
+        <div class="django-loading">
+          <div class="loading-spinner">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              class="spinner"
+              viewBox="0 0 66 66"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                class="path"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="6"
+                stroke-linecap="round"
+                cx="33"
+                cy="33"
+                r="30"
+              ></circle>
+            </svg>
+          </div>
+          <p>Loading products from Django backend...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    const container = document.getElementById('django-products-{{ section.id }}');
+    const maxProducts = {{ section.settings.products_to_show | default: 8 }};
+    
+    try {
+      // Wait for Django integration to be ready
+      if (typeof window.djangoIntegration === 'undefined') {
+        await new Promise(resolve => {
+          const checkIntegration = () => {
+            if (window.djangoIntegration && window.djangoIntegration.initialized) {
+              resolve();
+            } else {
+              setTimeout(checkIntegration, 100);
+            }
+          };
+          checkIntegration();
+        });
+      }
+
+      // Fetch products from Django backend
+      const response = await window.djangoIntegration.makeRequest('/products/featured/');
+      
+      if (!response || !response.length) {
+        container.innerHTML = `
+          <div class="django-error">
+            <h3>No products available</h3>
+            <p>Unable to load products from Django backend. Please check your connection.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Limit products to show
+      const products = response.slice(0, maxProducts);
+
+      // Render products
+      container.innerHTML = `
+        <div class="django-products-grid">
+          ${products.map(product => `
+            <div class="django-product-card">
+              <img 
+                src="${product.image_url || '{{ 'product-1.jpg' | asset_url }}'}" 
+                alt="${product.title}"
+                class="django-product-card__image"
+                loading="lazy"
+              >
+              <div class="django-product-card__info">
+                <h3 class="django-product-card__title">${product.title}</h3>
+                <div class="django-product-card__price">
+                  ${product.variants && product.variants[0] ? 
+                    `$${parseFloat(product.variants[0].price).toFixed(2)}` : 
+                    'Price unavailable'
+                  }
+                </div>
+                <div class="django-product-card__inventory">
+                  ${product.variants && product.variants[0] ? 
+                    `Stock: ${product.variants[0].inventory_quantity || 0}` : 
+                    'Stock info unavailable'
+                  }
+                </div>
+                <a href="/products/${product.handle}" class="button django-product-card__button">
+                  View Product
+                </a>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+    } catch (error) {
+      console.error('Django Products Section Error:', error);
+      container.innerHTML = `
+        <div class="django-error">
+          <h3>Error loading products</h3>
+          <p>There was an error connecting to the Django backend: ${error.message}</p>
+          <p>Please ensure the Django server is running and accessible.</p>
+        </div>
+      `;
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Django Products",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Featured Products from Django",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "Small"
+        },
+        {
+          "value": "h1",
+          "label": "Medium"
+        },
+        {
+          "value": "h0",
+          "label": "Large"
+        }
+      ],
+      "default": "h1",
+      "label": "Heading size"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 25,
+      "step": 1,
+      "default": 8,
+      "label": "Number of products to show"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "background-1",
+          "label": "Background 1"
+        },
+        {
+          "value": "background-2",
+          "label": "Background 2"
+        },
+        {
+          "value": "inverse",
+          "label": "Inverse"
+        },
+        {
+          "value": "accent-1",
+          "label": "Accent 1"
+        },
+        {
+          "value": "accent-2",
+          "label": "Accent 2"
+        }
+      ],
+      "default": "background-1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Django Products"
+    }
+  ]
+}
+{% endschema %}

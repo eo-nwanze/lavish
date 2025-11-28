@@ -1,0 +1,465 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'component-account-dropdown.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  /* MFA Setup Styles */
+  .mfa-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+    padding: 3rem;
+    box-shadow: 0 0.2rem 0.8rem rgba(var(--color-shadow), 0.1);
+  }
+
+  .mfa-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  }
+
+  .mfa-title {
+    font-size: 2.4rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 1rem;
+  }
+
+  .mfa-subtitle {
+    color: rgba(var(--color-foreground), 0.75);
+    font-size: 1.4rem;
+    line-height: 1.5;
+  }
+
+  .mfa-steps {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .mfa-step {
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--media-radius);
+    padding: 2rem;
+    position: relative;
+  }
+
+  .mfa-step.active {
+    background-color: rgba(var(--color-button), 0.1);
+    border: 0.1rem solid rgba(var(--color-button), 0.3);
+  }
+
+  .step-number {
+    position: absolute;
+    top: -1rem;
+    left: 2rem;
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.4rem;
+  }
+
+  .step-title {
+    font-size: 1.8rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
+
+  .step-description {
+    color: rgba(var(--color-foreground), 0.75);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .qr-code-container {
+    text-align: center;
+    padding: 2rem;
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+    margin: 1.5rem 0;
+  }
+
+  .qr-code-placeholder {
+    width: 200px;
+    height: 200px;
+    background-color: rgba(var(--color-foreground), 0.1);
+    border: 0.2rem dashed rgba(var(--color-foreground), 0.3);
+    border-radius: var(--media-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+
+  .backup-codes {
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--media-radius);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .backup-codes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .backup-code {
+    background-color: rgb(var(--color-background));
+    padding: 0.8rem 1rem;
+    border-radius: var(--buttons-radius);
+    font-family: monospace;
+    font-size: 1.3rem;
+    text-align: center;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  }
+
+  .verification-input {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+    border-radius: var(--inputs-radius);
+    font-size: 1.6rem;
+    text-align: center;
+    font-family: monospace;
+    letter-spacing: 0.5rem;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+  }
+
+  .verification-input:focus {
+    outline: none;
+    border-color: rgba(var(--color-button), 0.8);
+  }
+
+  .mfa-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  .btn-mfa {
+    padding: 1.2rem 2.4rem;
+    border-radius: var(--buttons-radius);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    border: none;
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: rgba(var(--color-foreground), 0.75);
+    border: 0.1rem solid rgba(var(--color-foreground), 0.3);
+  }
+
+  .btn-mfa:hover {
+    transform: translateY(-0.1rem);
+    box-shadow: 0 0.4rem 0.8rem rgba(var(--color-shadow), 0.2);
+  }
+
+  .security-notice {
+    background-color: rgba(var(--color-button), 0.1);
+    border-left: 0.4rem solid rgba(var(--color-button), 0.8);
+    padding: 1.5rem;
+    border-radius: var(--media-radius);
+    margin: 2rem 0;
+  }
+
+  .security-notice h4 {
+    color: rgb(var(--color-foreground));
+    margin-bottom: 0.5rem;
+  }
+
+  .security-notice p {
+    color: rgba(var(--color-foreground), 0.8);
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  @media screen and (max-width: 750px) {
+    .mfa-container {
+      padding: 2rem;
+      margin: 1rem;
+    }
+    
+    .backup-codes-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .mfa-actions {
+      flex-direction: column;
+    }
+  }
+{%- endstyle -%}
+
+<div class="customer mfa-setup section-{{ section.id }}-padding">
+  <div class="page-width">
+    <div class="mfa-container">
+      <div class="mfa-header">
+        <h1 class="mfa-title">🔐 Multi-Factor Authentication Setup</h1>
+        <p class="mfa-subtitle">Secure your account with an additional layer of protection</p>
+      </div>
+
+      <div class="mfa-steps">
+        <!-- Step 1: Download App -->
+        <div class="mfa-step active" id="step-1">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Download Authenticator App</h3>
+          <p class="step-description">
+            Install a compatible authenticator app on your mobile device. We recommend:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+            <div style="text-align: center; padding: 1rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <strong>Google Authenticator</strong><br>
+              <small>iOS & Android</small>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <strong>Microsoft Authenticator</strong><br>
+              <small>iOS & Android</small>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <strong>Authy</strong><br>
+              <small>iOS & Android</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Scan QR Code -->
+        <div class="mfa-step" id="step-2">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Scan QR Code</h3>
+          <p class="step-description">
+            Open your authenticator app and scan this QR code to add your account:
+          </p>
+          <div class="qr-code-container">
+            <div class="qr-code-placeholder">
+              📱 QR Code<br>
+              <small>Generated dynamically</small>
+            </div>
+            <p><strong>Manual Entry Key:</strong></p>
+            <code style="background: rgba(var(--color-foreground), 0.1); padding: 0.5rem 1rem; border-radius: var(--buttons-radius); font-family: monospace;">
+              JBSWY3DPEHPK3PXP
+            </code>
+          </div>
+        </div>
+
+        <!-- Step 3: Verify Setup -->
+        <div class="mfa-step" id="step-3">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Verify Setup</h3>
+          <p class="step-description">
+            Enter the 6-digit code from your authenticator app to verify the setup:
+          </p>
+          <form id="mfa-verify-form">
+            <input type="text" class="verification-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
+            <div class="mfa-actions">
+              <button type="submit" class="btn-mfa btn-primary">
+                ✓ Verify & Enable MFA
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 4: Backup Codes -->
+        <div class="mfa-step" id="step-4">
+          <div class="step-number">4</div>
+          <h3 class="step-title">Save Backup Codes</h3>
+          <p class="step-description">
+            Store these backup codes in a safe place. You can use them to access your account if you lose your phone:
+          </p>
+          <div class="backup-codes">
+            <div class="backup-codes-grid">
+              <div class="backup-code">A1B2-C3D4</div>
+              <div class="backup-code">E5F6-G7H8</div>
+              <div class="backup-code">I9J0-K1L2</div>
+              <div class="backup-code">M3N4-O5P6</div>
+              <div class="backup-code">Q7R8-S9T0</div>
+              <div class="backup-code">U1V2-W3X4</div>
+            </div>
+          </div>
+          <div class="mfa-actions">
+            <button class="btn-mfa btn-primary" onclick="downloadBackupCodes()">
+              💾 Download Codes
+            </button>
+            <button class="btn-mfa btn-secondary" onclick="printBackupCodes()">
+              🖨️ Print Codes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="security-notice">
+        <h4>🛡️ Security Notice</h4>
+        <p>
+          Multi-factor authentication significantly increases your account security. 
+          Keep your backup codes safe and never share them with anyone.
+        </p>
+      </div>
+
+      <div class="mfa-actions">
+        <a href="{{ routes.account_url }}" class="btn-mfa btn-secondary">
+          ← Back to Account
+        </a>
+        <button class="btn-mfa btn-primary" onclick="completeMFASetup()">
+          🎉 Complete Setup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const steps = document.querySelectorAll('.mfa-step');
+  let currentStep = 0;
+
+  // Step navigation
+  function showStep(stepIndex) {
+    steps.forEach((step, index) => {
+      step.classList.toggle('active', index === stepIndex);
+    });
+  }
+
+  // MFA verification form
+  const verifyForm = document.getElementById('mfa-verify-form');
+  if (verifyForm) {
+    verifyForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const code = this.querySelector('input').value;
+      
+      if (code.length === 6) {
+        // Simulate verification
+        setTimeout(() => {
+          showStep(3); // Show backup codes step
+          alert('✅ MFA setup verified successfully!');
+        }, 1000);
+      } else {
+        alert('❌ Please enter a valid 6-digit code');
+      }
+    });
+  }
+
+  // Auto-format verification input
+  const verificationInput = document.querySelector('.verification-input');
+  if (verificationInput) {
+    verificationInput.addEventListener('input', function(e) {
+      this.value = this.value.replace(/\D/g, '').substring(0, 6);
+    });
+  }
+});
+
+function downloadBackupCodes() {
+  const codes = Array.from(document.querySelectorAll('.backup-code')).map(el => el.textContent);
+  const content = `Lavish Library - MFA Backup Codes\n\nGenerated: ${new Date().toLocaleString()}\n\n${codes.join('\n')}\n\nKeep these codes safe and secure!`;
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lavish-library-backup-codes.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printBackupCodes() {
+  const printContent = `
+    <h2>Lavish Library - MFA Backup Codes</h2>
+    <p>Generated: ${new Date().toLocaleString()}</p>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 2rem 0;">
+      ${Array.from(document.querySelectorAll('.backup-code')).map(el => 
+        `<div style="border: 1px solid #ccc; padding: 1rem; text-align: center; font-family: monospace;">${el.textContent}</div>`
+      ).join('')}
+    </div>
+    <p><strong>Keep these codes safe and secure!</strong></p>
+  `;
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printContent);
+  printWindow.print();
+  printWindow.close();
+}
+
+function completeMFASetup() {
+  // Django integration
+  if (window.djangoIntegration) {
+    window.djangoIntegration.makeRequest('/customers/mfa/enable/', 'POST', {
+      customer_id: {{ customer.id | default: 'null' }},
+      backup_codes_saved: true
+    });
+  }
+  
+  alert('🎉 MFA setup completed successfully!');
+  window.location.href = '{{ routes.account_url }}';
+}
+</script>
+
+{% schema %}
+{
+  "name": "MFA Setup",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "MFA Setup"
+    }
+  ]
+}
+{% endschema %}

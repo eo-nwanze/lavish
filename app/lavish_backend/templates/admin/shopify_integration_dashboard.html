@@ -1,0 +1,226 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block title %}Shopify Integration Dashboard{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.sync-dashboard {
+    padding: 20px;
+    background: white;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sync-card {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px;
+    display: inline-block;
+    width: 280px;
+    vertical-align: top;
+}
+
+.sync-card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.sync-button {
+    background: #417690;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.sync-button:hover {
+    background: #205067;
+    color: white;
+    text-decoration: none;
+}
+
+.sync-button.danger {
+    background: #ba2121;
+}
+
+.sync-button.danger:hover {
+    background: #a41e1e;
+}
+
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #417690;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.sync-status {
+    background: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background: #28a745;
+}
+</style>
+{% endblock %}
+
+{% block content_title %}
+<h1>🔄 Shopify Integration Dashboard</h1>
+{% endblock %}
+
+{% block result_list %}
+<div class="sync-dashboard">
+    
+    <div class="sync-status">
+        <h3><span class="status-indicator"></span>Sync Status: Ready</h3>
+        <p>All systems operational. Ready for sync operations.</p>
+    </div>
+
+    <div class="data-stats">
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.customers|default:0 }}</div>
+            <div class="stat-label">Customers</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.customer_addresses|default:0 }}</div>
+            <div class="stat-label">Customer Addresses</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.products|default:0 }}</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.product_variants|default:0 }}</div>
+            <div class="stat-label">Product Variants</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.orders|default:0 }}</div>
+            <div class="stat-label">Orders</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ data_counts.inventory_items|default:0 }}</div>
+            <div class="stat-label">Inventory Items</div>
+        </div>
+    </div>
+
+    <div class="sync-cards">
+        <div class="sync-card">
+            <h3>🔄 Full Sync</h3>
+            <p>Sync all data from Shopify including customers, products, orders, inventory, and shipping.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_all' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button danger" onclick="return confirm('This will sync ALL data from Shopify. Continue?')">
+                    🚀 Sync All Data
+                </button>
+            </form>
+            <p><small><strong>Warning:</strong> This may take several minutes</small></p>
+        </div>
+
+        <div class="sync-card">
+            <h3>👥 Customers</h3>
+            <p>Sync customer data and addresses from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_customers' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">👥 Sync Customers</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>📦 Products</h3>
+            <p>Sync products, variants, and images from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_products' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">📦 Sync Products</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>🛒 Orders</h3>
+            <p>Sync orders, line items, and addresses from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_orders' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">🛒 Sync Orders</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>📊 Inventory</h3>
+            <p>Sync inventory items, levels, and locations from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_inventory' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">📊 Sync Inventory</button>
+            </form>
+        </div>
+
+        <div class="sync-card">
+            <h3>🚚 Shipping</h3>
+            <p>Sync shipping profiles, zones, and carrier services from Shopify.</p>
+            <form method="post" action="{% url 'admin:shopify_sync_shipping' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="sync-button">🚚 Sync Shipping</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="sync-status">
+        <h3>📋 Quick Actions</h3>
+        <p>
+            <a href="{% url 'admin:customers_shopifycustomer_changelist' %}" class="sync-button">View Customers</a>
+            <a href="{% url 'admin:products_shopifyproduct_changelist' %}" class="sync-button">View Products</a>
+            <a href="{% url 'admin:orders_shopifyorder_changelist' %}" class="sync-button">View Orders</a>
+            <a href="{% url 'admin:inventory_shopifyinventoryitem_changelist' %}" class="sync-button">View Inventory</a>
+            <a href="{% url 'admin:shipping_shopifycarrierservice_changelist' %}" class="sync-button">View Shipping</a>
+        </p>
+    </div>
+</div>
+
+<script>
+// Show success message after form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('sync') === 'started') {
+        alert('Sync operation started successfully!');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Shopify Integration Dashboard{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.sync-dashboard {
+    padding: 20px;
+}
+
+.sync-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: inline-block;
+    width: 300px;
+    vertical-align: top;
+}
+
+.sync-card h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.sync-button {
+    background: #417690;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 14px;
+}
+
+.sync-button:hover {
+    background: #205067;
+}
+
+.sync-button.danger {
+    background: #ba2121;
+}
+
+.sync-button.danger:hover {
+    background: #a41e1e;
+}
+
+.sync-status {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-idle { background: #28a745; }
+.status-running { background: #ffc107; }
+.status-error { background: #dc3545; }
+
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #417690;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sync-dashboard">
+    <h1>🔄 Shopify Integration Dashboard</h1>
+    
+    <div class="sync-status">
+        <h3><span class="status-indicator status-idle"></span>Sync Status: Idle</h3>
+        <p>Last sync: <span id="last-sync-time">Never</span></p>
+        <p>Status: <span id="sync-status-message">Ready for sync operations</span></p>
+    </div>
+
+    <div class="data-stats">
+        <div class="stat-item">
+            <div class="stat-number">1,270</div>
+            <div class="stat-label">Customers</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">98</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">50</div>
+            <div class="stat-label">Orders</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">461</div>
+            <div class="stat-label">Inventory Items</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">30</div>
+            <div class="stat-label">Shipping Records</div>
+        </div>
+    </div>
+
+    <div class="sync-cards">
+        <div class="sync-card">
+            <h3>🔄 Full Sync</h3>
+            <p>Sync all data from Shopify including customers, products, orders, inventory, and shipping information.</p>
+            <button class="sync-button danger" onclick="syncAllData()">
+                🚀 Sync All Data
+            </button>
+            <p><small><strong>Warning:</strong> This may take several minutes</small></p>
+        </div>
+
+        <div class="sync-card">
+            <h3>👥 Customers</h3>
+            <p>Sync customer data and addresses from Shopify.</p>
+            <button class="sync-button" onclick="syncCustomers()">
+                👥 Sync Customers
+            </button>
+        </div>
+
+        <div class="sync-card">
+            <h3>📦 Products</h3>
+            <p>Sync products, variants, and images from Shopify.</p>
+            <button class="sync-button" onclick="syncProducts()">
+                📦 Sync Products
+            </button>
+        </div>
+
+        <div class="sync-card">
+            <h3>🛒 Orders</h3>
+            <p>Sync orders, line items, and addresses from Shopify.</p>
+            <button class="sync-button" onclick="syncOrders()">
+                🛒 Sync Orders
+            </button>
+        </div>
+
+        <div class="sync-card">
+            <h3>📊 Inventory</h3>
+            <p>Sync inventory items, levels, and locations from Shopify.</p>
+            <button class="sync-button" onclick="syncInventory()">
+                📊 Sync Inventory
+            </button>
+        </div>
+
+        <div class="sync-card">
+            <h3>🚚 Shipping</h3>
+            <p>Sync shipping profiles, zones, and carrier services from Shopify.</p>
+            <button class="sync-button" onclick="syncShipping()">
+                🚚 Sync Shipping
+            </button>
+        </div>
+    </div>
+
+    <div class="sync-status">
+        <h3>📋 Recent Sync Activity</h3>
+        <div id="sync-log">
+            <p>No recent sync activity</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// CSRF token for Django
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// Sync functions
+function syncAllData() {
+    if (confirm('This will sync ALL data from Shopify. This may take several minutes. Continue?')) {
+        performSync('sync-all', 'Full sync');
+    }
+}
+
+function syncCustomers() {
+    performSync('sync-customers', 'Customer sync');
+}
+
+function syncProducts() {
+    performSync('sync-products', 'Product sync');
+}
+
+function syncOrders() {
+    performSync('sync-orders', 'Order sync');
+}
+
+function syncInventory() {
+    performSync('sync-inventory', 'Inventory sync');
+}
+
+function syncShipping() {
+    performSync('sync-shipping', 'Shipping sync');
+}
+
+function performSync(endpoint, description) {
+    // Update UI to show sync in progress
+    updateSyncStatus('running', `${description} in progress...`);
+    
+    fetch(`/admin/shopify_integration/shopifyintegrationadmin/${endpoint}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'started') {
+            addSyncLog(`${description} started successfully`);
+            // Poll for status updates
+            pollSyncStatus();
+        } else {
+            updateSyncStatus('error', data.message);
+            addSyncLog(`${description} failed: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        updateSyncStatus('error', `Network error: ${error.message}`);
+        addSyncLog(`${description} failed: ${error.message}`);
+    });
+}
+
+function updateSyncStatus(status, message) {
+    const indicator = document.querySelector('.status-indicator');
+    const statusMessage = document.getElementById('sync-status-message');
+    
+    indicator.className = `status-indicator status-${status}`;
+    statusMessage.textContent = message;
+    
+    if (status !== 'running') {
+        document.getElementById('last-sync-time').textContent = new Date().toLocaleString();
+    }
+}
+
+function addSyncLog(message) {
+    const logDiv = document.getElementById('sync-log');
+    const timestamp = new Date().toLocaleString();
+    const logEntry = document.createElement('p');
+    logEntry.innerHTML = `<strong>${timestamp}:</strong> ${message}`;
+    
+    if (logDiv.firstChild && logDiv.firstChild.textContent === 'No recent sync activity') {
+        logDiv.innerHTML = '';
+    }
+    
+    logDiv.insertBefore(logEntry, logDiv.firstChild);
+    
+    // Keep only last 10 entries
+    while (logDiv.children.length > 10) {
+        logDiv.removeChild(logDiv.lastChild);
+    }
+}
+
+function pollSyncStatus() {
+    fetch('/admin/shopify_integration/shopifyintegrationadmin/sync-status/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'running') {
+            setTimeout(pollSyncStatus, 2000); // Poll every 2 seconds
+        } else {
+            updateSyncStatus('idle', 'Ready for sync operations');
+        }
+    })
+    .catch(error => {
+        console.error('Status poll error:', error);
+    });
+}
+
+// Auto-refresh status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    pollSyncStatus();
+});
+</script>
+{% endblock %}

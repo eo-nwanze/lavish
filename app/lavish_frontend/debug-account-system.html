@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Account System</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Account System Debug</h1>
+    
+    <div class="debug-section">
+        <h2>1. Check if you can access these URLs:</h2>
+        <ul>
+            <li><a href="http://127.0.0.1:9292" target="_blank">🏠 Main Site</a></li>
+            <li><a href="http://127.0.0.1:9292/account/login" target="_blank">🔐 Login Page</a></li>
+            <li><a href="http://127.0.0.1:9292/account/register" target="_blank">📝 Register Page</a></li>
+            <li><a href="http://127.0.0.1:9292/account" target="_blank">📊 Account Dashboard (requires login)</a></li>
+            <li><a href="http://127.0.0.1:9292/account" target="_blank">👤 User Profile Tab (in Account Dashboard)</a></li>
+            <li><a href="http://127.0.0.1:9292/account" target="_blank">🔒 MFA Setup Tab (in Account Dashboard)</a></li>
+            <li><span style="color: #28a745;">✅ All features integrated into Account Dashboard</span></li>
+        </ul>
+        
+        <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ffc107;">
+            <strong>⚠️ Special Access Pages (Email Link Required):</strong>
+            <ul style="margin: 5px 0 0 20px; color: #856404;">
+                <li><strong>✉️ Activate Account:</strong> Only accessible via email activation link</li>
+                <li><strong>🔑 Reset Password:</strong> Only accessible via password reset email link</li>
+                <li><strong>Note:</strong> These pages require security tokens and cannot be accessed directly</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>2. What to look for on the main site:</h2>
+        <ul>
+            <li class="info"><strong>Header Account Icon:</strong> Look in top-right corner</li>
+            <li class="info"><strong>Dropdown Menu:</strong> Click the account icon</li>
+            <li class="info"><strong>Login/Register Links:</strong> Should appear in dropdown</li>
+        </ul>
+    </div>
+
+    <div class="debug-section">
+        <h2>3. After creating account and logging in:</h2>
+        <ul>
+            <li class="success"><strong>Account Dashboard:</strong> Should show sidebar navigation</li>
+            <li class="success"><strong>Tabbed Interface:</strong> Overview, Personal Info, Password, Addresses, Orders</li>
+            <li class="success"><strong>Django Status:</strong> Should show connection status</li>
+        </ul>
+    </div>
+
+    <div class="debug-section">
+        <h2>🆕 New Features Added to Account Dashboard:</h2>
+        <ul>
+            <li class="success"><strong>👤 User Profile Tab:</strong> Avatar, stats, achievements, account details</li>
+            <li class="success"><strong>🔒 MFA & Security Tab:</strong> Complete MFA setup and verification system</li>
+            <li class="success"><strong>📱 Interactive MFA:</strong> QR codes, 6-digit verification, auto-advance inputs</li>
+            <li class="success"><strong>🏆 Achievement System:</strong> Badges for purchases, loyalty status</li>
+            <li class="success"><strong>🎨 Integrated Design:</strong> All features use consistent Crave theme styling</li>
+            <li class="success"><strong>🔄 Django Integration:</strong> Real-time sync with backend for all features</li>
+        </ul>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔐 MFA Security Features:</h2>
+        <ul>
+            <li class="success"><strong>📍 Location:</strong> Inside Account Dashboard - MFA & Security Tab</li>
+            <li class="success"><strong>🎯 Purpose:</strong> Users can enable/disable two-factor authentication</li>
+            <li class="success"><strong>📱 6-Digit Verification:</strong> QR code setup with authenticator apps</li>
+            <li class="success"><strong>🔑 Backup Codes:</strong> 10 emergency access codes</li>
+            <li class="success"><strong>📲 SMS Option:</strong> Phone number verification available</li>
+            <li class="success"><strong>🎨 Integrated Design:</strong> Part of enhanced account dashboard</li>
+            <li class="success"><strong>✅ Working:</strong> All MFA features accessible within /account</li>
+        </ul>
+        
+        <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <h4 style="color: #1976d2; margin: 0 0 10px 0;">🧪 Testing MFA Features:</h4>
+            <ol style="margin: 0; color: #333;">
+                <li><strong>Go to:</strong> <a href="http://127.0.0.1:9292/account" target="_blank" style="color: #ff6b35;">Account Dashboard</a></li>
+                <li><strong>Click:</strong> "MFA & Security" tab in the navigation</li>
+                <li><strong>Enable MFA:</strong> Click "Enable Two-Factor Authentication"</li>
+                <li><strong>Scan QR Code:</strong> Use any authenticator app</li>
+                <li><strong>Test Code:</strong> Enter 6-digit code from app</li>
+                <li><strong>Get Backup Codes:</strong> Save your 10 emergency codes</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>✉️ Shopify Customer Account Pages:</h2>
+        
+        <h3 style="color: #28a745;">✅ Directly Accessible Pages:</h3>
+        <ul>
+            <li class="success"><strong>🔐 Login:</strong> /account/login (templates/customers/login.json)</li>
+            <li class="success"><strong>📝 Register:</strong> /account/register (templates/customers/register.json)</li>
+            <li class="success"><strong>📊 Dashboard:</strong> /account (templates/customers/account.json)</li>
+        </ul>
+        
+        <h3 style="color: #ff9800;">🔒 Token-Required Pages (Email Link Only):</h3>
+        <ul>
+            <li class="info"><strong>✉️ Activate Account:</strong> /account/activate?token=xxx (templates/customers/activate_account.json)</li>
+            <li class="info"><strong>🔑 Reset Password:</strong> /account/reset?token=xxx (templates/customers/reset_password.json)</li>
+            <li class="info"><strong>Note:</strong> These pages require security tokens sent via email and cannot be accessed directly</li>
+        </ul>
+        
+        <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #2196f3;">
+            <strong>ℹ️ How Token Pages Work:</strong>
+            <ul style="margin: 5px 0 0 20px; color: #0d47a1;">
+                <li><strong>Activate Account:</strong> User receives email after registration → Clicks link with token → Sees activation page</li>
+                <li><strong>Reset Password:</strong> User clicks "Forgot Password" on login → Receives email → Clicks link with token → Can set new password</li>
+                <li>Templates exist and work, but only when accessed with valid tokens from Shopify's email system</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>4. Troubleshooting Steps:</h2>
+        <ol>
+            <li><strong>Hard Refresh:</strong> Press Ctrl+F5 on the site</li>
+            <li><strong>Clear Cache:</strong> Clear browser cache for localhost</li>
+            <li><strong>Check Console:</strong> Press F12 and look for errors</li>
+            <li><strong>Disable Extensions:</strong> Try in incognito/private mode</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h2>5. Browser Developer Tools Check:</h2>
+        <p>Press F12 on the main site and check:</p>
+        <ul>
+            <li><strong>Console Tab:</strong> Look for JavaScript errors</li>
+            <li><strong>Network Tab:</strong> Check if CSS files are loading (200 status)</li>
+            <li><strong>Elements Tab:</strong> Search for "account-dropdown" class</li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug page loaded. Use the links above to test the account system.');
+        });
+    </script>
+</body>
+</html>

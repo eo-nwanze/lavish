@@ -1,0 +1,355 @@
+{% comment %}
+  Admin Accounts Section
+  Based on Django CustomUser admin with enhanced UI
+{% endcomment %}
+
+<div class="admin-content-section">
+  <div class="admin-table-header">
+    <h2 class="section-title">Account Management</h2>
+    <div class="admin-table-controls">
+      <input type="text" class="admin-search" placeholder="Search accounts..." id="account-search">
+      <select class="admin-filter-select" id="account-filter">
+        <option value="">All Accounts</option>
+        <option value="staff">Staff</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="mfa">MFA Enabled</option>
+        <option value="admin">Company Admin</option>
+      </select>
+      <select class="admin-filter-select" id="account-per-page">
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+        <option value="150">150 per page</option>
+        <option value="200">200 per page</option>
+      </select>
+      <button class="admin-btn" onclick="bulkActivateAccounts()">
+        ✅ Bulk Activate
+      </button>
+      <button class="admin-btn secondary" onclick="addNewAccount()">
+        ➕ Add Account
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table" id="accounts-table">
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="select-all-accounts" onchange="toggleAllAccounts()">
+          </th>
+          <th>User</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Company</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>MFA</th>
+          <th>Last Login</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="accounts-table-body">
+        <tr>
+          <td><input type="checkbox" class="account-checkbox" value="1"></td>
+          <td>
+            <div>
+              <strong>Admin User</strong><br>
+              <small style="color: rgba(var(--color-foreground), 0.6);">admin</small>
+            </div>
+          </td>
+          <td>admin@lavish-library.com</td>
+          <td>+44 20 7946 0958</td>
+          <td>Lavish Library</td>
+          <td>
+            <span class="status-badge" style="background: #e7f3ff; color: #0066cc;">Superuser</span>
+          </td>
+          <td><span class="status-badge status-enabled">Active</span></td>
+          <td><span class="status-badge status-enabled">✓ Enabled</span></td>
+          <td>2 hours ago</td>
+          <td>
+            <div class="admin-table-actions">
+              <button class="admin-table-btn edit" onclick="editAccount(1)">✏️ Edit</button>
+              <button class="admin-table-btn" style="background: #6f42c1; color: white;" onclick="resetMFA(1)">🔐 Reset MFA</button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="account-checkbox" value="2"></td>
+          <td>
+            <div>
+              <strong>Sarah Wilson</strong><br>
+              <small style="color: rgba(var(--color-foreground), 0.6);">sarah.wilson</small>
+            </div>
+          </td>
+          <td>sarah.wilson@lavish-library.com</td>
+          <td>+44 161 123 4567</td>
+          <td>Lavish Library</td>
+          <td>
+            <span class="status-badge" style="background: #d4edda; color: #155724;">Staff</span>
+          </td>
+          <td><span class="status-badge status-enabled">Active</span></td>
+          <td><span class="status-badge status-enabled">✓ Enabled</span></td>
+          <td>1 day ago</td>
+          <td>
+            <div class="admin-table-actions">
+              <button class="admin-table-btn edit" onclick="editAccount(2)">✏️ Edit</button>
+              <button class="admin-table-btn" style="background: #6f42c1; color: white;" onclick="resetMFA(2)">🔐 Reset MFA</button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="account-checkbox" value="3"></td>
+          <td>
+            <div>
+              <strong>James Thompson</strong><br>
+              <small style="color: rgba(var(--color-foreground), 0.6);">james.thompson</small>
+            </div>
+          </td>
+          <td>james.thompson@partner.com</td>
+          <td>+44 121 456 7890</td>
+          <td>Partner Company</td>
+          <td>
+            <span class="status-badge" style="background: #fff3cd; color: #856404;">Company Admin</span>
+          </td>
+          <td><span class="status-badge status-enabled">Active</span></td>
+          <td><span class="status-badge status-disabled">✗ Disabled</span></td>
+          <td>3 days ago</td>
+          <td>
+            <div class="admin-table-actions">
+              <button class="admin-table-btn edit" onclick="editAccount(3)">✏️ Edit</button>
+              <button class="admin-table-btn" style="background: #28a745; color: white;" onclick="enableMFA(3)">🔐 Enable MFA</button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="account-checkbox" value="4"></td>
+          <td>
+            <div>
+              <strong>Lisa Anderson</strong><br>
+              <small style="color: rgba(var(--color-foreground), 0.6);">lisa.anderson</small>
+            </div>
+          </td>
+          <td>lisa.anderson@lavish-library.com</td>
+          <td>+44 20 8765 4321</td>
+          <td>Lavish Library</td>
+          <td>
+            <span class="status-badge" style="background: #f8d7da; color: #721c24;">User</span>
+          </td>
+          <td><span class="status-badge status-disabled">Inactive</span></td>
+          <td><span class="status-badge status-disabled">✗ Disabled</span></td>
+          <td>2 weeks ago</td>
+          <td>
+            <div class="admin-table-actions">
+              <button class="admin-table-btn edit" onclick="editAccount(4)">✏️ Edit</button>
+              <button class="admin-table-btn" style="background: #28a745; color: white;" onclick="activateAccount(4)">✅ Activate</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="admin-pagination">
+      <div class="pagination-info">
+        Showing <strong>1-50</strong> of <strong>156</strong> accounts
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" disabled>← Previous</button>
+        <span style="color: #4C5151; font-weight: 600;">Page 1 of 4</span>
+        <button class="pagination-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account Statistics Cards -->
+<div class="admin-content-section" style="margin-top: 2rem;">
+  <div class="section-header">
+    <h2 class="section-title">Account Statistics</h2>
+    <div class="section-actions">
+      <button class="admin-btn secondary" onclick="generateAccountReport()">
+        📊 Generate Report
+      </button>
+    </div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">156</div>
+      <div class="stat-label">Total Accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">142</div>
+      <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">23</div>
+      <div class="stat-label">Staff Members</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">89</div>
+      <div class="stat-label">MFA Enabled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">12</div>
+      <div class="stat-label">Company Admins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">14</div>
+      <div class="stat-label">Inactive Accounts</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Account management functions
+  function toggleAllAccounts() {
+    const selectAll = document.getElementById('select-all-accounts');
+    const checkboxes = document.querySelectorAll('.account-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+  }
+
+  function editAccount(accountId) {
+    console.log('Editing account:', accountId);
+    alert(`Edit account ${accountId} - This would open an account edit form`);
+  }
+
+  function resetMFA(accountId) {
+    if (confirm('Are you sure you want to reset MFA for this account?')) {
+      console.log('Resetting MFA for account:', accountId);
+      if (window.djangoIntegration) {
+        window.djangoIntegration.makeRequest(`/accounts/${accountId}/reset-mfa/`, 'POST')
+          .then(response => {
+            if (response.success) {
+              alert('MFA reset successfully!');
+            } else {
+              alert('MFA reset failed: ' + response.message);
+            }
+          })
+          .catch(error => {
+            alert('MFA reset error: ' + error.message);
+          });
+      }
+    }
+  }
+
+  function enableMFA(accountId) {
+    console.log('Enabling MFA for account:', accountId);
+    if (window.djangoIntegration) {
+      window.djangoIntegration.makeRequest(`/accounts/${accountId}/enable-mfa/`, 'POST')
+        .then(response => {
+          if (response.success) {
+            alert('MFA enabled successfully!');
+          } else {
+            alert('MFA enable failed: ' + response.message);
+          }
+        })
+        .catch(error => {
+          alert('MFA enable error: ' + error.message);
+        });
+    }
+  }
+
+  function activateAccount(accountId) {
+    console.log('Activating account:', accountId);
+    if (window.djangoIntegration) {
+      window.djangoIntegration.makeRequest(`/accounts/${accountId}/activate/`, 'POST')
+        .then(response => {
+          if (response.success) {
+            alert('Account activated successfully!');
+            // Update the UI
+            location.reload();
+          } else {
+            alert('Account activation failed: ' + response.message);
+          }
+        })
+        .catch(error => {
+          alert('Account activation error: ' + error.message);
+        });
+    }
+  }
+
+  function bulkActivateAccounts() {
+    const selectedAccounts = Array.from(document.querySelectorAll('.account-checkbox:checked')).map(cb => cb.value);
+    
+    if (selectedAccounts.length === 0) {
+      alert('Please select accounts to activate.');
+      return;
+    }
+    
+    if (confirm(`Activate ${selectedAccounts.length} selected accounts?`)) {
+      console.log('Bulk activating accounts:', selectedAccounts);
+      if (window.djangoIntegration) {
+        window.djangoIntegration.makeRequest('/accounts/bulk-activate/', 'POST', {
+          account_ids: selectedAccounts
+        })
+        .then(response => {
+          alert('Bulk activation completed: ' + response.message);
+          location.reload();
+        })
+        .catch(error => {
+          alert('Bulk activation failed: ' + error.message);
+        });
+      }
+    }
+  }
+
+  function addNewAccount() {
+    console.log('Adding new account...');
+    alert('Add new account - This would open an account creation form');
+  }
+
+  function generateAccountReport() {
+    console.log('Generating account report...');
+    alert('Generate report - This would create and download a comprehensive account report');
+  }
+
+  // Search and filter functionality for accounts
+  document.getElementById('account-search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#accounts-table-body tr');
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('account-filter').addEventListener('change', function(e) {
+    const filter = e.target.value;
+    const rows = document.querySelectorAll('#accounts-table-body tr');
+    
+    rows.forEach(row => {
+      if (!filter) {
+        row.style.display = '';
+        return;
+      }
+      
+      const text = row.textContent.toLowerCase();
+      let shouldShow = false;
+      
+      switch(filter) {
+        case 'staff':
+          shouldShow = text.includes('staff') || text.includes('superuser');
+          break;
+        case 'active':
+          shouldShow = text.includes('active');
+          break;
+        case 'inactive':
+          shouldShow = text.includes('inactive');
+          break;
+        case 'mfa':
+          shouldShow = text.includes('✓ enabled');
+          break;
+        case 'admin':
+          shouldShow = text.includes('company admin') || text.includes('superuser');
+          break;
+      }
+      
+      row.style.display = shouldShow ? '' : 'none';
+    });
+  });
+</script>

@@ -1,0 +1,21 @@
+{
+    "detected_faces": [
+        {
+            "x": 216,
+            "y": 192,
+            "w": 197,
+            "h": 214,
+            "center": [
+                314,
+                299
+            ],
+            "distance": 59.30430001273095,
+            "radius": 102,
+            "face_hash": "bd1d8ac94c6fba5cdc905881417e70ef",
+            "image_path": "detected_faces/emmanuel_nwanze_20250424_201812.jpg",
+            "id": 1,
+            "name": "emmanuel nwanze"
+        }
+    ],
+    "last_updated": "2025-04-24T20:18:12.660061"
+}

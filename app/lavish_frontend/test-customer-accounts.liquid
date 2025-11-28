@@ -1,0 +1,36 @@
+<!-- Test file to check customer accounts -->
+<div style="padding: 20px; background: #f0f0f0; margin: 20px; border-radius: 8px;">
+  <h2>🔍 Customer Account Test</h2>
+  
+  <p><strong>Customer accounts enabled:</strong> 
+    {% if shop.customer_accounts_enabled %}
+      ✅ YES - Customer accounts are enabled
+    {% else %}
+      ❌ NO - Customer accounts are disabled
+    {% endif %}
+  </p>
+  
+  <p><strong>Current customer status:</strong>
+    {% if customer %}
+      ✅ Logged in as: {{ customer.first_name }} {{ customer.last_name }} ({{ customer.email }})
+    {% else %}
+      ❌ Not logged in
+    {% endif %}
+  </p>
+  
+  <p><strong>Available routes:</strong></p>
+  <ul>
+    <li>Login: <a href="{{ routes.account_login_url }}">{{ routes.account_login_url }}</a></li>
+    <li>Register: <a href="{{ routes.account_register_url }}">{{ routes.account_register_url }}</a></li>
+    <li>Account: <a href="{{ routes.account_url }}">{{ routes.account_url }}</a></li>
+    <li>Logout: <a href="{{ routes.account_logout_url }}">{{ routes.account_logout_url }}</a></li>
+  </ul>
+  
+  <p><strong>Header account icon should be visible:</strong>
+    {% if shop.customer_accounts_enabled %}
+      ✅ Account icon should appear in header
+    {% else %}
+      ❌ Account icon will not appear (accounts disabled)
+    {% endif %}
+  </p>
+</div>

@@ -1,0 +1,81 @@
+{% load static %}
+
+<!-- Facial Authentication Section -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-camera"></i> Facial Authentication
+        </h6>
+        {% if has_facial %}
+        <div class="custom-control custom-switch">
+            <form method="post" action="{% url 'accounts:facial_toggle' %}" id="facial-toggle-form">
+                {% csrf_token %}
+                <input type="hidden" name="enable" value="{% if facial_enabled %}false{% else %}true{% endif %}" id="facial-toggle-value">
+                <input type="checkbox" class="custom-control-input" id="facial-toggle-switch" {% if facial_enabled %}checked{% endif %} onchange="document.getElementById('facial-toggle-value').value = this.checked ? 'true' : 'false'; document.getElementById('facial-toggle-form').submit();">
+                <label class="custom-control-label" for="facial-toggle-switch">
+                    {% if facial_enabled %}Enabled{% else %}Disabled{% endif %}
+                </label>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if has_facial %}
+            <div class="row">
+                <div class="col-md-5">
+                    {% if facial_image %}
+                    <div class="position-relative">
+                        <img src="{{ MEDIA_URL }}{{ facial_image }}" alt="Facial Identity" class="img-fluid rounded shadow mb-3">
+                        <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 m-2 facial-setup-btn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-4 bg-light rounded mb-3 position-relative">
+                        <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                        <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 m-2 facial-setup-btn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-7">
+                    <h5>Facial Authentication Status</h5>
+                    <p class="mb-1">
+                        <span class="badge {% if facial_enabled %}bg-success{% else %}bg-secondary{% endif %} text-white">
+                            {% if facial_enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                    </p>
+                    
+                    <h5 class="mt-3">Details</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Registered:</strong> {{ face_registered_date|date:"F j, Y" }}</li>
+                        {% if face_last_used %}
+                        <li><strong>Last Used:</strong> {{ face_last_used|date:"F j, Y g:i A" }}</li>
+                        {% endif %}
+                        <li><strong>Confidence Level:</strong> {{ min_confidence|floatformat:0 }}%</li>
+                    </ul>
+                    
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-outline-primary facial-setup-btn">
+                            <i class="fas fa-sync-alt"></i> Re-register Face
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-face-smile fa-4x text-secondary"></i>
+                </div>
+                <h5>Facial Authentication Not Setup</h5>
+                <p class="text-muted">
+                    Setting up facial authentication allows you to log in with your face instead of typing your password.
+                </p>
+                <button type="button" class="btn btn-primary facial-setup-btn">
+                    <i class="fas fa-camera"></i> Setup Facial Login
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div> 

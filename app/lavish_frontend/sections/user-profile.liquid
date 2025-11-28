@@ -1,0 +1,1256 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'component-account-dropdown.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  /* MOST AGGRESSIVE WIDTH OVERRIDES - MUST BE FIRST */
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .customer.user-profile,
+  .customer.user-profile > *,
+  .customer.user-profile .shopify-section,
+  .customer.user-profile .section-template,
+  .customer.user-profile .main-content,
+  .customer.user-profile .content-for-layout,
+  .customer.user-profile .page-width,
+  .customer.user-profile .container,
+  .customer.user-profile .grid,
+  .customer.user-profile .page-width-desktop {
+    width: 100% !important;
+    max-width: none !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* Force full width on all possible containers */
+  .shopify-section .page-width,
+  .main-content .page-width,
+  .content-for-layout .page-width,
+  .section-template .page-width {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* Global overrides for full width */
+  .customer.user-profile {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  /* Force full width container */
+  .shopify-section,
+  .section-template-customers,
+  .main-content,
+  .content-for-layout {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  /* User Profile Styles */
+  .profile-container {
+    max-width: 2400px !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 380px 1fr !important;
+    gap: 4rem !important;
+    font-size: 1.5rem !important; /* Increased base font size */
+    width: 100% !important;
+  }
+
+  /* Override page-width constraint */
+  .customer.user-profile .page-width {
+    max-width: 100% !important;
+    padding: 0 3rem !important;
+  }
+
+  /* Override any container constraints */
+  .customer.user-profile .page-width,
+  .customer.user-profile .container,
+  .customer.user-profile .shopify-section,
+  .customer.user-profile .main-content,
+  .customer.user-profile .grid,
+  .customer.user-profile .page-width-desktop {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 4rem !important;
+  }
+
+  /* Full width on large screens */
+  @media screen and (min-width: 1400px) {
+    .customer.user-profile .page-width {
+      padding: 0 4rem !important;
+    }
+    
+    .profile-container {
+      max-width: 1800px;
+    }
+  }
+
+  /* Extra large screens */
+  @media screen and (min-width: 1600px) {
+    .customer.user-profile .page-width {
+      padding: 0 5rem !important;
+    }
+    
+    .profile-container {
+      max-width: 2000px;
+      grid-template-columns: 360px 1fr;
+      gap: 4rem;
+    }
+  }
+
+  @media screen and (max-width: 990px) {
+    .profile-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .profile-sidebar {
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--media-radius);
+    padding: 2.5rem;
+    height: fit-content;
+  }
+
+  .profile-avatar-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin: 0 auto 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-upload {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 0.5rem;
+    font-weight: var(--font-heading-weight);
+    word-break: break-word;
+  }
+
+  .profile-email {
+    color: rgba(var(--color-foreground), 0.75);
+    font-size: 1.4rem;
+    word-break: break-all;
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: rgba(var(--color-button), var(--alpha-button-background));
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  .profile-badges {
+    margin-bottom: 2rem;
+  }
+
+  .profile-badges h4 {
+    color: rgb(var(--color-foreground));
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+
+  .badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    background-color: rgba(var(--color-button), 0.1);
+    color: rgba(var(--color-button), 0.8);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--buttons-radius);
+    font-size: 1.1rem;
+    border: 0.1rem solid rgba(var(--color-button), 0.3);
+  }
+
+  .profile-main {
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+    padding: 3.5rem;
+    box-shadow: 0 0.2rem 0.8rem rgba(var(--color-shadow), 0.1);
+    font-size: 1.25rem;
+  }
+
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  }
+
+  .profile-title {
+    font-size: 2.4rem;
+    color: rgb(var(--color-foreground));
+    margin: 0;
+  }
+
+  .edit-profile-btn {
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--buttons-radius);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .edit-profile-btn:hover {
+    transform: translateY(-0.1rem);
+    box-shadow: 0 0.4rem 0.8rem rgba(var(--color-shadow), 0.2);
+  }
+
+  .profile-sections {
+    display: grid;
+    gap: 3rem;
+  }
+
+  .profile-section {
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--media-radius);
+    padding: 2rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .info-item {
+    background-color: rgb(var(--color-background));
+    padding: 1.5rem;
+    border-radius: var(--media-radius);
+    border: 0.1rem solid rgba(var(--color-foreground), 0.1);
+  }
+
+  .info-label {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+  }
+
+  .info-value {
+    font-size: 1.5rem;
+    color: rgb(var(--color-foreground));
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .preferences-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .preference-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+    border: 0.1rem solid rgba(var(--color-foreground), 0.1);
+    gap: 1rem;
+  }
+
+  .preference-label {
+    font-size: 1.4rem;
+    color: rgb(var(--color-foreground));
+  }
+
+  .preference-description {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+    margin-top: 0.2rem;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background-color: rgba(var(--color-foreground), 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch.active {
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: rgb(var(--color-background));
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-switch.active::after {
+    transform: translateX(26px);
+  }
+
+  .activity-timeline {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background-color: rgb(var(--color-background));
+    border-radius: var(--media-radius);
+    border: 0.1rem solid rgba(var(--color-foreground), 0.1);
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(var(--color-button), 0.1);
+    color: rgba(var(--color-button), 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .activity-content {
+    flex: 1;
+  }
+
+  .activity-title {
+    font-size: 1.4rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 0.2rem;
+  }
+
+  .activity-time {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  .security-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: rgba(var(--color-button), 0.1);
+    border-radius: var(--media-radius);
+    border: 0.1rem solid rgba(var(--color-button), 0.3);
+    margin-bottom: 2rem;
+  }
+
+  .security-icon {
+    font-size: 2rem;
+  }
+
+  .security-text {
+    flex: 1;
+  }
+
+  .security-title {
+    font-size: 1.4rem;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 0.2rem;
+  }
+
+  .security-description {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  /* Navigation Menu Styles */
+  .profile-navigation {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  }
+
+  .profile-navigation h4 {
+    color: rgb(var(--color-foreground));
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .nav-item {
+    margin: 0;
+  }
+
+  .nav-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    padding: 1.2rem 1.5rem !important;
+    border-radius: var(--buttons-radius) !important;
+    text-decoration: none !important;
+    color: rgba(var(--color-foreground), 0.8) !important;
+    transition: all 0.3s ease !important;
+    font-size: 1.6rem !important;
+  }
+
+  .nav-link:hover {
+    background-color: rgba(var(--color-foreground), 0.1);
+    color: rgb(var(--color-foreground));
+    text-decoration: none;
+  }
+
+  .nav-link.active {
+    background-color: rgba(var(--color-button), var(--alpha-button-background));
+    color: rgb(var(--color-button-text));
+    font-weight: 500;
+  }
+
+  .nav-icon {
+    font-size: 1.4rem;
+    width: 24px;
+    text-align: center;
+  }
+
+  .nav-text {
+    flex: 1;
+  }
+
+  /* Mobile-first responsive improvements */
+  @media screen and (max-width: 749px) {
+    .profile-container {
+      padding: 0 1rem;
+    }
+
+    .profile-sidebar {
+      padding: 1.5rem;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+    }
+
+    .avatar-upload {
+      width: 28px;
+      height: 28px;
+      font-size: 1.2rem;
+    }
+
+    .profile-name {
+      font-size: 1.4rem;
+    }
+
+    .profile-email {
+      font-size: 1.1rem;
+    }
+
+    .stat-item {
+      padding: 0.8rem;
+    }
+
+    .stat-number {
+      font-size: 1.6rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+    }
+
+    .profile-badges h4 {
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .badge {
+      padding: 0.3rem 0.6rem;
+      font-size: 1rem;
+    }
+
+    .profile-main {
+      padding: 1.5rem;
+    }
+    
+    .profile-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .profile-title {
+      font-size: 1.8rem;
+    }
+
+    .edit-profile-btn {
+      padding: 0.8rem 1.2rem;
+      font-size: 1.2rem;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .profile-sections {
+      gap: 1.5rem;
+    }
+
+    .profile-section {
+      padding: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .info-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .info-item {
+      padding: 1rem;
+    }
+
+    .info-label {
+      font-size: 1rem;
+    }
+
+    .info-value {
+      font-size: 1.2rem;
+    }
+
+    .preference-item {
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .preference-label {
+      font-size: 1.2rem;
+    }
+
+    .preference-description {
+      font-size: 1rem;
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 22px;
+      border-radius: 11px;
+    }
+
+    .toggle-switch::after {
+      width: 18px;
+      height: 18px;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(22px);
+    }
+
+    .activity-item {
+      gap: 0.8rem;
+      padding: 1rem;
+    }
+
+    .activity-icon {
+      width: 36px;
+      height: 36px;
+      font-size: 1.4rem;
+    }
+
+    .activity-title {
+      font-size: 1.2rem;
+    }
+
+    .activity-time {
+      font-size: 1rem;
+    }
+
+    .security-status {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.2rem;
+    }
+
+    .security-status .edit-profile-btn {
+      width: 100%;
+    }
+    
+    .profile-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .nav-link {
+      padding: 0.6rem 0.8rem;
+      font-size: 1.2rem;
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      width: 20px;
+    }
+  }
+
+  /* Tablet improvements */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
+    }
+
+    .avatar-upload {
+      width: 32px;
+      height: 32px;
+      font-size: 1.3rem;
+    }
+
+    .profile-name {
+      font-size: 1.6rem;
+    }
+
+    .profile-email {
+      font-size: 1.2rem;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+    }
+
+    .stat-label {
+      font-size: 1.1rem;
+    }
+
+    .profile-main {
+      padding: 2rem;
+    }
+
+    .profile-title {
+      font-size: 2rem;
+    }
+
+    .edit-profile-btn {
+      padding: 0.9rem 1.6rem;
+      font-size: 1.3rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+    }
+
+    .info-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .info-item {
+      padding: 1.2rem;
+    }
+
+    .info-label {
+      font-size: 1.1rem;
+    }
+
+    .info-value {
+      font-size: 1.3rem;
+    }
+  }
+{%- endstyle -%}
+
+/* FINAL AGGRESSIVE OVERRIDES */
+<style>
+.customer.user-profile * {
+  max-width: none !important;
+}
+
+.customer.user-profile .page-width {
+  max-width: 100% !important;
+  width: 100vw !important;
+  padding: 0 4rem !important;
+}
+
+.customer.user-profile .profile-container {
+  max-width: 2400px !important;
+  width: 100% !important;
+  grid-template-columns: 380px 1fr !important;
+  gap: 4rem !important;
+  font-size: 1.5rem !important;
+}
+
+.customer.user-profile .profile-sidebar {
+  min-width: 380px !important;
+  padding: 3rem !important;
+}
+
+.customer.user-profile .profile-main {
+  font-size: 1.4rem !important;
+  padding: 4rem !important;
+}
+
+.customer.user-profile .nav-link {
+  font-size: 1.6rem !important;
+  padding: 1.2rem 1.5rem !important;
+}
+</style>
+
+<div class="customer user-profile section-{{ section.id }}-padding" style="width: 100vw !important; max-width: none !important;">
+  <div class="page-width" style="width: 100% !important; max-width: none !important; padding: 0 4rem !important;">
+    <div class="profile-container" style="max-width: 2400px !important; width: 100% !important; margin: 0 auto !important; display: grid !important; grid-template-columns: 380px 1fr !important; gap: 4rem !important; font-size: 1.5rem !important;">
+      <!-- Profile Sidebar -->
+      <div class="profile-sidebar" style="padding: 3rem !important; min-width: 380px !important;">
+        <div class="profile-avatar-section">
+          <div class="profile-avatar">
+            {%- if customer and customer.has_avatar? -%}
+              {{ customer | avatar }}
+            {%- else -%}
+              {{ customer.first_name | default: 'U' | slice: 0 }}{{ customer.last_name | default: 'ser' | slice: 0 }}
+            {%- endif -%}
+            <button class="avatar-upload" onclick="uploadAvatar()">📷</button>
+          </div>
+          <div class="profile-name">{{ customer.first_name | default: 'User' }} {{ customer.last_name | default: 'Profile' }}</div>
+          <div class="profile-email">{{ customer.email | default: 'user@example.com' }}</div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-number">{{ customer.orders_count | default: 0 }}</span>
+            <span class="stat-label">Orders</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ customer.total_spent | money | default: '$0.00' }}</span>
+            <span class="stat-label">Spent</span>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="profile-navigation">
+          <h4>📋 Account Menu</h4>
+          <nav class="profile-nav">
+            <ul class="nav-list">
+              <li class="nav-item">
+                <a href="#overview" class="nav-link active" onclick="showSection('overview')">
+                  <span class="nav-icon">📊</span>
+                  <span class="nav-text">Overview</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#orders" class="nav-link" onclick="showSection('orders')">
+                  <span class="nav-icon">📦</span>
+                  <span class="nav-text">Orders</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#subscriptions" class="nav-link" onclick="showSection('subscriptions')">
+                  <span class="nav-icon">🔄</span>
+                  <span class="nav-text">Subscriptions</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#addresses" class="nav-link" onclick="showSection('addresses')">
+                  <span class="nav-icon">📍</span>
+                  <span class="nav-text">Addresses</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#payment-methods" class="nav-link" onclick="showSection('payment-methods')">
+                  <span class="nav-icon">💳</span>
+                  <span class="nav-text">Payment Methods</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#personal-information" class="nav-link" onclick="showSection('personal-information')">
+                  <span class="nav-icon">👤</span>
+                  <span class="nav-text">Personal Information</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#password" class="nav-link" onclick="showSection('password')">
+                  <span class="nav-icon">🔐</span>
+                  <span class="nav-text">Password</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#mfa-security" class="nav-link" onclick="showSection('mfa-security')">
+                  <span class="nav-icon">🛡️</span>
+                  <span class="nav-text">MFA & Security</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="profile-badges">
+          <h4>🏆 Achievements</h4>
+          <div class="badge-list">
+            {% if customer.orders_count > 0 %}
+              <span class="badge">First Purchase</span>
+            {% endif %}
+            {% if customer.orders_count >= 5 %}
+              <span class="badge">Loyal Customer</span>
+            {% endif %}
+            {% if customer.total_spent >= 10000 %}
+              <span class="badge">VIP Member</span>
+            {% endif %}
+            <span class="badge">Verified Email</span>
+          </div>
+        </div>
+
+        <div class="django-sync-status">
+          <strong>Django Status:</strong> <span id="profile-django-status">Checking...</span>
+        </div>
+      </div>
+
+      <!-- Main Profile Content -->
+      <div class="profile-main" style="padding: 4rem !important; font-size: 1.4rem !important;">
+        <div class="profile-header">
+          <h1 class="profile-title">My Profile</h1>
+          <button class="edit-profile-btn" onclick="toggleEditMode()">
+            ✏️ Edit Profile
+          </button>
+        </div>
+
+        <div class="profile-sections">
+          <!-- Overview Section -->
+          <div id="overview" class="profile-section">
+            <h3 class="section-title">📊 Overview</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Account Status</div>
+                <div class="info-value" style="color: #28a745;">✅ Active & Verified</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Member Since</div>
+                <div class="info-value">{{ customer.created_at | date: '%B %d, %Y' | default: 'Unknown' }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Total Orders</div>
+                <div class="info-value">{{ customer.orders_count | default: 0 }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Total Spent</div>
+                <div class="info-value">{{ customer.total_spent | money | default: '$0.00' }}</div>
+              </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <h4 style="margin-top: 2rem; margin-bottom: 1rem;">📊 Recent Activity</h4>
+            <div class="activity-timeline">
+              <div class="activity-item">
+                <div class="activity-icon">🛒</div>
+                <div class="activity-content">
+                  <div class="activity-title">Placed order #1001</div>
+                  <div class="activity-time">2 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">👤</div>
+                <div class="activity-content">
+                  <div class="activity-title">Updated profile information</div>
+                  <div class="activity-time">1 day ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">🔐</div>
+                <div class="activity-content">
+                  <div class="activity-title">Logged in from new device</div>
+                  <div class="activity-time">3 days ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">📧</div>
+                <div class="activity-content">
+                  <div class="activity-title">Email address verified</div>
+                  <div class="activity-time">1 week ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Orders Section -->
+          <div id="orders" class="profile-section" style="display: none;">
+            <h3 class="section-title">📦 Orders</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Total Orders</div>
+                <div class="info-value">{{ customer.orders_count | default: 0 }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Total Spent</div>
+                <div class="info-value">{{ customer.total_spent | money | default: '$0.00' }}</div>
+              </div>
+            </div>
+            <p style="margin-top: 1rem; color: rgba(var(--color-foreground), 0.75);">Order history will be displayed here. Integration with Django backend for detailed order tracking.</p>
+          </div>
+
+          <!-- Subscriptions Section -->
+          <div id="subscriptions" class="profile-section" style="display: none;">
+            <h3 class="section-title">🔄 Subscriptions</h3>
+            <p>No active subscriptions found.</p>
+            <p style="margin-top: 1rem; color: rgba(var(--color-foreground), 0.75);">Subscription management will be integrated with Django backend.</p>
+          </div>
+
+          <!-- Addresses Section -->
+          <div id="addresses" class="profile-section" style="display: none;">
+            <h3 class="section-title">📍 Addresses</h3>
+            <p>No addresses saved yet.</p>
+            <p style="margin-top: 1rem; color: rgba(var(--color-foreground), 0.75);">Address management will be integrated with Django backend.</p>
+          </div>
+
+          <!-- Payment Methods Section -->
+          <div id="payment-methods" class="profile-section" style="display: none;">
+            <h3 class="section-title">💳 Payment Methods</h3>
+            <p>No payment methods saved yet.</p>
+            <p style="margin-top: 1rem; color: rgba(var(--color-foreground), 0.75);">Payment method management will be integrated with Django backend.</p>
+          </div>
+
+          <!-- Personal Information Section -->
+          <div id="personal-information" class="profile-section" style="display: none;">
+            <h3 class="section-title">👤 Personal Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Full Name</div>
+                <div class="info-value">{{ customer.first_name | default: 'Not provided' }} {{ customer.last_name | default: '' }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Email Address</div>
+                <div class="info-value">{{ customer.email | default: 'Not provided' }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Phone Number</div>
+                <div class="info-value">{{ customer.phone | default: 'Not provided' }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Member Since</div>
+                <div class="info-value">{{ customer.created_at | date: '%B %d, %Y' | default: 'Unknown' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Password Section -->
+          <div id="password" class="profile-section" style="display: none;">
+            <h3 class="section-title">🔐 Password</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Password</div>
+                <div class="info-value">••••••••••</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Last Changed</div>
+                <div class="info-value">Not available</div>
+              </div>
+            </div>
+            <button class="edit-profile-btn" style="margin-top: 1rem;">Change Password</button>
+          </div>
+
+          <!-- MFA & Security Section -->
+          <div id="mfa-security" class="profile-section" style="display: none;">
+            <h3 class="section-title">🛡️ MFA & Security</h3>
+            
+            <div class="security-status">
+              <div class="security-icon">🛡️</div>
+              <div class="security-text">
+                <div class="security-title">Two-Factor Authentication</div>
+                <div class="security-description">Add an extra layer of security to your account</div>
+              </div>
+              <button class="edit-profile-btn" onclick="setupMFA()">Setup MFA</button>
+            </div>
+
+            <div class="info-grid" style="margin-top: 2rem;">
+              <div class="info-item">
+                <div class="info-label">Last Login</div>
+                <div class="info-value">{{ 'now' | date: '%B %d, %Y at %I:%M %p' }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Login Method</div>
+                <div class="info-value">Email & Password</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Account Status</div>
+                <div class="info-value" style="color: #28a745;">✅ Active & Verified</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences Section (kept from original) -->
+          <div class="profile-section">
+            <h3 class="section-title">⚙️ Preferences</h3>
+            <div class="preferences-grid">
+              <div class="preference-item">
+                <div>
+                  <div class="preference-label">Email Notifications</div>
+                  <div class="preference-description">Receive order updates and promotions</div>
+                </div>
+                <div class="toggle-switch active" onclick="togglePreference(this)"></div>
+              </div>
+              <div class="preference-item">
+                <div>
+                  <div class="preference-label">SMS Notifications</div>
+                  <div class="preference-description">Get text messages for important updates</div>
+                </div>
+                <div class="toggle-switch" onclick="togglePreference(this)"></div>
+              </div>
+              <div class="preference-item">
+                <div>
+                  <div class="preference-label">Marketing Communications</div>
+                  <div class="preference-description">Receive newsletters and special offers</div>
+                </div>
+                <div class="toggle-switch active" onclick="togglePreference(this)"></div>
+              </div>
+              <div class="preference-item">
+                <div>
+                  <div class="preference-label">Two-Factor Authentication</div>
+                  <div class="preference-description">Require code verification for login</div>
+                </div>
+                <div class="toggle-switch" onclick="togglePreference(this)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  checkProfileDjangoStatus();
+});
+
+async function checkProfileDjangoStatus() {
+  const statusElement = document.getElementById('profile-django-status');
+  
+  try {
+    if (window.djangoIntegration && window.djangoIntegration.initialized) {
+      const response = await window.djangoIntegration.makeRequest('/customers/profile/', 'GET');
+      
+      if (response) {
+        statusElement.innerHTML = '✅ Synced';
+        statusElement.style.color = 'green';
+        
+        // Sync profile data
+        await window.djangoIntegration.makeRequest('/customers/profile/sync/', 'POST', {
+          shopify_customer_id: {{ customer.id | default: 'null' }},
+          profile_data: {
+            first_name: "{{ customer.first_name }}",
+            last_name: "{{ customer.last_name }}",
+            email: "{{ customer.email }}",
+            phone: "{{ customer.phone }}",
+            orders_count: {{ customer.orders_count | default: 0 }},
+            total_spent: {{ customer.total_spent | remove: ',' | times: 100 | default: 0 }},
+            created_at: "{{ customer.created_at }}",
+            last_login: new Date().toISOString()
+          }
+        });
+      } else {
+        statusElement.innerHTML = '⚠️ Partial';
+        statusElement.style.color = 'orange';
+      }
+    } else {
+      statusElement.innerHTML = '❌ Offline';
+      statusElement.style.color = 'red';
+    }
+  } catch (error) {
+    statusElement.innerHTML = '❌ Error';
+    statusElement.style.color = 'red';
+  }
+}
+
+function showSection(sectionId) {
+  // Hide all sections
+  const sections = document.querySelectorAll('.profile-section');
+  sections.forEach(section => {
+    section.style.display = 'none';
+  });
+  
+  // Remove active class from all nav links
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Show selected section
+  const targetSection = document.getElementById(sectionId);
+  if (targetSection) {
+    targetSection.style.display = 'block';
+  }
+  
+  // Add active class to clicked nav link
+  const activeLink = document.querySelector(`[href="#${sectionId}"]`);
+  if (activeLink) {
+    activeLink.classList.add('active');
+  }
+}
+
+function toggleEditMode() {
+  alert('🔧 Edit mode would open a modal or redirect to edit form');
+  // In a real implementation, this would enable inline editing or open a modal
+}
+
+function uploadAvatar() {
+  alert('📷 Avatar upload functionality would open file picker');
+  // In a real implementation, this would open a file picker and upload to server
+}
+
+function setupMFA() {
+  window.location.href = '/pages/mfa-setup';
+}
+
+function togglePreference(toggle) {
+  toggle.classList.toggle('active');
+  
+  const isActive = toggle.classList.contains('active');
+  const preferenceItem = toggle.closest('.preference-item');
+  const label = preferenceItem.querySelector('.preference-label').textContent;
+  
+  // Django integration for preference updates
+  if (window.djangoIntegration) {
+    window.djangoIntegration.makeRequest('/customers/preferences/', 'POST', {
+      customer_id: {{ customer.id | default: 'null' }},
+      preference: label.toLowerCase().replace(/\s+/g, '_'),
+      enabled: isActive
+    });
+  }
+  
+  console.log(`${label}: ${isActive ? 'Enabled' : 'Disabled'}`);
+}
+</script>
+
+{% schema %}
+{
+  "name": "User Profile",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "User Profile"
+    }
+  ]
+}
+{% endschema %}
