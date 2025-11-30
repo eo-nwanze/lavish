@@ -197,13 +197,15 @@ def calculate_shipping_rates(request):
       }
     }
     
-    Response format:
+    Response format (Shopify ShippingRate object):
     {
       "rates": [{
-        "service_name": "Standard Shipping",
-        "service_code": "standard",
-        "total_price": "599",
-        "currency": "CAD",
+        "handle": "standard-shipping",
+        "title": "Standard Shipping",
+        "price": {
+          "amount": "5.99",
+          "currencyCode": "CAD"
+        },
         "description": "5-7 business days",
         "min_delivery_date": "2024-01-20",
         "max_delivery_date": "2024-01-25"
