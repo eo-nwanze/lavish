@@ -23,9 +23,10 @@ class ShopifyPaymentsClient:
         Returns:
             dict: GraphQL response with balance transactions
         """
-        query = f"""
-        query {{
-            shopifyPaymentsAccount {{
+        after_clause = f', after: "{after}"' if after else ''
+        query = """
+        query {
+            shopifyPaymentsAccount {
                 id
                 activated
                 country
@@ -33,50 +34,50 @@ class ShopifyPaymentsClient:
                 onboardable
                 payoutStatementDescriptor
                 chargeStatementDescriptor
-                balanceTransactions(first: {first}{f', after: "{after}"' if after else ''}) {{
-                    edges {{
-                        node {{
+                balanceTransactions(first: """ + str(first) + after_clause + """) {
+                    edges {
+                        node {
                             id
                             type
                             test
-                            associatedPayout {{
+                            associatedPayout {
                                 id
                                 status
-                            }}
-                            amount {{
+                            }
+                            amount {
                                 amount
                                 currencyCode
-                            }}
-                            fee {{
+                            }
+                            fee {
                                 amount
-                            }}
-                            net {{
+                            }
+                            net {
                                 amount
-                            }}
+                            }
                             sourceId
                             sourceType
                             sourceOrderTransactionId
-                            associatedOrder {{
+                            associatedOrder {
                                 id
-                            }}
-                            adjustmentsOrders {{
+                            }
+                            adjustmentsOrders {
                                 orderTransactionId
-                                amount {{
+                                amount {
                                     amount
-                                }}
+                                }
                                 name
-                            }}
+                            }
                             adjustmentReason
-                        }}
+                        }
                         cursor
-                    }}
-                    pageInfo {{
+                    }
+                    pageInfo {
                         hasNextPage
                         hasPreviousPage
-                    }}
-                }}
-            }}
-        }}
+                    }
+                }
+            }
+        }
         """
         
         return self.client.execute_graphql_query(query)
@@ -92,40 +93,40 @@ class ShopifyPaymentsClient:
         Returns:
             dict: GraphQL response with payouts
         """
-        query = f"""
-        query {{
-            shopifyPaymentsAccount {{
+        after_part = f', after: "{after}"' if after else ''
+        query = """
+        query {
+            shopifyPaymentsAccount {
                 id
-                payouts(first: {first}{f', after: "{after}"' if after else ''}) {{
-                    edges {{
-                        node {{
+                payouts(first: """ + str(first) + after_part + """) {
+                    edges {
+                        node {
                             id
                             status
-                            gross {{
+                            gross {
                                 amount
                                 currencyCode
-                            }}
-                            net {{
+                            }
+                            net {
                                 amount
                                 currencyCode
-                            }}
-                            bankAccount {{
+                            }
+                            bankAccount {
                                 id
                                 bankName
-                                last4
                                 status
-                            }}
+                            }
                             issuedAt
-                        }}
+                        }
                         cursor
-                    }}
-                    pageInfo {{
+                    }
+                    pageInfo {
                         hasNextPage
                         hasPreviousPage
-                    }}
-                }}
-            }}
-        }}
+                    }
+                }
+            }
+        }
         """
         
         return self.client.execute_graphql_query(query)
@@ -141,37 +142,41 @@ class ShopifyPaymentsClient:
         Returns:
             dict: GraphQL response with disputes
         """
-        query = f"""
-        query {{
-            shopifyPaymentsAccount {{
+        after_part = f', after: "{after}"' if after else ''
+        query = """
+        query {
+            shopifyPaymentsAccount {
                 id
-                disputes(first: {first}{f', after: "{after}"' if after else ''}) {{
-                    edges {{
-                        node {{
+                disputes(first: """ + str(first) + after_part + """) {
+                    edges {
+                        node {
                             id
                             status
-                            reasonDetails
-                            amount {{
+                            reasonDetails {
+                                reason
+                                networkReasonCode
+                            }
+                            amount {
                                 amount
                                 currencyCode
-                            }}
-                            order {{
+                            }
+                            order {
                                 id
-                            }}
+                            }
                             initiatedAt
                             evidenceDueBy
                             evidenceSentOn
                             finalizedOn
-                        }}
+                        }
                         cursor
-                    }}
-                    pageInfo {{
+                    }
+                    pageInfo {
                         hasNextPage
                         hasPreviousPage
-                    }}
-                }}
-            }}
-        }}
+                    }
+                }
+            }
+        }
         """
         
         return self.client.execute_graphql_query(query)
@@ -187,30 +192,29 @@ class ShopifyPaymentsClient:
         Returns:
             dict: GraphQL response with bank accounts
         """
-        query = f"""
-        query {{
-            shopifyPaymentsAccount {{
+        after_part = f', after: "{after}"' if after else ''
+        query = """
+        query {
+            shopifyPaymentsAccount {
                 id
-                bankAccounts(first: {first}{f', after: "{after}"' if after else ''}) {{
-                    edges {{
-                        node {{
+                bankAccounts(first: """ + str(first) + after_part + """) {
+                    edges {
+                        node {
                             id
                             bankName
-                            last4
-                            routingNumber
                             currency
                             country
                             status
-                        }}
+                        }
                         cursor
-                    }}
-                    pageInfo {{
+                    }
+                    pageInfo {
                         hasNextPage
                         hasPreviousPage
-                    }}
-                }}
-            }}
-        }}
+                    }
+                }
+            }
+        }
         """
         
         return self.client.execute_graphql_query(query)
@@ -226,7 +230,6 @@ class ShopifyPaymentsClient:
         query {
             shopifyPaymentsAccount {
                 id
-                accountOpenerName
                 activated
                 country
                 defaultCurrency
@@ -386,42 +389,9 @@ class ShopifyPaymentsClient:
         Returns:
             dict: GraphQL response with KYC information
         """
-        query = """
-        query {
-            financeKycInformation {
-                businessAddress {
-                    addressLine1
-                    addressLine2
-                    city
-                    country
-                    postalCode
-                    zone
-                }
-                businessType
-                industry {
-                    category
-                    categoryLabel
-                    code
-                    id
-                    subcategoryLabel
-                }
-                legalName
-                shopOwner {
-                    email
-                    firstName
-                    id
-                    lastName
-                    phone
-                }
-                taxIdentification {
-                    taxIdentificationType
-                    value
-                }
-            }
-        }
-        """
-        
-        return self.client.execute_graphql_query(query)
+        # Note: financeKycInformation field is not available in current API
+        # Return empty response for now
+        return {"data": {}}
     
     def fetch_all_disputes(self, query_filter=None):
         """
@@ -441,49 +411,50 @@ class ShopifyPaymentsClient:
             # Build query with optional filter
             filter_param = f', query: "{query_filter}"' if query_filter else ''
             
-            query = f"""
-            query {{
-                disputes(first: 100{f', after: "{after}"' if after else ''}{filter_param}) {{
-                    edges {{
-                        node {{
+            after_part = f', after: "{after}"' if after else ''
+            query = """
+            query {
+                disputes(first: 100""" + after_part + filter_param + """) {
+                    edges {
+                        node {
                             id
                             status
                             type
-                            reasonDetails {{
+                            reasonDetails {
                                 reason
                                 networkReasonCode
-                            }}
-                            amount {{
+                            }
+                            amount {
                                 amount
                                 currencyCode
-                            }}
+                            }
                             initiatedAt
                             evidenceDueBy
                             evidenceSentOn
                             finalizedOn
-                        }}
+                        }
                         cursor
-                    }}
-                    pageInfo {{
+                    }
+                    pageInfo {
                         hasNextPage
                         hasPreviousPage
-                    }}
-                }}
-            }}
-            """
+                    }
+                }
+            }
+        """
+        
+        response = self.client.execute_graphql_query(query)
+        
+        if 'data' in response and 'disputes' in response['data']:
+            disputes_data = response['data']['disputes']
             
-            response = self.client.execute_graphql_query(query)
+            for edge in disputes_data.get('edges', []):
+                all_disputes.append(edge['node'])
+                after = edge.get('cursor')
             
-            if 'data' in response and 'disputes' in response['data']:
-                disputes_data = response['data']['disputes']
-                
-                for edge in disputes_data.get('edges', []):
-                    all_disputes.append(edge['node'])
-                    after = edge.get('cursor')
-                
-                page_info = disputes_data.get('pageInfo', {})
-                has_next_page = page_info.get('hasNextPage', False)
-            else:
-                has_next_page = False
+            page_info = disputes_data.get('pageInfo', {})
+            has_next_page = page_info.get('hasNextPage', False)
+        else:
+            has_next_page = False
         
         return all_disputes
