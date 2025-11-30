@@ -12,6 +12,35 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /* INLINE MOBILE FIXES - HIGHEST PRIORITY */
+  @media screen and (max-width: 749px) and (min-width: 340px) {
+    .customer.order .order-details,
+    .customer.order .order-details *,
+    .customer.order .order-details td,
+    .customer.order .order-details td *,
+    .customer.order .order-details span,
+    .customer.order .order-details p,
+    .customer.order .order-details div {
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      word-break: break-word !important;
+      white-space: normal !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    
+    .customer.order .fulfillment span,
+    .customer.order .properties span {
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      word-break: break-word !important;
+      white-space: normal !important;
+      display: block !important;
+      line-height: 1.4 !important;
+    }
+  }
 {%- endstyle -%}
 
 <div class="customer order section-{{ section.id }}-padding">
@@ -36,7 +65,7 @@
         <p>{{ 'customer.order.cancelled_reason' | t: reason: order.cancel_reason_label }}</p>
       {%- endif -%}
 
-      <table role="table" class="order-details">
+      <table role="table" class="order-details mobile-order-table">
         <caption class="visually-hidden">
           {{ 'customer.order.title' | t: name: order.name }}
         </caption>

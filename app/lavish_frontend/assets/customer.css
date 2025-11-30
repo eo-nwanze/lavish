@@ -264,7 +264,40 @@
 
 /* Mobile Order Page Card Layout - 340px and above */
 @media screen and (max-width: 749px) and (min-width: 340px) {
-  .customer.order .order-details {
+  /* OVERRIDE BASE.CSS CONFLICTS */
+  .customer.order table:not([class]),
+  .customer.order table:not([class]) td,
+  .customer.order table:not([class]) th,
+  .customer.order .mobile-order-table,
+  .customer.order .mobile-order-table td,
+  .customer.order .mobile-order-table th {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    table-layout: fixed !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  
+  /* OVERRIDE WORD-WRAP NORMAL */
+  .customer.order *,
+  .customer.order table,
+  .customer.order .mobile-order-table,
+  .customer.order td,
+  .customer.order th,
+  .customer.order span,
+  .customer.order p,
+  .customer.order div {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+  
+  .customer.order .order-details,
+  .customer.order .mobile-order-table {
     display: block;
     border: none;
     box-shadow: none;
@@ -276,13 +309,17 @@
     box-sizing: border-box !important;
   }
   
-  .customer.order .order-details thead {
+  .customer.order .order-details thead,
+  .customer.order .mobile-order-table thead {
     display: none;
   }
   
   .customer.order .order-details tbody,
   .customer.order .order-details tr,
-  .customer.order .order-details td {
+  .customer.order .order-details td,
+  .customer.order .mobile-order-table tbody,
+  .customer.order .mobile-order-table tr,
+  .customer.order .mobile-order-table td {
     display: block;
     width: 100%;
     border: none;
@@ -294,7 +331,8 @@
     box-sizing: border-box !important;
   }
   
-  .customer.order .order-details tr {
+  .customer.order .order-details tr,
+  .customer.order .mobile-order-table tr {
     background: rgb(var(--color-background));
     border: 0.1rem solid rgba(var(--color-foreground), 0.08);
     border-radius: 0.8rem;
@@ -308,7 +346,8 @@
     overflow-y: visible !important;
   }
   
-  .customer.order .order-details td {
+  .customer.order .order-details td,
+  .customer.order .mobile-order-table td {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -322,12 +361,14 @@
     word-break: break-word;
   }
   
-  .customer.order .order-details td:last-child {
+  .customer.order .order-details td:last-child,
+  .customer.order .mobile-order-table td:last-child {
     border-bottom: none;
     padding-bottom: 0;
   }
   
-  .customer.order .order-details td::before {
+  .customer.order .order-details td::before,
+  .customer.order .mobile-order-table td::before {
     content: attr(data-label);
     font-size: 1.2rem;
     font-weight: 600;
@@ -342,19 +383,22 @@
   }
   
   /* Product title styling */
-  .customer.order .order-details td[data-label="Product"] {
+  .customer.order .order-details td[data-label="Product"],
+  .customer.order .mobile-order-table td[data-label="Product"] {
     padding-bottom: 1rem;
     border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.1);
     margin-bottom: 1rem;
   }
   
-  .customer.order .order-details td[data-label="Product"]::before {
+  .customer.order .order-details td[data-label="Product"]::before,
+  .customer.order .mobile-order-table td[data-label="Product"]::before {
     font-size: 1.3rem;
     color: rgb(var(--color-foreground));
     margin-bottom: 0.8rem;
   }
   
-  .customer.order .order-details td[data-label="Product"] a {
+  .customer.order .order-details td[data-label="Product"] a,
+  .customer.order .mobile-order-table td[data-label="Product"] a {
     font-size: 1.5rem;
     font-weight: 600;
     color: rgba(var(--color-button), var(--alpha-button-background));
@@ -367,12 +411,14 @@
     margin-bottom: 0.5rem;
   }
   
-  .customer.order .order-details td[data-label="Product"] a:hover {
+  .customer.order .order-details td[data-label="Product"] a:hover,
+  .customer.order .mobile-order-table td[data-label="Product"] a:hover {
     text-decoration: underline;
   }
   
   /* SKU styling */
-  .customer.order .order-details td[data-label="SKU"] {
+  .customer.order .order-details td[data-label="SKU"],
+  .customer.order .mobile-order-table td[data-label="SKU"] {
     font-size: 1.3rem;
     color: rgba(var(--color-foreground), 0.6);
     font-family: monospace;
