@@ -269,6 +269,11 @@
     border: none;
     box-shadow: none;
     background: transparent;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .customer.order .order-details thead {
@@ -283,6 +288,10 @@
     border: none;
     padding: 0;
     margin: 0;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .customer.order .order-details tr {
@@ -295,6 +304,8 @@
     max-width: 100%;
     overflow: hidden;
     box-sizing: border-box;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
   
   .customer.order .order-details td {
@@ -410,6 +421,12 @@
     background: rgba(var(--color-foreground), 0.03);
     border-radius: 0.6rem;
     border-left: 0.3rem solid rgba(var(--color-button), var(--alpha-button-background));
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .customer.order .fulfillment span {
@@ -420,6 +437,10 @@
     overflow-wrap: break-word;
     word-break: break-word;
     color: rgba(var(--color-foreground), 0.8);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    hyphens: auto;
   }
   
   .customer.order .properties {
@@ -427,6 +448,12 @@
     padding: 0.8rem;
     background: rgba(var(--color-foreground), 0.02);
     border-radius: 0.4rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .customer.order .properties span {
@@ -437,20 +464,82 @@
     overflow-wrap: break-word;
     word-break: break-word;
     color: rgba(var(--color-foreground), 0.7);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    hyphens: auto;
+  }
+  
+  /* Enhanced text wrapping for all content */
+  .customer.order .order-details td,
+  .customer.order .order-details td *,
+  .customer.order .order-details td span,
+  .customer.order .order-details td p,
+  .customer.order .order-details td div {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+  }
+  
+  /* Specific fix for very long text like "all caught up" */
+  .customer.order .fulfillment span:contains("all caught up"),
+  .customer.order .fulfillment span:contains("All caught up"),
+  .customer.order .properties span:contains("all caught up"),
+  .customer.order .properties span:contains("All caught up") {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
   }
   
   /* Ensure no content spills out */
   .customer.order {
-    overflow-x: hidden;
-    max-width: 100vw;
-    box-sizing: border-box;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
   }
   
   .customer.order * {
-    max-width: 100%;
-    box-sizing: border-box;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    overflow: hidden !important;
+  }
+  
+  /* Force all text elements to wrap */
+  .customer.order .order-details,
+  .customer.order .order-details *,
+  .customer.order .order-details td,
+  .customer.order .order-details td *,
+  .customer.order .order-details td span,
+  .customer.order .order-details td p,
+  .customer.order .order-details td div,
+  .customer.order .fulfillment,
+  .customer.order .fulfillment *,
+  .customer.order .properties,
+  .customer.order .properties * {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+  
+  /* Specific fix for any remaining long strings */
+  .customer.order * {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
   }
   
   /* Address sections mobile fix */
