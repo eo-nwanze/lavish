@@ -77,6 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'locations.shopify_currency_service.LocaleMiddleware',  # Currency and locale detection
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -92,6 +93,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'locations.context_processors.currency_context',  # Currency context for templates
             ],
         },
     },
@@ -231,4 +233,105 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+}
+
+
+# ============================================================================
+# SHOPIFY CONFIGURATION
+# ============================================================================
+
+# Shopify Store Configuration
+SHOPIFY_SHOP_DOMAIN = os.getenv('SHOPIFY_SHOP_DOMAIN', '7fa66c-ac.myshopify.com')
+SHOPIFY_ACCESS_TOKEN = os.getenv('SHOPIFY_ACCESS_TOKEN', '')
+SHOPIFY_API_KEY = os.getenv('SHOPIFY_API_KEY', '')
+SHOPIFY_API_SECRET = os.getenv('SHOPIFY_API_SECRET', '')
+SHOPIFY_API_VERSION = '2024-10'
+
+# Sendal Shipping Integration
+SENDAL_API_ENDPOINT = os.getenv('SENDAL_API_ENDPOINT', 'https://api.sendal.com/v1/rates')
+SENDAL_API_KEY = os.getenv('SENDAL_API_KEY', '')
+
+# Exchange Rate API for currency conversion
+EXCHANGE_RATE_API_KEY = os.getenv('EXCHANGE_RATE_API_KEY', '')
+
+
+# ============================================================================
+# MULTI-CURRENCY CONFIGURATION
+# ============================================================================
+
+# Supported currencies (ISO 4217 codes)
+SUPPORTED_CURRENCIES = [
+    'USD',  # US Dollar
+    'EUR',  # Euro
+    'GBP',  # British Pound
+    'CAD',  # Canadian Dollar
+    'AUD',  # Australian Dollar
+    'JPY',  # Japanese Yen
+    'CNY',  # Chinese Yuan
+    'CHF',  # Swiss Franc
+    'SEK',  # Swedish Krona
+    'NZD',  # New Zealand Dollar
+]
+
+# Default currency
+DEFAULT_CURRENCY = 'USD'
+
+# Currency display settings
+CURRENCY_SETTINGS = {
+    'USD': {'symbol': '$', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+    'EUR': {'symbol': '€', 'position': 'after', 'decimal_separator': ',', 'thousand_separator': '.'},
+    'GBP': {'symbol': '£', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+    'CAD': {'symbol': 'C$', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+    'AUD': {'symbol': 'A$', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+    'JPY': {'symbol': '¥', 'position': 'before', 'decimal_separator': '', 'thousand_separator': ','},
+    'CNY': {'symbol': '¥', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+    'CHF': {'symbol': 'CHF', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': "'"},
+    'SEK': {'symbol': 'kr', 'position': 'after', 'decimal_separator': ',', 'thousand_separator': ' '},
+    'NZD': {'symbol': 'NZ$', 'position': 'before', 'decimal_separator': '.', 'thousand_separator': ','},
+}
+
+
+# ============================================================================
+# LOCALE AND INTERNATIONALIZATION
+# ============================================================================
+
+# Supported languages (ISO 639-1 codes)
+SUPPORTED_LANGUAGES = [
+    ('en', 'English'),
+    ('fr', 'Français'),
+    ('de', 'Deutsch'),
+    ('es', 'Español'),
+    ('it', 'Italiano'),
+    ('ja', '日本語'),
+    ('zh-cn', '简体中文'),
+]
+
+# Locale to currency mapping
+LOCALE_CURRENCY_MAP = {
+    'en-US': 'USD',
+    'en-CA': 'CAD',
+    'en-GB': 'GBP',
+    'en-AU': 'AUD',
+    'en-NZ': 'NZD',
+    'fr-FR': 'EUR',
+    'de-DE': 'EUR',
+    'es-ES': 'EUR',
+    'it-IT': 'EUR',
+    'ja-JP': 'JPY',
+    'zh-CN': 'CNY',
+    'fr-CH': 'CHF',
+    'de-CH': 'CHF',
+    'sv-SE': 'SEK',
+}
+
+# Country to currency mapping
+COUNTRY_CURRENCY_MAP = {
+    'US': 'USD', 'CA': 'CAD', 'GB': 'GBP', 'AU': 'AUD', 'NZ': 'NZD',
+    'JP': 'JPY', 'CN': 'CNY', 'CH': 'CHF', 'SE': 'SEK', 'NO': 'NOK',
+    'DK': 'DKK',
+    # EU countries
+    'DE': 'EUR', 'FR': 'EUR', 'IT': 'EUR', 'ES': 'EUR', 'NL': 'EUR',
+    'BE': 'EUR', 'AT': 'EUR', 'IE': 'EUR', 'PT': 'EUR', 'FI': 'EUR',
+    'GR': 'EUR', 'LU': 'EUR', 'SI': 'EUR', 'SK': 'EUR', 'EE': 'EUR',
+    'LV': 'EUR', 'LT': 'EUR', 'CY': 'EUR', 'MT': 'EUR',
 }
