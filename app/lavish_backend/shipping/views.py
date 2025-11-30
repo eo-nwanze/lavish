@@ -4,7 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .shopify_shipping_service import ShopifyCarrierServiceWebhook
-from .models import ShopifyCarrierService
+from .shopify_sync_service import ShopifyShippingSyncService
+from .models import ShopifyCarrierService, ShopifyDeliveryProfile, ShopifyDeliveryZone, ShopifyDeliveryMethod
 import json
 import logging
 
@@ -22,9 +23,122 @@ def carrier_service_list(request):
             'shopify_id': service.shopify_id,
             'name': service.name,
             'callback_url': service.callback_url,
-            'service_discovery': service.service_discovery
+            'service_discovery': service.service_discovery,
+            'carrier_service_type': service.carrier_service_type,
+            'format': service.format,
+            'active': service.active
         } for service in services]
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def delivery_profiles_list(request):
+    """List all delivery profiles with zones and methods"""
+    profiles = ShopifyDeliveryProfile.objects.filter(active=True).prefetch_related('zones__methods')
+    
+    return Response({
+        'delivery_profiles': [{
+            'id': profile.id,
+            'shopify_id': profile.shopify_id,
+            'name': profile.name,
+            'default': profile.default,
+            'zones': [{
+                'id': zone.id,
+                'shopify_id': zone.shopify_id,
+                'name': zone.name,
+                'countries': zone.countries,
+                'methods': [{
+                    'id': method.id,
+                    'shopify_id': method.shopify_id,
+                    'name': method.name,
+                    'method_type': method.method_type
+                } for method in zone.methods.all()]
+            } for zone in profile.zones.all()]
+        } for profile in profiles]
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def sync_shipping_data(request):
+    """
+    Trigger a sync of shipping data from Shopify
+    
+    POST /api/shipping/sync/
+    {
+      "sync_type": "all|carrier_services|delivery_profiles"
+    }
+    """
+    sync_type = request.data.get('sync_type', 'all')
+    
+    service = ShopifyShippingSyncService()
+    
+    try:
+        if sync_type == 'carrier_services':
+            results = service.sync_carrier_services()
+        elif sync_type == 'delivery_profiles':
+            results = service.sync_delivery_profiles()
+        else:  # 'all'
+            results = service.sync_all_shipping_data()
+        
+        return Response({
+            'success': True,
+            'sync_type': sync_type,
+            'results': results
+        })
+        
+    except Exception as e:
+        logger.error(f"Shipping sync failed: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def shipping_rates_query(request):
+    """
+    Query available shipping rates for an address
+    
+    GET /api/shipping/rates/?country=US&postal_code=10001
+    """
+    country = request.GET.get('country', 'US')
+    postal_code = request.GET.get('postal_code', '')
+    
+    try:
+        # Find applicable zones
+        zones = ShopifyDeliveryZone.objects.filter(
+            countries__icontains=country
+        ).prefetch_related('methods', 'profile')
+        
+        rates = []
+        
+        for zone in zones:
+            for method in zone.methods.all():
+                rates.append({
+                    'service_name': method.name,
+                    'service_code': method.shopify_id,
+                    'zone': zone.name,
+                    'profile': zone.profile.name,
+                    'method_type': method.method_type
+                })
+        
+        return Response({
+            'success': True,
+            'country': country,
+            'postal_code': postal_code,
+            'available_rates': rates,
+            'count': len(rates)
+        })
+        
+    except Exception as e:
+        logger.error(f"Failed to query shipping rates: {str(e)}", exc_info=True)
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @api_view(['GET'])
