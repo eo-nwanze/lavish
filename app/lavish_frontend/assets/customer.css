@@ -344,6 +344,73 @@
     box-sizing: border-box;
     overflow-x: hidden !important;
     overflow-y: visible !important;
+    width: 100%;
+    min-width: 0; /* Allow shrinking */
+    flex-shrink: 1; /* Allow flex shrinking */
+  }
+  
+  /* Auto-adjust card size to prevent overflow */
+  .customer.order .order-details,
+  .customer.order .mobile-order-table {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden !important;
+    position: relative;
+  }
+  
+  /* Responsive font sizing based on available width */
+  .customer.order .order-details td[data-label="Product"] a,
+  .customer.order .mobile-order-table td[data-label="Product"] a {
+    font-size: clamp(1.2rem, 4vw, 1.5rem) !important;
+    line-height: 1.3 !important;
+  }
+  
+  .customer.order .order-details td::before,
+  .customer.order .mobile-order-table td::before {
+    font-size: clamp(1.0rem, 3vw, 1.2rem) !important;
+  }
+  
+  .customer.order .order-details td,
+  .customer.order .mobile-order-table td {
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem) !important;
+    padding: clamp(0.6rem, 2vw, 0.8rem) 0 !important;
+  }
+  
+  /* Adjust card padding for very small screens */
+  @media screen and (max-width: 350px) {
+    .customer.order .order-details tr,
+    .customer.order .mobile-order-table tr {
+      padding: 0.8rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .customer.order .order-details td[data-label="Product"],
+    .customer.order .mobile-order-table td[data-label="Product"] {
+      padding-bottom: 0.6rem !important;
+      margin-bottom: 0.6rem !important;
+    }
+  }
+  
+  /* Ultra-small screens - minimal padding */
+  @media screen and (max-width: 300px) {
+    .customer.order .order-details tr,
+    .customer.order .mobile-order-table tr {
+      padding: 0.6rem !important;
+      margin-bottom: 0.8rem !important;
+      border-radius: 0.6rem !important;
+    }
+    
+    .customer.order .order-details td[data-label="Product"],
+    .customer.order .mobile-order-table td[data-label="Product"] {
+      padding-bottom: 0.4rem !important;
+      margin-bottom: 0.4rem !important;
+    }
+    
+    .customer.order .order-details td,
+    .customer.order .mobile-order-table td {
+      padding: 0.4rem 0 !important;
+    }
   }
   
   .customer.order .order-details td,
@@ -598,12 +665,68 @@
     position: relative !important;
   }
   
+  /* Dynamic width adjustment based on content */
+  .customer.order .order-details,
+  .customer.order .mobile-order-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    table-layout: auto !important;
+  }
+  
+  /* Force cards to fit container */
+  .customer.order .order-details tbody,
+  .customer.order .mobile-order-table tbody {
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  /* Auto-shrink content to fit */
+  .customer.order .order-details tr,
+  .customer.order .mobile-order-table tr {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    flex-grow: 0 !important;
+  }
+  
+  /* Responsive text sizing */
+  .customer.order .order-details td,
+  .customer.order .mobile-order-table td {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  
+  /* Prevent any element from causing overflow */
   .customer.order * {
     max-width: 100% !important;
     box-sizing: border-box !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     overflow: hidden !important;
+  }
+  
+  /* Special handling for very long content */
+  .customer.order .order-details td[data-label="Product"] a,
+  .customer.order .mobile-order-table td[data-label="Product"] a {
+    max-width: calc(100% - 2rem) !important;
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Override text-overflow for mobile - allow wrapping */
+  @media screen and (max-width: 749px) and (min-width: 290px) {
+    .customer.order .order-details td[data-label="Product"] a,
+    .customer.order .mobile-order-table td[data-label="Product"] a {
+      white-space: normal !important;
+      text-overflow: clip !important;
+      word-wrap: break-word !important;
+      overflow-wrap: anywhere !important;
+    }
   }
   
   /* Extra aggressive for very small screens */

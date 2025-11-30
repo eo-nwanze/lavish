@@ -40,6 +40,27 @@
       display: block !important;
       line-height: 1.4 !important;
     }
+    
+    /* Dynamic card sizing */
+    .customer.order .order-details tr {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      flex-shrink: 1 !important;
+    }
+    
+    /* Auto-adjust font sizes */
+    .customer.order .order-details td[data-label="Product"] a {
+      font-size: clamp(1.1rem, 4vw, 1.4rem) !important;
+    }
+    
+    .customer.order .order-details td::before {
+      font-size: clamp(0.9rem, 3vw, 1.1rem) !important;
+    }
+    
+    .customer.order .order-details td {
+      font-size: clamp(1.0rem, 3.5vw, 1.3rem) !important;
+    }
   }
 {%- endstyle -%}
 
@@ -404,3 +425,39 @@
   ]
 }
 {% endschema %}
+
+<script>
+// Dynamic card sizing for mobile order page
+if (window.innerWidth <= 749 && window.innerWidth >= 290) {
+  function adjustCardSizes() {
+    const cards = document.querySelectorAll('.customer.order .order-details tr, .customer.order .mobile-order-table tr');
+    const containerWidth = document.querySelector('.customer.order').offsetWidth;
+    
+    cards.forEach(card => {
+      const cardWidth = card.offsetWidth;
+      
+      // If card is wider than container, shrink it
+      if (cardWidth > containerWidth - 20) {
+        const scale = (containerWidth - 20) / cardWidth;
+        card.style.transform = `scale(${Math.min(scale, 1)})`;
+        card.style.transformOrigin = 'left center';
+      } else {
+        card.style.transform = '';
+      }
+    });
+  }
+  
+  // Adjust on load
+  adjustCardSizes();
+  
+  // Adjust on resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(adjustCardSizes, 100);
+  });
+  
+  // Adjust after content loads
+  window.addEventListener('load', adjustCardSizes);
+}
+</script>
