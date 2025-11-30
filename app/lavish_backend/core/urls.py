@@ -33,6 +33,9 @@ urlpatterns = [
     path('api/shipping/', include('shipping.urls')),
     path('api/shopify/', include('shopify_integration.urls')),
     path('api/accounts/', include('accounts.urls')),
+    
+    # Subscription skip management
+    path('api/skips/', include('skips.urls', namespace='skips')),
 ]
 
 # Serve media files in development

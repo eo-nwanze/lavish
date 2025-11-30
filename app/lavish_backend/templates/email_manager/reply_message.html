@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Reply - ENDEVOPS{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'email_manager:message_detail' original_message.pk %}" style="color: #007bff; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Message
+        </a>
+    </div>
+    
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2><i class="fas fa-reply"></i> Reply to: {{ original_message.subject }}</h2>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 20px;">
+            <p><strong>Original Message From:</strong> {{ original_message.from_email }}</p>
+            <p><strong>Date:</strong> {{ original_message.received_at|date:"F d, Y g:i A" }}</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">To:</label>
+                {{ form.to_emails }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
+                {{ form.subject }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
+                {{ form.body }}
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="padding: 10px 30px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i> Send Reply
+                </button>
+                <a href="{% url 'email_manager:message_detail' original_message.pk %}" style="padding: 10px 30px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

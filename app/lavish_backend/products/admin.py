@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.utils.html import format_html
 from .models import ShopifyProduct, ShopifyProductVariant, ShopifyProductImage, ShopifyProductMetafield, ProductSyncLog
 from .realtime_sync import sync_products_realtime, get_product_sync_stats
+from .bidirectional_sync import bidirectional_sync
 
 
 class ShopifyProductVariantInline(admin.TabularInline):
@@ -27,13 +28,38 @@ class ShopifyProductMetafieldInline(admin.TabularInline):
     readonly_fields = ('shopify_id', 'created_at', 'updated_at')
 
 
+class ShippingConfigInline(admin.StackedInline):
+    """Inline for Product Shipping Configuration - Cutoff logic and shipping settings"""
+    from customer_subscriptions.models import ProductShippingConfig
+    model = ProductShippingConfig
+    extra = 0
+    max_num = 1
+    
+    fieldsets = (
+        ('Cutoff Configuration', {
+            'fields': ('cutoff_days', 'reminder_days'),
+            'description': 'Configure when orders are cut off and when reminders are sent before shipping'
+        }),
+        ('Shipping Details', {
+            'fields': ('processing_days', 'estimated_transit_days')
+        }),
+        ('Special Handling', {
+            'fields': ('special_handling', 'handling_notes')
+        }),
+        ('International Shipping', {
+            'fields': ('international_shipping', 'restricted_countries'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
 @admin.register(ShopifyProduct)
 class ShopifyProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'vendor', 'product_type', 'status', 'last_synced')
-    list_filter = ('status', 'vendor', 'product_type', 'store_domain', 'last_synced')
+    list_display = ('title', 'vendor', 'product_type', 'status_badge', 'cutoff_days_display', 'sync_status_badge', 'last_synced')
+    list_filter = ('status', 'vendor', 'product_type', 'created_in_django', 'needs_shopify_push', 'store_domain', 'last_synced')
     search_fields = ('title', 'handle', 'vendor', 'product_type', 'shopify_id')
-    readonly_fields = ('shopify_id', 'handle', 'created_at', 'updated_at', 'published_at', 'last_synced', 'store_domain')
-    inlines = [ShopifyProductVariantInline, ShopifyProductImageInline, ShopifyProductMetafieldInline]
+    readonly_fields = ('handle', 'created_at', 'updated_at', 'published_at', 'last_synced', 'last_pushed_to_shopify', 'store_domain', 'shopify_push_error')
+    inlines = [ShopifyProductVariantInline, ShopifyProductImageInline, ShopifyProductMetafieldInline, ShippingConfigInline]
     
     fieldsets = (
         ('Basic Information', {
@@ -46,17 +72,66 @@ class ShopifyProductAdmin(admin.ModelAdmin):
             'fields': ('published_at',),
             'classes': ('collapse',)
         }),
+        ('Shipping Configuration', {
+            'fields': (),  # This section is handled by inlines
+            'description': 'Configure cutoff dates and shipping settings for this product'
+        }),
         ('SEO', {
             'fields': ('seo_title', 'seo_description'),
             'classes': ('collapse',)
         }),
+        ('Sync Status', {
+            'fields': ('created_in_django', 'needs_shopify_push', 'shopify_push_error', 'sync_status')
+        }),
         ('Timestamps', {
-            'fields': ('created_at', 'updated_at', 'last_synced', 'store_domain'),
+            'fields': ('created_at', 'updated_at', 'last_synced', 'last_pushed_to_shopify', 'store_domain'),
             'classes': ('collapse',)
         }),
     )
     
-    actions = ['sync_selected_products']
+    actions = ['sync_selected_products', 'push_to_shopify', 'update_in_shopify', 'delete_from_shopify', 'mark_for_push', 'create_shipping_configs']
+    
+    def status_badge(self, obj):
+        """Show product status with colored badge"""
+        colors = {
+            'ACTIVE': 'green',
+            'ARCHIVED': 'gray',
+            'DRAFT': 'orange',
+        }
+        color = colors.get(obj.status, 'gray')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px;">{}</span>',
+            color, obj.status
+        )
+    status_badge.short_description = "Status"
+    
+    def cutoff_days_display(self, obj):
+        """Display cutoff days for product shipping"""
+        try:
+            if hasattr(obj, 'shipping_config'):
+                config = obj.shipping_config
+                if config.cutoff_days <= 3:
+                    return format_html('<span style="color: red;">⚡ {} days</span>', config.cutoff_days)
+                elif config.cutoff_days <= 7:
+                    return format_html('<span style="color: orange;">⏰ {} days</span>', config.cutoff_days)
+                else:
+                    return format_html('<span style="color: green;">📅 {} days</span>', config.cutoff_days)
+            return format_html('<span style="color: gray;">📋 Setup needed</span>')
+        except:
+            return "-"
+    cutoff_days_display.short_description = "Cutoff Days"
+    
+    def sync_status_badge(self, obj):
+        """Show sync status badge"""
+        if obj.created_in_django and obj.needs_shopify_push:
+            return format_html('<span style="color: orange;">⏳ Pending Push</span>')
+        elif obj.created_in_django and obj.shopify_id:
+            return format_html('<span style="color: green;">✅ Synced</span>')
+        elif obj.created_in_django:
+            return format_html('<span style="color: red;">❌ Not Synced</span>')
+        else:
+            return format_html('<span style="color: blue;">📥 From Shopify</span>')
+    sync_status_badge.short_description = "Sync Status"
     
     def sync_selected_products(self, request, queryset):
         """Sync selected products from Shopify"""
@@ -70,13 +145,139 @@ class ShopifyProductAdmin(admin.ModelAdmin):
         
         self.message_user(request, f"Successfully synced {count} products", level=messages.SUCCESS)
     
-    sync_selected_products.short_description = "Sync selected products from Shopify"
+    sync_selected_products.short_description = "📥 Sync selected products FROM Shopify"
+    
+    def push_to_shopify(self, request, queryset):
+        """Push selected products TO Shopify (create new or update existing)"""
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": []
+        }
+        
+        for product in queryset:
+            result = bidirectional_sync.push_product_to_shopify(product)
+            if result.get("success"):
+                results["successful"] += 1
+            else:
+                results["failed"] += 1
+                results["errors"].append(f"{product.title}: {result.get('message', 'Unknown error')}")
+        
+        if results["successful"] > 0:
+            self.message_user(request, f"✅ Successfully pushed {results['successful']} products to Shopify", level=messages.SUCCESS)
+        
+        if results["failed"] > 0:
+            error_msg = f"❌ Failed to push {results['failed']} products. Errors: " + "; ".join(results["errors"][:3])
+            self.message_user(request, error_msg, level=messages.ERROR)
+    
+    push_to_shopify.short_description = "📤 Push selected products TO Shopify (Create/Update)"
+    
+    def update_in_shopify(self, request, queryset):
+        """Update existing products in Shopify"""
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": []
+        }
+        
+        for product in queryset:
+            if not product.shopify_id:
+                results["failed"] += 1
+                results["errors"].append(f"{product.title}: No Shopify ID (use 'Push to Shopify' instead)")
+                continue
+            
+            result = bidirectional_sync.push_product_to_shopify(product)
+            if result.get("success"):
+                results["successful"] += 1
+            else:
+                results["failed"] += 1
+                results["errors"].append(f"{product.title}: {result.get('message', 'Unknown error')}")
+        
+        if results["successful"] > 0:
+            self.message_user(request, f"✅ Successfully updated {results['successful']} products in Shopify", level=messages.SUCCESS)
+        
+        if results["failed"] > 0:
+            error_msg = f"❌ Failed to update {results['failed']} products. Errors: " + "; ".join(results["errors"][:3])
+            self.message_user(request, error_msg, level=messages.ERROR)
+    
+    update_in_shopify.short_description = "🔄 Update existing products IN Shopify"
+    
+    def delete_from_shopify(self, request, queryset):
+        """Delete selected products from Shopify"""
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": []
+        }
+        
+        for product in queryset:
+            if not product.shopify_id:
+                results["failed"] += 1
+                results["errors"].append(f"{product.title}: No Shopify ID, cannot delete")
+                continue
+            
+            result = bidirectional_sync.delete_product_from_shopify(product)
+            if result.get("success"):
+                results["successful"] += 1
+            else:
+                results["failed"] += 1
+                results["errors"].append(f"{product.title}: {result.get('message', 'Unknown error')}")
+        
+        if results["successful"] > 0:
+            self.message_user(request, f"✅ Successfully deleted {results['successful']} products from Shopify", level=messages.SUCCESS)
+        
+        if results["failed"] > 0:
+            error_msg = f"❌ Failed to delete {results['failed']} products. Errors: " + "; ".join(results["errors"][:3])
+            self.message_user(request, error_msg, level=messages.ERROR)
+    
+    delete_from_shopify.short_description = "🗑️ Delete selected products FROM Shopify"
+    
+    def mark_for_push(self, request, queryset):
+        """Mark selected products as needing push to Shopify"""
+        count = queryset.update(needs_shopify_push=True)
+        self.message_user(request, f"✅ Marked {count} products for push to Shopify", level=messages.SUCCESS)
+    
+    mark_for_push.short_description = "⚡ Mark for push to Shopify"
+    
+    def create_shipping_configs(self, request, queryset):
+        """Create default shipping configs for selected products"""
+        from customer_subscriptions.models import ProductShippingConfig
+        
+        created = 0
+        skipped = 0
+        
+        for product in queryset:
+            config, was_created = ProductShippingConfig.objects.get_or_create(
+                product=product,
+                defaults={
+                    'cutoff_days': 7,
+                    'reminder_days': 14,
+                    'processing_days': 2,
+                    'estimated_transit_days': 5,
+                    'international_shipping': True,
+                    'special_handling': False,
+                }
+            )
+            
+            if was_created:
+                created += 1
+            else:
+                skipped += 1
+        
+        message = f"Created shipping configs for {created} products"
+        if skipped > 0:
+            message += f", skipped {skipped} (already configured)"
+        
+        self.message_user(request, message, level=messages.SUCCESS)
+    
+    create_shipping_configs.short_description = "📦 Create default shipping configs"
     
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path('refresh-all/', self.admin_site.admin_view(self.refresh_all_products), name='products_refresh_all'),
             path('sync-stats/', self.admin_site.admin_view(self.sync_statistics), name='products_sync_stats'),
+            path('push-pending/', self.admin_site.admin_view(self.push_pending_products), name='products_push_pending'),
         ]
         return custom_urls + urls
     
@@ -95,6 +296,25 @@ class ShopifyProductAdmin(admin.ModelAdmin):
         
         return HttpResponseRedirect("../")
     
+    def push_pending_products(self, request):
+        """Push all products marked as needing push to Shopify"""
+        try:
+            results = bidirectional_sync.sync_pending_products()
+            if results['successful'] > 0:
+                message = f"✅ Push completed! Successful: {results['successful']}/{results['total']}"
+                messages.success(request, message)
+            
+            if results['failed'] > 0:
+                error_msg = f"❌ Failed: {results['failed']}/{results['total']}. Check product sync errors for details."
+                messages.warning(request, error_msg)
+                
+            if results['total'] == 0:
+                messages.info(request, "ℹ️ No products marked for push to Shopify")
+        except Exception as e:
+            messages.error(request, f"❌ Error during push: {str(e)}")
+        
+        return HttpResponseRedirect("../")
+    
     def sync_statistics(self, request):
         """Show sync statistics"""
         try:
@@ -109,7 +329,8 @@ class ShopifyProductAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['refresh_buttons'] = format_html(
-            '<a class="button" href="refresh-all/">🔄 Refresh All Products</a> '
+            '<a class="button" href="refresh-all/">📥 Refresh FROM Shopify</a> '
+            '<a class="button" href="push-pending/">📤 Push TO Shopify</a> '
             '<a class="button" href="sync-stats/">📊 Sync Statistics</a>'
         )
         return super().changelist_view(request, extra_context=extra_context)

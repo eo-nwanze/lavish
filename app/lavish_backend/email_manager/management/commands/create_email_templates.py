@@ -1,0 +1,248 @@
+ÿþfrom django.core.management.base import BaseCommand
+from email_manager.models import EmailTemplate, EmailConfiguration
+
+class Command(BaseCommand):
+    help = 'Creates default email templates for the system'
+
+    def handle(self, *args, **kwargs):
+        self.stdout.write("Creating default email templates...")
+        
+        # Get default configuration
+        default_config = EmailConfiguration.objects.filter(is_default=True).first()
+        if not default_config:
+            self.stdout.write("No default email configuration found. Creating templates without configuration.")
+        
+        # Create welcome email template
+        welcome_template, created = EmailTemplate.objects.update_or_create(
+            name="welcome_email",
+            defaults={
+                "name": "welcome_email",
+                "template_type": "welcome",
+                "subject": "Welcome to MyComparables!",
+                "html_content": """
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background-color: #4e73df; padding: 20px; color: white; text-align: center; }
+                        .content { padding: 20px; background-color: #f8f9fc; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+                        .button { display: inline-block; padding: 10px 20px; background-color: #4e73df; color: white; 
+                                text-decoration: none; border-radius: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Welcome to MyComparables!</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hello {{ full_name }},</p>
+                            <p>Thank you for registering with MyComparables! We're excited to have you join our community.</p>
+                            <p>Please verify your email address by clicking the button below:</p>
+                            <p style="text-align: center;">
+                                <a href="{{ activation_url }}" class="button">Verify Email Address</a>
+                            </p>
+                            <p>If the button doesn't work, you can also click on the link below or copy it to your browser:</p>
+                            <p>{{ activation_url }}</p>
+                            <p>With MyComparables, you can:</p>
+                            <ul>
+                                <li>Create and manage property listings</li>
+                                <li>Find comparable properties</li>
+                                <li>Connect with other real estate professionals</li>
+                                <li>Access market insights and reports</li>
+                            </ul>
+                            <p>If you have any questions, please don't hesitate to reach out to our support team.</p>
+                            <p>Best regards,<br>The MyComparables Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>This email was sent to {{ email }} because you registered for a MyComparables account.</p>
+                            <p>&copy; 2023 MyComparables. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                "plain_text_content": """
+                Hello {{ full_name }},
+                
+                Thank you for registering with MyComparables! We're excited to have you join our community.
+                
+                Please verify your email address by clicking the link below:
+                {{ activation_url }}
+                
+                With MyComparables, you can:
+                - Create and manage property listings
+                - Find comparable properties
+                - Connect with other real estate professionals
+                - Access market insights and reports
+                
+                If you have any questions, please don't hesitate to reach out to our support team.
+                
+                Best regards,
+                The MyComparables Team
+                """,
+                "configuration": default_config,
+                "variables": {
+                    "full_name": "John Doe",
+                    "activation_url": "https://mycomparables.com/activate/token",
+                    "email": "user@example.com"
+                },
+                "is_active": True
+            }
+        )
+        
+        if created:
+            self.stdout.write(self.style.SUCCESS("Welcome email template created."))
+        else:
+            self.stdout.write(self.style.SUCCESS("Welcome email template updated."))
+
+        # Create password reset email template
+        password_reset_template, created = EmailTemplate.objects.update_or_create(
+            name="password_reset",
+            defaults={
+                "name": "password_reset",
+                "template_type": "custom",
+                "subject": "Reset Your MyComparables Password",
+                "html_content": """
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background-color: #4e73df; padding: 20px; color: white; text-align: center; }
+                        .content { padding: 20px; background-color: #f8f9fc; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+                        .button { display: inline-block; padding: 10px 20px; background-color: #4e73df; color: white; 
+                                text-decoration: none; border-radius: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Password Reset</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hello {{ username }},</p>
+                            <p>We received a request to reset your password for your MyComparables account.</p>
+                            <p>Please click the button below to reset your password:</p>
+                            <p style="text-align: center;">
+                                <a href="{{ reset_url }}" class="button">Reset Password</a>
+                            </p>
+                            <p>If the button doesn't work, you can also click on the link below or copy it to your browser:</p>
+                            <p>{{ reset_url }}</p>
+                            <p>If you didn't request a password reset, you can safely ignore this email.</p>
+                            <p>This link is valid for 24 hours.</p>
+                            <p>Best regards,<br>The MyComparables Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>This is an automated email. Please do not reply to this message.</p>
+                            <p>&copy; 2023 MyComparables. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                "plain_text_content": """
+                Hello {{ username }},
+                
+                We received a request to reset your password for your MyComparables account.
+                
+                Please click the link below to reset your password:
+                {{ reset_url }}
+                
+                If you didn't request a password reset, you can safely ignore this email.
+                
+                This link is valid for 24 hours.
+                
+                Best regards,
+                The MyComparables Team
+                """,
+                "configuration": default_config,
+                "variables": {
+                    "username": "johndoe",
+                    "reset_url": "https://mycomparables.com/reset-password/token"
+                },
+                "is_active": True
+            }
+        )
+        
+        if created:
+            self.stdout.write(self.style.SUCCESS("Password reset email template created."))
+        else:
+            self.stdout.write(self.style.SUCCESS("Password reset email template updated."))
+
+        # Create account activation email template
+        activation_template, created = EmailTemplate.objects.update_or_create(
+            name="account_activation",
+            defaults={
+                "name": "account_activation",
+                "template_type": "custom",
+                "subject": "Activate Your MyComparables Account",
+                "html_content": """
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background-color: #4e73df; padding: 20px; color: white; text-align: center; }
+                        .content { padding: 20px; background-color: #f8f9fc; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+                        .button { display: inline-block; padding: 10px 20px; background-color: #4e73df; color: white; 
+                                text-decoration: none; border-radius: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Activate Your Account</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hello {{ full_name }},</p>
+                            <p>Thank you for registering with MyComparables! To complete your registration, 
+                               please activate your account by clicking the button below:</p>
+                            <p style="text-align: center;">
+                                <a href="{{ activation_url }}" class="button">Activate Account</a>
+                            </p>
+                            <p>If the button doesn't work, you can also click on the link below or copy it to your browser:</p>
+                            <p>{{ activation_url }}</p>
+                            <p>If you did not sign up for this account, you can ignore this email.</p>
+                            <p>Best regards,<br>The MyComparables Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>This is an automated email. Please do not reply to this message.</p>
+                            <p>&copy; 2023 MyComparables. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """,
+                "plain_text_content": """
+                Hello {{ full_name }},
+                
+                Thank you for registering with MyComparables! To complete your registration, 
+                please activate your account by clicking the link below:
+                
+                {{ activation_url }}
+                
+                If you did not sign up for this account, you can ignore this email.
+                
+                Best regards,
+                The MyComparables Team
+                """,
+                "configuration": default_config,
+                "variables": {
+                    "full_name": "John Doe",
+                    "activation_url": "https://mycomparables.com/activate/token"
+                },
+                "is_active": True
+            }
+        )
+        
+        if created:
+            self.stdout.write(self.style.SUCCESS("Account activation email template created."))
+        else:
+            self.stdout.write(self.style.SUCCESS("Account activation email template updated."))
+            
+        self.stdout.write(self.style.SUCCESS("Email templates setup complete!"))

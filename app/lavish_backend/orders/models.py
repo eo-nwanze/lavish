@@ -103,7 +103,7 @@ class ShopifyOrderLineItem(models.Model):
     # Item details
     title = models.CharField(max_length=255)
     variant_title = models.CharField(max_length=255, blank=True)
-    sku = models.CharField(max_length=100, blank=True)
+    sku = models.CharField(max_length=100, blank=True, null=True)
     
     # Quantity and pricing
     quantity = models.IntegerField()
@@ -146,7 +146,7 @@ class ShopifyOrderAddress(models.Model):
     address1 = models.CharField(max_length=255, blank=True)
     address2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
-    province = models.CharField(max_length=100, blank=True)
+    province = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True)
     zip_code = models.CharField(max_length=20, blank=True)
     phone = models.CharField(max_length=20, blank=True)

@@ -61,9 +61,11 @@ INSTALLED_APPS = [
     'inventory',
     'shipping',
     'payments',
-    'subscriptions',
     'shopify_integration',
     'locations',
+    'skips',
+    'customer_subscriptions',
+    'email_manager',
 ]
 
 MIDDLEWARE = [
@@ -162,6 +164,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Shopify API settings
+SHOPIFY_STORE_URL = os.getenv('SHOPIFY_STORE_URL')
 SHOPIFY_API_KEY = os.getenv('SHOPIFY_API_KEY')
 SHOPIFY_API_SECRET = os.getenv('SHOPIFY_API_SECRET')
 SHOPIFY_ACCESS_TOKEN = os.getenv('SHOPIFY_ACCESS_TOKEN')

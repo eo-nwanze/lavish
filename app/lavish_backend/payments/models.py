@@ -10,7 +10,7 @@ from django.utils import timezone
 class ShopifyPaymentsAccount(models.Model):
     """Shopify Payments account information"""
     shopify_id = models.CharField(max_length=255, unique=True)
-    account_opener_name = models.CharField(max_length=255, blank=True)
+    account_opener_name = models.CharField(max_length=255, blank=True, null=True)
     activated = models.BooleanField(default=False)
     country = models.CharField(max_length=2)
     default_currency = models.CharField(max_length=3)
@@ -75,17 +75,17 @@ class ShopifyBalanceTransaction(models.Model):
     net_amount = models.DecimalField(max_digits=12, decimal_places=2)
     
     # Source information
-    source_id = models.CharField(max_length=255, blank=True)
-    source_type = models.CharField(max_length=50, choices=SOURCE_TYPES, blank=True)
-    source_order_transaction_id = models.CharField(max_length=255, blank=True)
+    source_id = models.CharField(max_length=255, blank=True, null=True)
+    source_type = models.CharField(max_length=50, choices=SOURCE_TYPES, blank=True, null=True)
+    source_order_transaction_id = models.CharField(max_length=255, blank=True, null=True)
     
     # Associated records
-    associated_order_id = models.CharField(max_length=255, blank=True)
-    associated_payout_id = models.CharField(max_length=255, blank=True)
-    associated_payout_status = models.CharField(max_length=50, blank=True)
+    associated_order_id = models.CharField(max_length=255, blank=True, null=True)
+    associated_payout_id = models.CharField(max_length=255, blank=True, null=True)
+    associated_payout_status = models.CharField(max_length=50, blank=True, null=True)
     
     # Adjustments
-    adjustment_reason = models.TextField(blank=True)
+    adjustment_reason = models.TextField(blank=True, null=True)
     
     # Metadata
     store_domain = models.CharField(max_length=255, default='7fa66c-ac.myshopify.com')

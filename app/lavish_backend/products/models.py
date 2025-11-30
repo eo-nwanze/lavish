@@ -48,6 +48,12 @@ class ShopifyProduct(models.Model):
         ('error', 'Sync Error'),
     ])
     
+    # Bidirectional sync tracking
+    created_in_django = models.BooleanField(default=False, help_text="True if product was created in Django (not imported from Shopify)")
+    needs_shopify_push = models.BooleanField(default=False, help_text="True if product needs to be pushed to Shopify")
+    shopify_push_error = models.TextField(blank=True, help_text="Error message if push to Shopify failed")
+    last_pushed_to_shopify = models.DateTimeField(null=True, blank=True, help_text="Last time product was pushed to Shopify")
+    
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -60,6 +66,30 @@ class ShopifyProduct(models.Model):
     
     def __str__(self):
         return self.title
+    
+    def save(self, *args, **kwargs):
+        """Override save to handle bidirectional sync tracking"""
+        # If this is a new product without shopify_id, it was created in Django
+        if not self.pk and not self.shopify_id:
+            self.created_in_django = True
+            self.needs_shopify_push = True
+        
+        # If product has been modified and has a shopify_id, mark for update
+        if self.pk and self.shopify_id:
+            try:
+                old_product = ShopifyProduct.objects.get(pk=self.pk)
+                # Check if important fields changed
+                if (old_product.title != self.title or 
+                    old_product.description != self.description or
+                    old_product.vendor != self.vendor or
+                    old_product.product_type != self.product_type or
+                    old_product.status != self.status or
+                    old_product.tags != self.tags):
+                    self.needs_shopify_push = True
+            except ShopifyProduct.DoesNotExist:
+                pass
+        
+        super().save(*args, **kwargs)
     
     def get_tags_list(self):
         """Return tags as a Python list"""

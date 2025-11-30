@@ -1,0 +1,476 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Inbox - ENDEVOPS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inbox-container {
+        max-width: 1400px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .inbox-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .inbox-selector {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .inbox-selector select {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        min-width: 250px;
+    }
+    
+    .inbox-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .message-list {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .message-item {
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 20px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .message-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .message-item.unread {
+        background-color: #f0f8ff;
+        font-weight: 600;
+    }
+    
+    .message-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .message-from {
+        flex: 0 0 200px;
+        font-weight: 500;
+    }
+    
+    .message-subject {
+        flex: 1;
+    }
+    
+    .message-date {
+        flex: 0 0 120px;
+        text-align: right;
+        color: #6c757d;
+        font-size: 13px;
+    }
+    
+    .message-status {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .badge-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .badge-warning {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .no-messages {
+        padding: 60px 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .no-messages i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px;
+    }
+    
+    .pagination a,
+    .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #007bff;
+    }
+    
+    .pagination .current {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .search-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .search-box input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .alert {
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inbox-container">
+    <div class="inbox-header">
+        <h1><i class="fas fa-inbox"></i> Email Inbox</h1>
+        
+        <div class="inbox-actions">
+            <button class="btn btn-success" id="fetchEmailsBtn" onclick="fetchEmails()">
+                <i class="fas fa-sync-alt"></i> Fetch New Emails
+            </button>
+            <a href="{% url 'email_manager:compose_message' %}" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Compose
+            </a>
+        </div>
+    </div>
+    
+    <div class="inbox-selector">
+        <label for="inboxSelect"><strong>Select Inbox:</strong></label>
+        <select id="inboxSelect" onchange="switchInbox(this.value)">
+            {% for inbox_item in all_inboxes %}
+                <option value="{{ inbox_item.id }}" {% if inbox_item.id == inbox.id %}selected{% endif %}>
+                    {{ inbox_item.name }} ({{ inbox_item.email_address }})
+                </option>
+            {% endfor %}
+        </select>
+        
+        <label>
+            <input type="checkbox" id="viewAllCheckbox" {% if view_all %}checked{% endif %} onchange="toggleViewAll(this.checked)">
+            View All Inboxes
+        </label>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search emails..." value="{{ request.GET.q }}">
+        <button class="btn btn-secondary" onclick="searchEmails()">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </div>
+    
+    <div id="alertContainer"></div>
+    
+    <div class="loading" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Fetching emails...</p>
+    </div>
+    
+    <div class="message-list">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="message-item {% if not message.is_read %}unread{% endif %}" onclick="viewMessage({{ message.id }})">
+                <input type="checkbox" class="message-checkbox" onclick="event.stopPropagation()">
+                <div class="message-from">{{ message.from_email|truncatechars:30 }}</div>
+                <div class="message-subject">
+                    <strong>{{ message.subject|truncatechars:80 }}</strong>
+                    {% if message.is_favorite %}
+                        <i class="fas fa-star" style="color: #ffc107;"></i>
+                    {% endif %}
+                </div>
+                <div class="message-status">
+                    {% if message.status == 'received' %}
+                        <span class="badge badge-success">Received</span>
+                    {% elif message.status == 'sent' %}
+                        <span class="badge badge-primary">Sent</span>
+                    {% elif message.status == 'draft' %}
+                        <span class="badge badge-warning">Draft</span>
+                    {% endif %}
+                </div>
+                <div class="message-date">
+                    {% if message.received_at %}
+                        {{ message.received_at|date:"M d, Y" }}
+                    {% else %}
+                        {{ message.created_at|date:"M d, Y" }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-messages">
+                <i class="fas fa-inbox"></i>
+                <h3>No emails found</h3>
+                <p>{% if inbox.incoming_config %}Click "Fetch New Emails" to retrieve messages from your mailbox.{% else %}Please configure an incoming mail configuration for this inbox.{% endif %}</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if messages.has_other_pages %}
+    <div class="pagination">
+        {% if messages.has_previous %}
+            <a href="?page=1{% if request.GET.inbox %}&inbox={{ request.GET.inbox }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if view_all %}&view_all=true{% endif %}">&laquo; First</a>
+            <a href="?page={{ messages.previous_page_number }}{% if request.GET.inbox %}&inbox={{ request.GET.inbox }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if view_all %}&view_all=true{% endif %}">Previous</a>
+        {% endif %}
+        
+        <span class="current">Page {{ messages.number }} of {{ messages.paginator.num_pages }}</span>
+        
+        {% if messages.has_next %}
+            <a href="?page={{ messages.next_page_number }}{% if request.GET.inbox %}&inbox={{ request.GET.inbox }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if view_all %}&view_all=true{% endif %}">Next</a>
+            <a href="?page={{ messages.paginator.num_pages }}{% if request.GET.inbox %}&inbox={{ request.GET.inbox }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if view_all %}&view_all=true{% endif %}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function switchInbox(inboxId) {
+    const viewAll = document.getElementById('viewAllCheckbox').checked;
+    const url = new URL(window.location.href);
+    url.searchParams.set('inbox', inboxId);
+    if (!viewAll) {
+        url.searchParams.delete('view_all');
+    }
+    window.location.href = url.toString();
+}
+
+function toggleViewAll(checked) {
+    const url = new URL(window.location.href);
+    if (checked) {
+        url.searchParams.set('view_all', 'true');
+    } else {
+        url.searchParams.delete('view_all');
+    }
+    window.location.href = url.toString();
+}
+
+function searchEmails() {
+    const searchQuery = document.getElementById('searchInput').value;
+    const url = new URL(window.location.href);
+    if (searchQuery) {
+        url.searchParams.set('q', searchQuery);
+    } else {
+        url.searchParams.delete('q');
+    }
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
+function viewMessage(messageId) {
+    window.location.href = `/email_manager/message/${messageId}/`;
+}
+
+function fetchEmails() {
+    const inboxId = document.getElementById('inboxSelect').value;
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const fetchBtn = document.getElementById('fetchEmailsBtn');
+    
+    if (!inboxId) {
+        showAlert('Please select an inbox', 'error');
+        return;
+    }
+    
+    // Show loading
+    loadingSpinner.style.display = 'block';
+    fetchBtn.disabled = true;
+    fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+    
+    // Get CSRF token
+    const csrftoken = getCookie('csrftoken');
+    
+    // Fetch emails
+    fetch('/email_manager/fetch-emails/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: `inbox_id=${inboxId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingSpinner.style.display = 'none';
+        fetchBtn.disabled = false;
+        fetchBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Fetch New Emails';
+        
+        if (data.status === 'success') {
+            showAlert(data.message, 'success');
+            // Reload page to show new emails
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showAlert(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        loadingSpinner.style.display = 'none';
+        fetchBtn.disabled = false;
+        fetchBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Fetch New Emails';
+        showAlert('Error fetching emails: ' + error.message, 'error');
+    });
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertClass = type === 'success' ? 'alert-success' : (type === 'error' ? 'alert-error' : 'alert-info');
+    
+    alertContainer.innerHTML = `
+        <div class="alert ${alertClass}">
+            <strong>${type === 'success' ? 'Success!' : (type === 'error' ? 'Error!' : 'Info:')}</strong> ${message}
+        </div>
+    `;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        alertContainer.innerHTML = '';
+    }, 5000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Allow search on Enter key
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchEmails();
+    }
+});
+</script>
+{% endblock %}

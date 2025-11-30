@@ -48,7 +48,7 @@ class ShopifyInventoryItem(models.Model):
     
     # Shopify fields
     shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Inventory Item ID")
-    sku = models.CharField(max_length=100, db_index=True)
+    sku = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     
     # Inventory settings
     tracked = models.BooleanField(default=True)

@@ -701,3 +701,326 @@ class EnhancedShopifyAPIClient:
             return connection_test['shop_info']
         else:
             raise Exception(f"Failed to get shop info: {connection_test['message']}")
+    
+    # ==================== PRODUCT MUTATIONS (Django → Shopify) ====================
+    
+    def create_product_in_shopify(self, title: str, description: str = "", vendor: str = "", 
+                                   product_type: str = "", tags: List[str] = None,
+                                   variants: List[Dict] = None, images: List[Dict] = None,
+                                   status: str = "DRAFT") -> Dict:
+        """
+        Create a new product in Shopify from Django
+        
+        Args:
+            title: Product title
+            description: Product description (HTML supported)
+            vendor: Product vendor/brand
+            product_type: Product type/category
+            tags: List of tags
+            variants: List of variant dicts with price, sku, inventory_quantity, etc.
+            images: List of image dicts with src URLs
+            status: ACTIVE, DRAFT, or ARCHIVED
+            
+        Returns:
+            Dict with success status, product data, and any errors
+        """
+        mutation = """
+        mutation productCreate($input: ProductInput!) {
+          productCreate(input: $input) {
+            product {
+              id
+              title
+              handle
+              descriptionHtml
+              vendor
+              productType
+              tags
+              status
+              createdAt
+              updatedAt
+              variants(first: 100) {
+                edges {
+                  node {
+                    id
+                    title
+                    price
+                    sku
+                    inventoryQuantity
+                  }
+                }
+              }
+              images(first: 100) {
+                edges {
+                  node {
+                    id
+                    url
+                    altText
+                  }
+                }
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        # Build product input
+        product_input = {
+            "title": title,
+            "descriptionHtml": description,
+            "vendor": vendor or "",
+            "productType": product_type or "",
+            "status": status.upper(),
+        }
+        
+        if tags:
+            product_input["tags"] = tags
+        
+        # Add variants if provided
+        if variants:
+            product_input["variants"] = []
+            for variant in variants:
+                variant_input = {}
+                if "price" in variant:
+                    variant_input["price"] = str(variant["price"])
+                if "sku" in variant:
+                    variant_input["sku"] = variant["sku"]
+                if "inventory_quantity" in variant:
+                    variant_input["inventoryQuantities"] = [{
+                        "availableQuantity": int(variant["inventory_quantity"]),
+                        "locationId": "gid://shopify/Location/PRIMARY"  # Use primary location
+                    }]
+                if "title" in variant:
+                    variant_input["options"] = [variant["title"]]
+                    
+                product_input["variants"].append(variant_input)
+        
+        # Add images if provided
+        if images:
+            product_input["images"] = []
+            for image in images:
+                if "src" in image:
+                    product_input["images"].append({
+                        "src": image["src"],
+                        "altText": image.get("alt", "")
+                    })
+        
+        variables = {"input": product_input}
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                logger.error(f"Product creation failed: {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            product_data = result.get("data", {}).get("productCreate", {})
+            user_errors = product_data.get("userErrors", [])
+            
+            if user_errors:
+                logger.error(f"Product creation validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            product = product_data.get("product")
+            if product:
+                logger.info(f"Successfully created product in Shopify: {product['id']}")
+                return {
+                    "success": True,
+                    "product": product,
+                    "message": f"Product '{title}' created successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No product data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception creating product: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to create product: {e}"
+            }
+    
+    def update_product_in_shopify(self, shopify_product_id: str, title: str = None,
+                                   description: str = None, vendor: str = None,
+                                   product_type: str = None, tags: List[str] = None,
+                                   status: str = None) -> Dict:
+        """
+        Update an existing product in Shopify
+        
+        Args:
+            shopify_product_id: Shopify GID (e.g., gid://shopify/Product/123456)
+            title: New product title
+            description: New product description
+            vendor: New vendor
+            product_type: New product type
+            tags: New tags list
+            status: New status (ACTIVE, DRAFT, ARCHIVED)
+            
+        Returns:
+            Dict with success status and updated product data
+        """
+        mutation = """
+        mutation productUpdate($input: ProductInput!) {
+          productUpdate(input: $input) {
+            product {
+              id
+              title
+              handle
+              descriptionHtml
+              vendor
+              productType
+              tags
+              status
+              updatedAt
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        # Build update input - only include fields that are provided
+        product_input = {"id": shopify_product_id}
+        
+        if title is not None:
+            product_input["title"] = title
+        if description is not None:
+            product_input["descriptionHtml"] = description
+        if vendor is not None:
+            product_input["vendor"] = vendor
+        if product_type is not None:
+            product_input["productType"] = product_type
+        if tags is not None:
+            product_input["tags"] = tags
+        if status is not None:
+            product_input["status"] = status.upper()
+        
+        variables = {"input": product_input}
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            product_data = result.get("data", {}).get("productUpdate", {})
+            user_errors = product_data.get("userErrors", [])
+            
+            if user_errors:
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            product = product_data.get("product")
+            if product:
+                logger.info(f"Successfully updated product in Shopify: {product['id']}")
+                return {
+                    "success": True,
+                    "product": product,
+                    "message": f"Product updated successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No product data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception updating product: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to update product: {e}"
+            }
+    
+    def delete_product_in_shopify(self, shopify_product_id: str) -> Dict:
+        """
+        Delete a product from Shopify
+        
+        Args:
+            shopify_product_id: Shopify GID (e.g., gid://shopify/Product/123456)
+            
+        Returns:
+            Dict with success status
+        """
+        mutation = """
+        mutation productDelete($input: ProductDeleteInput!) {
+          productDelete(input: $input) {
+            deletedProductId
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variables = {
+            "input": {
+                "id": shopify_product_id
+            }
+        }
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            product_data = result.get("data", {}).get("productDelete", {})
+            user_errors = product_data.get("userErrors", [])
+            
+            if user_errors:
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            deleted_id = product_data.get("deletedProductId")
+            if deleted_id:
+                logger.info(f"Successfully deleted product from Shopify: {deleted_id}")
+                return {
+                    "success": True,
+                    "deleted_id": deleted_id,
+                    "message": "Product deleted successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No deletion confirmation in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception deleting product: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to delete product: {e}"
+            }

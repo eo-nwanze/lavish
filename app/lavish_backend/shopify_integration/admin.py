@@ -526,9 +526,9 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                     
                     for image_data in image_list:
                         ShopifyProductImage.objects.update_or_create(
-                            product=product,
                             shopify_id=image_data.get('id'),
                             defaults={
+                                'product': product,
                                 'src': image_data.get('src', ''),
                                 'alt_text': image_data.get('altText', ''),
                                 'width': image_data.get('width', 0),
@@ -658,7 +658,7 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                             'city': shipping_addr.get('city', ''),
                             'province': shipping_addr.get('province', ''),
                             'country': shipping_addr.get('country', ''),
-                            'zip': shipping_addr.get('zip', ''),
+                            'zip_code': shipping_addr.get('zip', ''),
                             'phone': shipping_addr.get('phone', ''),
                             'store_domain': '7fa66c-ac.myshopify.com'
                         }

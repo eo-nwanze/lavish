@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Compose Email - ENDEVOPS{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'email_manager:inbox_list' %}" style="color: #007bff; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Inbox
+        </a>
+    </div>
+    
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2><i class="fas fa-paper-plane"></i> Compose Email</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">To:</label>
+                {{ form.to_emails }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">CC:</label>
+                {{ form.cc_emails }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
+                {{ form.subject }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
+                {{ form.body }}
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Attachments:</label>
+                <input type="file" name="attachments" multiple>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="padding: 10px 30px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+                <a href="{% url 'email_manager:inbox_list' %}" style="padding: 10px 30px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

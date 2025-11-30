@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}No Inbox - ENDEVOPS{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 100px auto; text-align: center; padding: 40px;">
+    <i class="fas fa-inbox" style="font-size: 100px; color: #dee2e6; margin-bottom: 30px;"></i>
+    <h1>No Active Email Inbox Found</h1>
+    <p style="font-size: 18px; color: #6c757d; margin: 20px 0;">
+        There are no active email inboxes configured. Please contact the administrator to set up an inbox.
+    </p>
+    <a href="{% url 'admin:index' %}" class="btn btn-primary" style="display: inline-block; padding: 12px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">
+        <i class="fas fa-cog"></i> Go to Admin Panel
+    </a>
+</div>
+{% endblock %}

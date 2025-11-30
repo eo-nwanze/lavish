@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ message.subject }} - ENDEVOPS{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'email_manager:inbox_list' %}" style="color: #007bff; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Back to Inbox
+        </a>
+    </div>
+    
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2>{{ message.subject }}</h2>
+        
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <p><strong>From:</strong> {{ message.from_email }}</p>
+            <p><strong>To:</strong> {{ message.to_emails|join:", " }}</p>
+            {% if message.cc_emails %}
+                <p><strong>CC:</strong> {{ message.cc_emails|join:", " }}</p>
+            {% endif %}
+            <p><strong>Date:</strong> {{ message.received_at|date:"F d, Y g:i A" }}</p>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            {% if message.html_body %}
+                <iframe srcdoc="{{ message.html_body|escape }}" style="width: 100%; min-height: 400px; border: 1px solid #e9ecef; border-radius: 4px;"></iframe>
+            {% else %}
+                <div style="white-space: pre-wrap; font-family: monospace; padding: 20px; background: #f8f9fa; border-radius: 4px;">{{ message.body }}</div>
+            {% endif %}
+        </div>
+        
+        {% if attachments %}
+        <div style="margin-bottom: 20px;">
+            <h4>Attachments ({{ attachments.count }})</h4>
+            <ul>
+                {% for attachment in attachments %}
+                <li>
+                    <a href="{{ attachment.file.url }}" target="_blank">
+                        <i class="fas fa-paperclip"></i> {{ attachment.filename }} ({{ attachment.size|filesizeformat }})
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <a href="{% url 'email_manager:reply_message' message.pk %}" class="btn btn-primary" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                <i class="fas fa-reply"></i> Reply
+            </a>
+            <a href="{% url 'email_manager:forward_message' message.pk %}" class="btn btn-secondary" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+                <i class="fas fa-share"></i> Forward
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

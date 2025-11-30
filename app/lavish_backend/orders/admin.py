@@ -7,6 +7,42 @@ from .models import ShopifyOrder, ShopifyOrderLineItem, ShopifyOrderAddress, Ord
 from .realtime_sync import sync_orders_realtime, get_order_sync_stats
 
 
+class ShopifyOrderAddressInline(admin.TabularInline):
+    model = ShopifyOrderAddress
+    extra = 0
+    readonly_fields = ()
+    fields = ('address_type', 'first_name', 'last_name', 'address1', 'city', 'province', 'country', 'zip_code')
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        
+        # Add help text for address editing
+        if obj and obj.fulfillment_status in ['null', 'partial']:
+            formset.help_text = "✅ Order is unshipped - address changes will be applied"
+        elif obj:
+            formset.help_text = "⚠️ Order is shipped/fulfilled - address changes won't affect delivery"
+        
+        return formset
+
+
+class OrderAddressOverrideInline(admin.StackedInline):
+    """Inline for managing address overrides - Edit address for this delivery only"""
+    model = None  # We'll link this to the override model
+    extra = 0
+    max_num = 1
+    
+    fieldsets = (
+        ('Address Override - For This Delivery Only', {
+            'fields': ('first_name', 'last_name', 'company', 'address1', 'address2', 'city', 'province', 'country', 'zip_code', 'phone'),
+            'description': 'Override shipping address for this specific order. This will not affect the customer\'s primary subscription address.'
+        }),
+        ('Override Details', {
+            'fields': ('reason', 'is_temporary'),
+            'description': 'Explain why this override is needed'
+        }),
+    )
+
+
 class ShopifyOrderLineItemInline(admin.TabularInline):
     model = ShopifyOrderLineItem
     extra = 0
@@ -14,16 +50,9 @@ class ShopifyOrderLineItemInline(admin.TabularInline):
     fields = ('title', 'quantity', 'price', 'shopify_id')
 
 
-class ShopifyOrderAddressInline(admin.TabularInline):
-    model = ShopifyOrderAddress
-    extra = 0
-    readonly_fields = ()
-    fields = ('address_type', 'first_name', 'last_name', 'address1', 'city', 'province', 'country', 'zip_code')
-
-
 @admin.register(ShopifyOrder)
 class ShopifyOrderAdmin(admin.ModelAdmin):
-    list_display = ('name', 'customer_email', 'total_price_display', 'financial_status', 'fulfillment_status', 'created_at', 'last_synced')
+    list_display = ('name', 'customer_email', 'total_price_display', 'financial_status', 'fulfillment_status_badge', 'cutoff_date_display', 'created_at', 'last_synced')
     list_filter = ('financial_status', 'fulfillment_status', 'currency_code', 'store_domain', 'created_at', 'last_synced')
     search_fields = ('name', 'customer_email', 'shopify_id')
     readonly_fields = ('shopify_id', 'created_at', 'updated_at', 'processed_at', 'last_synced', 'store_domain')
@@ -36,6 +65,11 @@ class ShopifyOrderAdmin(admin.ModelAdmin):
         ('Financial Details', {
             'fields': ('total_price', 'currency_code', 'financial_status', 'fulfillment_status')
         }),
+        ('Address Management', {
+            'fields': (),  # This section is handled by inlines
+            'description': 'Manage shipping addresses for this order. Changes to unshipped orders will be applied.',
+            'classes': ('wide',)
+        }),
         ('Additional Info', {
             'fields': ('subtotal_price', 'total_tax', 'total_shipping_price'),
             'classes': ('collapse',)
@@ -46,11 +80,95 @@ class ShopifyOrderAdmin(admin.ModelAdmin):
         }),
     )
     
+    actions = ['create_address_override', 'sync_selected_orders', 'check_cutoff_dates']
+    
     def total_price_display(self, obj):
         return f"${obj.total_price} {obj.currency_code}"
     total_price_display.short_description = "Total Price"
     
-    actions = ['sync_selected_orders']
+    def fulfillment_status_badge(self, obj):
+        """Show fulfillment status with colored badge"""
+        status = obj.fulfillment_status
+        colors = {
+            'fulfilled': 'green',
+            'partial': 'orange', 
+            'null': 'red',
+            'restocked': 'gray',
+        }
+        color = colors.get(status, 'gray')
+        status_text = 'Unfulfilled' if status == 'null' else status.title()
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px;">{}</span>',
+            color, status_text
+        )
+    fulfillment_status_badge.short_description = "Fulfillment Status"
+    
+    def cutoff_date_display(self, obj):
+        """Display cutoff date for subscription orders"""
+        try:
+            from customer_subscriptions.models import CustomerSubscription
+            
+            # Check if this is a subscription order by looking for related subscription
+            subscription = CustomerSubscription.objects.filter(customer=obj.customer).first()
+            if subscription:
+                cutoff_date = subscription.get_cutoff_date()
+                if cutoff_date:
+                    from datetime import date
+                    days_until = (cutoff_date - date.today()).days
+                    
+                    if days_until < 0:
+                        return format_html('<span style="color: red;">⚠️ Past Cutoff</span>')
+                    elif days_until <= 2:
+                        return format_html('<span style="color: orange;">⚡ {} days</span>', days_until)
+                    else:
+                        return format_html('<span style="color: green;">📅 {} days</span>', days_until)
+            
+            return "-"
+        except:
+            return "-"
+    cutoff_date_display.short_description = "Cutoff Date"
+    
+    def create_address_override(self, request, queryset):
+        """Create address overrides for selected orders"""
+        count = 0
+        for order in queryset:
+            if order.fulfillment_status in ['null', 'partial']:
+                # Only create overrides for unshipped orders
+                count += 1
+            else:
+                self.message_user(request, f"Skipped {order.name} - already fulfilled", level=messages.WARNING)
+        
+        if count > 0:
+            self.message_user(request, f"Ready to create address overrides for {count} orders. Edit individual orders to set override addresses.", level=messages.SUCCESS)
+        
+    create_address_override.short_description = "📍 Create address overrides for unshipped orders"
+    
+    def check_cutoff_dates(self, request, queryset):
+        """Check cutoff dates for selected orders"""
+        from datetime import date
+        
+        approaching_cutoff = 0
+        past_cutoff = 0
+        
+        for order in queryset:
+            try:
+                from customer_subscriptions.models import CustomerSubscription
+                subscription = CustomerSubscription.objects.filter(customer=order.customer).first()
+                if subscription:
+                    cutoff_date = subscription.get_cutoff_date()
+                    if cutoff_date:
+                        days_until = (cutoff_date - date.today()).days
+                        if days_until < 0:
+                            past_cutoff += 1
+                        elif days_until <= 3:
+                            approaching_cutoff += 1
+            except:
+                continue
+        
+        message = f"Cutoff Check: {approaching_cutoff} approaching cutoff, {past_cutoff} past cutoff"
+        self.message_user(request, message, level=messages.INFO)
+    
+    check_cutoff_dates.short_description = "⏰ Check cutoff dates"
     
     def sync_selected_orders(self, request, queryset):
         """Sync selected orders from Shopify"""
