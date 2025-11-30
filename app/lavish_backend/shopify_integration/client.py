@@ -70,7 +70,7 @@ class ShopifyAPIClient:
     
     def execute_graphql_query(self, query: str, variables: Optional[Dict] = None) -> Dict:
         """Execute GraphQL query with enhanced error handling and rate limiting"""
-        self._check_rate_limit()
+        # Rate limiting is handled after the request via _handle_rate_limit()
         
         headers = {
             'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ class ShopifyAPIClient:
             )
             
             # Update rate limit info
-            self._update_rate_limit(response.headers)
+            self._handle_rate_limit(response)
             
             if response.status_code != 200:
                 logger.error(f"GraphQL request failed: {response.status_code} - {response.text}")

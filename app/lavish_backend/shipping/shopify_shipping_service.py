@@ -174,16 +174,19 @@ class ShopifyShippingRateCalculator:
             return None
     
     def _parse_sendal_response(self, data: Dict, currency: str) -> List[Dict]:
-        """Parse Sendal/carrier service response into Shopify rate format"""
+        """Parse Sendal/carrier service response into Shopify ShippingRate format"""
         rates = []
         
         for rate in data.get('rates', []):
+            price_amount = Decimal(str(rate['total_price']))
             rates.append({
-                'service_name': rate['name'],
-                'service_code': rate['code'],
-                'total_price': str(int(Decimal(str(rate['total_price'])) * 100)),  # Convert to cents
+                'handle': rate['code'],  # Human-readable unique identifier
+                'title': rate['name'],   # Name of the shipping rate
+                'price': {
+                    'amount': str(price_amount),
+                    'currencyCode': currency
+                },
                 'description': rate.get('description', ''),
-                'currency': currency,
                 'min_delivery_date': rate.get('min_delivery_date'),
                 'max_delivery_date': rate.get('max_delivery_date'),
                 'phone_required': rate.get('phone_required', False)
@@ -207,34 +210,40 @@ class ShopifyShippingRateCalculator:
         # Convert rates to target currency
         rates_converted = self._convert_rates_to_currency(rates_usd, currency)
         
-        # Build response
+        # Build response using Shopify ShippingRate object structure
         today = datetime.now()
         
         return [
             {
-                'service_name': 'Standard Shipping',
-                'service_code': 'STANDARD',
-                'total_price': str(int(rates_converted['standard'] * 100)),  # Convert to cents
+                'handle': 'standard-shipping',
+                'title': 'Standard Shipping',
+                'price': {
+                    'amount': str(rates_converted['standard']),
+                    'currencyCode': currency
+                },
                 'description': '5-7 business days',
-                'currency': currency,
                 'min_delivery_date': (today + timedelta(days=5)).isoformat(),
                 'max_delivery_date': (today + timedelta(days=7)).isoformat(),
             },
             {
-                'service_name': 'Express Shipping',
-                'service_code': 'EXPRESS',
-                'total_price': str(int(rates_converted['express'] * 100)),
+                'handle': 'express-shipping',
+                'title': 'Express Shipping',
+                'price': {
+                    'amount': str(rates_converted['express']),
+                    'currencyCode': currency
+                },
                 'description': '2-3 business days',
-                'currency': currency,
                 'min_delivery_date': (today + timedelta(days=2)).isoformat(),
                 'max_delivery_date': (today + timedelta(days=3)).isoformat(),
             },
             {
-                'service_name': 'Overnight Shipping',
-                'service_code': 'OVERNIGHT',
-                'total_price': str(int(rates_converted['overnight'] * 100)),
+                'handle': 'overnight-shipping',
+                'title': 'Overnight Shipping',
+                'price': {
+                    'amount': str(rates_converted['overnight']),
+                    'currencyCode': currency
+                },
                 'description': 'Next business day',
-                'currency': currency,
                 'min_delivery_date': (today + timedelta(days=1)).isoformat(),
                 'max_delivery_date': (today + timedelta(days=1)).isoformat(),
                 'phone_required': True
