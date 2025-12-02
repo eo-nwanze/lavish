@@ -767,7 +767,7 @@ class EnhancedShopifyAPIClient:
         }
         """
         
-        # Build product input
+        # Build product input (NOTE: ProductInput does NOT accept variants directly!)
         product_input = {
             "title": title,
             "descriptionHtml": description,
@@ -778,25 +778,6 @@ class EnhancedShopifyAPIClient:
         
         if tags:
             product_input["tags"] = tags
-        
-        # Add variants if provided
-        if variants:
-            product_input["variants"] = []
-            for variant in variants:
-                variant_input = {}
-                if "price" in variant:
-                    variant_input["price"] = str(variant["price"])
-                if "sku" in variant:
-                    variant_input["sku"] = variant["sku"]
-                if "inventory_quantity" in variant:
-                    variant_input["inventoryQuantities"] = [{
-                        "availableQuantity": int(variant["inventory_quantity"]),
-                        "locationId": "gid://shopify/Location/PRIMARY"  # Use primary location
-                    }]
-                if "title" in variant:
-                    variant_input["options"] = [variant["title"]]
-                    
-                product_input["variants"].append(variant_input)
         
         # Add images if provided
         if images:
@@ -834,7 +815,39 @@ class EnhancedShopifyAPIClient:
             
             product = product_data.get("product")
             if product:
-                logger.info(f"Successfully created product in Shopify: {product['id']}")
+                product_id = product['id']
+                logger.info(f"Successfully created product in Shopify: {product_id}")
+                
+                # Now update variants if provided (Shopify creates a default variant)
+                if variants and len(variants) > 0:
+                    # Get the default variant ID created by Shopify
+                    default_variant = product.get("variants", {}).get("edges", [])
+                    if default_variant:
+                        default_variant_id = default_variant[0]["node"]["id"]
+                        
+                        # Update the default variant with our data
+                        first_variant = variants[0]
+                        variant_update_result = self._update_product_variant(
+                            default_variant_id,
+                            price=first_variant.get("price", "0.00"),
+                            sku=first_variant.get("sku", ""),
+                            inventory_quantity=first_variant.get("inventory_quantity", 0)
+                        )
+                        
+                        if not variant_update_result.get("success"):
+                            logger.warning(f"Failed to update default variant: {variant_update_result.get('message')}")
+                        
+                        # Create additional variants if more than one
+                        if len(variants) > 1:
+                            for variant_data in variants[1:]:
+                                self._create_product_variant(
+                                    product_id,
+                                    price=variant_data.get("price", "0.00"),
+                                    sku=variant_data.get("sku", ""),
+                                    inventory_quantity=variant_data.get("inventory_quantity", 0),
+                                    title=variant_data.get("title", "Default")
+                                )
+                
                 return {
                     "success": True,
                     "product": product,
@@ -1023,4 +1036,180 @@ class EnhancedShopifyAPIClient:
                 "success": False,
                 "error": str(e),
                 "message": f"Failed to delete product: {e}"
+            }
+    
+    def _update_product_variant(self, variant_id: str, price: str = None, 
+                                sku: str = None, inventory_quantity: int = None) -> Dict:
+        """
+        Update a product variant
+        
+        Args:
+            variant_id: Shopify variant GID
+            price: Variant price
+            sku: Variant SKU
+            inventory_quantity: Inventory quantity
+            
+        Returns:
+            Dict with success status
+        """
+        mutation = """
+        mutation productVariantUpdate($input: ProductVariantInput!) {
+          productVariantUpdate(input: $input) {
+            productVariant {
+              id
+              price
+              sku
+              inventoryQuantity
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variant_input = {"id": variant_id}
+        
+        if price is not None:
+            variant_input["price"] = str(price)
+        if sku is not None:
+            variant_input["sku"] = sku
+        if inventory_quantity is not None:
+            variant_input["inventoryQuantities"] = {
+                "availableQuantity": int(inventory_quantity),
+                "locationId": "gid://shopify/Location/PRIMARY"
+            }
+        
+        variables = {"input": variant_input}
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            variant_data = result.get("data", {}).get("productVariantUpdate", {})
+            user_errors = variant_data.get("userErrors", [])
+            
+            if user_errors:
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            variant = variant_data.get("productVariant")
+            if variant:
+                return {
+                    "success": True,
+                    "variant": variant,
+                    "message": "Variant updated successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No variant data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception updating variant: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to update variant: {e}"
+            }
+    
+    def _create_product_variant(self, product_id: str, price: str = "0.00",
+                                sku: str = "", inventory_quantity: int = 0,
+                                title: str = "Default") -> Dict:
+        """
+        Create a new product variant
+        
+        Args:
+            product_id: Shopify product GID
+            price: Variant price
+            sku: Variant SKU
+            inventory_quantity: Inventory quantity
+            title: Variant title
+            
+        Returns:
+            Dict with success status
+        """
+        mutation = """
+        mutation productVariantCreate($input: ProductVariantInput!) {
+          productVariantCreate(input: $input) {
+            productVariant {
+              id
+              title
+              price
+              sku
+              inventoryQuantity
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variant_input = {
+            "productId": product_id,
+            "price": str(price),
+            "sku": sku,
+            "options": [title]
+        }
+        
+        if inventory_quantity > 0:
+            variant_input["inventoryQuantities"] = {
+                "availableQuantity": int(inventory_quantity),
+                "locationId": "gid://shopify/Location/PRIMARY"
+            }
+        
+        variables = {"input": variant_input}
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            variant_data = result.get("data", {}).get("productVariantCreate", {})
+            user_errors = variant_data.get("userErrors", [])
+            
+            if user_errors:
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            variant = variant_data.get("productVariant")
+            if variant:
+                return {
+                    "success": True,
+                    "variant": variant,
+                    "message": "Variant created successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No variant data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception creating variant: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to create variant: {e}"
             }
