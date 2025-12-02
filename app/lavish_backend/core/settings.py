@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'crispy_forms',
+    'import_export',
     
     # Custom apps
     'api',

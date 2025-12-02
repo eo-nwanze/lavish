@@ -3,8 +3,35 @@ from django.contrib import messages
 from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import ShopifyOrder, ShopifyOrderLineItem, ShopifyOrderAddress, OrderSyncLog
 from .realtime_sync import sync_orders_realtime, get_order_sync_stats
+
+
+# Import-Export Resources
+class ShopifyOrderResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyOrder
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyOrderLineItemResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyOrderLineItem
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyOrderAddressResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyOrderAddress
+        import_id_fields = ['id']
+
+
+class OrderSyncLogResource(resources.ModelResource):
+    class Meta:
+        model = OrderSyncLog
+        import_id_fields = ['id']
 
 
 class ShopifyOrderAddressInline(admin.TabularInline):
@@ -51,7 +78,8 @@ class ShopifyOrderLineItemInline(admin.TabularInline):
 
 
 @admin.register(ShopifyOrder)
-class ShopifyOrderAdmin(admin.ModelAdmin):
+class ShopifyOrderAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyOrderResource
     list_display = ('name', 'customer_email', 'total_price_display', 'financial_status', 'fulfillment_status_badge', 'cutoff_date_display', 'created_at', 'last_synced')
     list_filter = ('financial_status', 'fulfillment_status', 'currency_code', 'store_domain', 'created_at', 'last_synced')
     search_fields = ('name', 'customer_email', 'shopify_id')
@@ -228,7 +256,8 @@ class ShopifyOrderAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyOrderLineItem)
-class ShopifyOrderLineItemAdmin(admin.ModelAdmin):
+class ShopifyOrderLineItemAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyOrderLineItemResource
     list_display = ('order', 'title', 'quantity', 'price')
     list_filter = ('order__financial_status', 'order__fulfillment_status', 'store_domain')
     search_fields = ('title', 'order__name', 'shopify_id')
@@ -236,7 +265,8 @@ class ShopifyOrderLineItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyOrderAddress)
-class ShopifyOrderAddressAdmin(admin.ModelAdmin):
+class ShopifyOrderAddressAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyOrderAddressResource
     list_display = ('order', 'address_type', 'full_name', 'city', 'province', 'country')
     list_filter = ('address_type', 'country', 'province', 'store_domain')
     search_fields = ('first_name', 'last_name', 'address1', 'city', 'order__name')
@@ -248,7 +278,8 @@ class ShopifyOrderAddressAdmin(admin.ModelAdmin):
 
 
 @admin.register(OrderSyncLog)
-class OrderSyncLogAdmin(admin.ModelAdmin):
+class OrderSyncLogAdmin(ImportExportModelAdmin):
+    resource_class = OrderSyncLogResource
     list_display = ('operation_type', 'status', 'orders_processed', 'orders_created', 'orders_updated', 'started_at', 'completed_at')
     list_filter = ('operation_type', 'status', 'store_domain', 'started_at')
     readonly_fields = ('started_at', 'completed_at')

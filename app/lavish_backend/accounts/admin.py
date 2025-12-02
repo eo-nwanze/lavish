@@ -1,10 +1,62 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import CustomUser, Company, IndustryType, CompanyRole, CompanyStaff, BankDetail, CardDetail, PayID, UserSession, CompanySite
 
 
-class CustomUserAdmin(UserAdmin):
+# Import-Export Resources
+class CustomUserResource(resources.ModelResource):
+    class Meta:
+        model = CustomUser
+        exclude = ('password',)  # Exclude password for security
+        import_id_fields = ('username',)
+
+
+class CompanyResource(resources.ModelResource):
+    class Meta:
+        model = Company
+        import_id_fields = ('id',)
+
+
+class CompanyRoleResource(resources.ModelResource):
+    class Meta:
+        model = CompanyRole
+
+
+class CompanyStaffResource(resources.ModelResource):
+    class Meta:
+        model = CompanyStaff
+
+
+class BankDetailResource(resources.ModelResource):
+    class Meta:
+        model = BankDetail
+
+
+class CardDetailResource(resources.ModelResource):
+    class Meta:
+        model = CardDetail
+
+
+class PayIDResource(resources.ModelResource):
+    class Meta:
+        model = PayID
+
+
+class UserSessionResource(resources.ModelResource):
+    class Meta:
+        model = UserSession
+
+
+class CompanySiteResource(resources.ModelResource):
+    class Meta:
+        model = CompanySite
+
+
+class CustomUserAdmin(UserAdmin, ImportExportModelAdmin):
+    resource_class = CustomUserResource
     list_display = (
         'username', 'email', 'fullname', 'gender', 'is_staff', 'is_active',
         'email_verified', 'mfa_enabled', 'company', 'is_company_admin'
@@ -72,7 +124,8 @@ class CustomUserAdmin(UserAdmin):
     reset_mfa.short_description = "Reset MFA for selected users"
 
 
-class CompanyAdmin(admin.ModelAdmin):
+class CompanyAdmin(ImportExportModelAdmin):
+    resource_class = CompanyResource
     list_display = ('name', 'industry_type', 'employee_count', 'website', 'contact_email', 'created_by')
     search_fields = ('name', 'industry_type__name', 'contact_email')
     list_filter = ('industry_type', 'country')
@@ -80,14 +133,16 @@ class CompanyAdmin(admin.ModelAdmin):
 
 
 @admin.register(CompanyRole)
-class CompanyRoleAdmin(admin.ModelAdmin):
+class CompanyRoleAdmin(ImportExportModelAdmin):
+    resource_class = CompanyRoleResource
     list_display = ('name', 'description')
     search_fields = ('name',)
     list_per_page = 10
 
 
 @admin.register(CompanyStaff)
-class CompanyStaffAdmin(admin.ModelAdmin):
+class CompanyStaffAdmin(ImportExportModelAdmin):
+    resource_class = CompanyStaffResource
     list_display = ('user', 'company', 'role', 'is_active')
     search_fields = ('user__fullname', 'company__name', 'role__name')
     list_filter = ('role', 'is_active')
@@ -99,24 +154,28 @@ admin.site.register(IndustryType)
 
 
 @admin.register(BankDetail)
-class BankDetailAdmin(admin.ModelAdmin):
+class BankDetailAdmin(ImportExportModelAdmin):
+    resource_class = BankDetailResource
     list_display = ("user", "bank_name", "account_number", "account_holder_name", "created_at")
     search_fields = ("bank_name", "account_number", "account_holder_name")
 
 
 @admin.register(CardDetail)
-class CardDetailAdmin(admin.ModelAdmin):
+class CardDetailAdmin(ImportExportModelAdmin):
+    resource_class = CardDetailResource
     list_display = ("user", "card_number", "cardholder_name", "expiry_date", "created_at")
     search_fields = ("card_number", "cardholder_name")
 
 
 @admin.register(PayID)
-class PayIDAdmin(admin.ModelAdmin):
+class PayIDAdmin(ImportExportModelAdmin):
+    resource_class = PayIDResource
     list_display = ("user", "name", "email", "phone_number", "created_at")
     search_fields = ("name", "email", "phone_number")
 
 @admin.register(UserSession)
-class UserSessionAdmin(admin.ModelAdmin):
+class UserSessionAdmin(ImportExportModelAdmin):
+    resource_class = UserSessionResource
     list_display = ('user', 'session_key', 'user_agent', 'ip_address', 'expired', 'last_activity')
     list_filter = ('expired', 'created_at', 'last_activity')
     search_fields = ('user__username', 'user__email', 'ip_address', 'user_agent')
@@ -135,8 +194,9 @@ class UserSessionAdmin(admin.ModelAdmin):
 
 
 @admin.register(CompanySite)
-class CompanySiteAdmin(admin.ModelAdmin):
+class CompanySiteAdmin(ImportExportModelAdmin):
     """Admin for company sites/locations"""
+    resource_class = CompanySiteResource
     list_display = ('name', 'company', 'suburb', 'state', 'country', 'is_active', 'created_at')
     list_filter = ('is_active', 'state', 'country', 'company')
     search_fields = ('name', 'address', 'suburb', 'company__name')

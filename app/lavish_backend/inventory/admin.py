@@ -3,8 +3,41 @@ from django.contrib import messages
 from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import ShopifyLocation, ShopifyInventoryItem, ShopifyInventoryLevel, InventoryAdjustment, InventorySyncLog
 from .realtime_sync import sync_inventory_realtime, get_inventory_sync_stats, get_low_stock_alerts
+
+
+# Import-Export Resources
+class ShopifyLocationResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyLocation
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyInventoryItemResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyInventoryItem
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyInventoryLevelResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyInventoryLevel
+        import_id_fields = ['id']
+
+
+class InventoryAdjustmentResource(resources.ModelResource):
+    class Meta:
+        model = InventoryAdjustment
+        import_id_fields = ['id']
+
+
+class InventorySyncLogResource(resources.ModelResource):
+    class Meta:
+        model = InventorySyncLog
+        import_id_fields = ['id']
 
 
 class ShopifyInventoryLevelInline(admin.TabularInline):
@@ -15,7 +48,8 @@ class ShopifyInventoryLevelInline(admin.TabularInline):
 
 
 @admin.register(ShopifyLocation)
-class ShopifyLocationAdmin(admin.ModelAdmin):
+class ShopifyLocationAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyLocationResource
     list_display = ('name', 'shopify_id', 'active', 'inventory_items_count')
     search_fields = ('name', 'shopify_id')
     readonly_fields = ('shopify_id', 'created_at', 'updated_at', 'store_domain')
@@ -26,7 +60,8 @@ class ShopifyLocationAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyInventoryItem)
-class ShopifyInventoryItemAdmin(admin.ModelAdmin):
+class ShopifyInventoryItemAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyInventoryItemResource
     list_display = ('sku', 'variant_name', 'tracked', 'requires_shipping', 'total_available', 'last_synced')
     list_filter = ('tracked', 'requires_shipping', 'store_domain', 'last_synced')
     search_fields = ('sku', 'shopify_id', 'variant__title', 'variant__product__title')
@@ -140,7 +175,8 @@ class ShopifyInventoryItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyInventoryLevel)
-class ShopifyInventoryLevelAdmin(admin.ModelAdmin):
+class ShopifyInventoryLevelAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyInventoryLevelResource
     list_display = ('get_product_name', 'location', 'available', 'committed', 'stock_status')
     list_filter = ('location', 'available', 'store_domain')
     search_fields = ('inventory_item__sku', 'location__name', 'inventory_item__variant__product__title', 'inventory_item__variant__title')
@@ -170,7 +206,8 @@ class ShopifyInventoryLevelAdmin(admin.ModelAdmin):
 
 
 @admin.register(InventoryAdjustment)
-class InventoryAdjustmentAdmin(admin.ModelAdmin):
+class InventoryAdjustmentAdmin(ImportExportModelAdmin):
+    resource_class = InventoryAdjustmentResource
     list_display = ('inventory_item', 'location', 'adjustment_type', 'quantity_delta', 'reason', 'created_at')
     list_filter = ('adjustment_type', 'reason', 'location', 'created_at')
     search_fields = ('inventory_item__sku', 'reason', 'notes')
@@ -178,7 +215,8 @@ class InventoryAdjustmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(InventorySyncLog)
-class InventorySyncLogAdmin(admin.ModelAdmin):
+class InventorySyncLogAdmin(ImportExportModelAdmin):
+    resource_class = InventorySyncLogResource
     list_display = ('operation_type', 'status', 'items_processed', 'items_created', 'items_updated', 'started_at', 'completed_at')
     list_filter = ('operation_type', 'status', 'store_domain', 'started_at')
     readonly_fields = ('started_at', 'completed_at')

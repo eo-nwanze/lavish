@@ -24,6 +24,16 @@ class Command(BaseCommand):
             help='Sync only delivery profiles (includes zones and methods)',
         )
         parser.add_argument(
+            '--rates',
+            action='store_true',
+            help='Sync only shipping rates from delivery methods',
+        )
+        parser.add_argument(
+            '--fulfillment-orders',
+            action='store_true',
+            help='Sync fulfillment orders and tracking info from Shopify orders',
+        )
+        parser.add_argument(
             '--show-details',
             action='store_true',
             help='Show detailed information after sync',
@@ -50,11 +60,16 @@ class Command(BaseCommand):
         # Determine what to sync
         sync_carriers = options['carrier_services']
         sync_profiles = options['delivery_profiles']
+        sync_rates = options['rates']
+        sync_fulfillment = options['fulfillment_orders']
         
         # If nothing specified, sync everything
-        if not sync_carriers and not sync_profiles:
+        if not sync_carriers and not sync_profiles and not sync_rates and not sync_fulfillment:
             sync_carriers = True
             sync_profiles = True
+            sync_rates = True
+            # Don't auto-sync fulfillment orders (can be slow with many orders)
+            sync_fulfillment = False
         
         results = {}
         
@@ -70,6 +85,18 @@ class Command(BaseCommand):
                 profile_results = service.sync_delivery_profiles()
                 results['delivery_profiles'] = profile_results
                 self.print_profile_results(profile_results)
+            
+            if sync_rates:
+                self.stdout.write(self.style.WARNING('Syncing shipping rates...'))
+                rate_results = service.sync_shipping_rates()
+                results['shipping_rates'] = rate_results
+                self.print_rate_results(rate_results)
+            
+            if sync_fulfillment:
+                self.stdout.write(self.style.WARNING('Syncing fulfillment orders and tracking info...'))
+                fulfillment_results = service.sync_fulfillment_orders()
+                results['fulfillment_orders'] = fulfillment_results
+                self.print_fulfillment_results(fulfillment_results)
             
             # Show summary
             self.stdout.write('')
@@ -88,6 +115,17 @@ class Command(BaseCommand):
                 dp = results['delivery_profiles']
                 self.stdout.write(f"Delivery Profiles: {dp['profiles']} profiles, {dp['zones']} zones, {dp['methods']} methods")
                 total_errors += len(dp.get('errors', []))
+            
+            if 'shipping_rates' in results:
+                sr = results['shipping_rates']
+                self.stdout.write(f"Shipping Rates: {sr['rates_synced']} rates synced ({sr['rates_created']} created, {sr['rates_updated']} updated) from {sr['methods_processed']} methods")
+                total_errors += len(sr.get('errors', []))
+            
+            if 'fulfillment_orders' in results:
+                fo = results['fulfillment_orders']
+                self.stdout.write(f"Fulfillment Orders: {fo['fulfillment_orders_synced']} orders ({fo['fulfillment_orders_created']} created, {fo['fulfillment_orders_updated']} updated)")
+                self.stdout.write(f"Tracking Info: {fo['tracking_info_synced']} records ({fo['tracking_info_created']} created, {fo['tracking_info_updated']} updated)")
+                total_errors += len(fo.get('errors', []))
             
             if total_errors > 0:
                 self.stdout.write(self.style.ERROR(f"Total Errors: {total_errors}"))
@@ -127,6 +165,45 @@ class Command(BaseCommand):
         self.stdout.write(f"  - Profiles: {results['profiles']}")
         self.stdout.write(f"  - Zones: {results['zones']}")
         self.stdout.write(f"  - Methods: {results['methods']}")
+        
+        if results.get('errors'):
+            self.stdout.write(self.style.ERROR(f"  - Errors: {len(results['errors'])}"))
+            for error in results['errors'][:5]:  # Show first 5 errors
+                self.stdout.write(self.style.ERROR(f"    • {error}"))
+        else:
+            self.stdout.write(self.style.SUCCESS("  - No errors"))
+        
+        self.stdout.write('')
+    
+    def print_rate_results(self, results):
+        """Print shipping rate sync results"""
+        self.stdout.write('')
+        self.stdout.write(self.style.SUCCESS('Shipping Rates:'))
+        self.stdout.write(f"  - Methods Processed: {results['methods_processed']}")
+        self.stdout.write(f"  - Rates Synced: {results['rates_synced']}")
+        self.stdout.write(f"  - Created: {results['rates_created']}")
+        self.stdout.write(f"  - Updated: {results['rates_updated']}")
+        
+        if results.get('errors'):
+            self.stdout.write(self.style.ERROR(f"  - Errors: {len(results['errors'])}"))
+            for error in results['errors'][:5]:  # Show first 5 errors
+                self.stdout.write(self.style.ERROR(f"    • {error}"))
+        else:
+            self.stdout.write(self.style.SUCCESS("  - No errors"))
+        
+        self.stdout.write('')
+    
+    def print_fulfillment_results(self, results):
+        """Print fulfillment order sync results"""
+        self.stdout.write('')
+        self.stdout.write(self.style.SUCCESS('Fulfillment Orders & Tracking:'))
+        self.stdout.write(f"  - Orders Processed: {results['orders_processed']}")
+        self.stdout.write(f"  - Fulfillment Orders Synced: {results['fulfillment_orders_synced']}")
+        self.stdout.write(f"    • Created: {results['fulfillment_orders_created']}")
+        self.stdout.write(f"    • Updated: {results['fulfillment_orders_updated']}")
+        self.stdout.write(f"  - Tracking Info Synced: {results['tracking_info_synced']}")
+        self.stdout.write(f"    • Created: {results['tracking_info_created']}")
+        self.stdout.write(f"    • Updated: {results['tracking_info_updated']}")
         
         if results.get('errors'):
             self.stdout.write(self.style.ERROR(f"  - Errors: {len(results['errors'])}"))

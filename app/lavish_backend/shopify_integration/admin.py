@@ -53,7 +53,7 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
         from inventory.models import ShopifyInventoryItem, ShopifyInventoryLevel
         from shipping.models import ShopifyCarrierService, ShopifyDeliveryProfile
         from payments.models import ShopifyPaymentsAccount, ShopifyBalanceTransaction, ShopifyPayout, ShopifyDispute, ShopifyFinanceKYC
-        from subscriptions.models import ShopifyWebhookSubscription, ShopifyWebhookDelivery
+        # Note: subscriptions module doesn't exist, skipping webhook imports
         
         # Get recent product images for gallery
         product_images = ShopifyProductImage.objects.select_related('product').order_by('-created_at')[:12]
@@ -79,8 +79,8 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                 'payouts': ShopifyPayout.objects.count(),
                 'disputes': ShopifyDispute.objects.count(),
                 'kyc_info': ShopifyFinanceKYC.objects.count(),
-                'webhook_subscriptions': ShopifyWebhookSubscription.objects.count(),
-                'webhook_deliveries': ShopifyWebhookDelivery.objects.count(),
+                'webhook_subscriptions': 0,  # Webhook module not implemented yet
+                'webhook_deliveries': 0,  # Webhook module not implemented yet
             },
             'product_images': product_images,
         }
@@ -1192,8 +1192,12 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
     
     def _sync_webhooks_data(self, client):
         """Sync webhook subscriptions data"""
-        from subscriptions.models import ShopifyWebhookSubscription, ShopifyWebhookSyncLog
-        from subscriptions.shopify_webhooks_client import ShopifyWebhooksClient
+        try:
+            from subscriptions.models import ShopifyWebhookSubscription, ShopifyWebhookSyncLog
+            from subscriptions.shopify_webhooks_client import ShopifyWebhooksClient
+        except ImportError:
+            print("Webhook module not available, skipping webhook sync")
+            return
         
         print("Fetching webhook subscriptions from Shopify API...")
         

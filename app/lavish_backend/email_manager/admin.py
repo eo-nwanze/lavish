@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import (
     EmailInbox,
     EmailMessage,
@@ -23,8 +25,109 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 import json
 
+
+# Import-Export Resources
+class EmailInboxResource(resources.ModelResource):
+    class Meta:
+        model = EmailInbox
+        import_id_fields = ['id']
+
+
+class EmailMessageResource(resources.ModelResource):
+    class Meta:
+        model = EmailMessage
+        import_id_fields = ['id']
+
+
+class EmailAttachmentResource(resources.ModelResource):
+    class Meta:
+        model = EmailAttachment
+        import_id_fields = ['id']
+
+
+class EmailGuardianResource(resources.ModelResource):
+    class Meta:
+        model = EmailGuardian
+        import_id_fields = ['id']
+
+
+class SecurityAlertResource(resources.ModelResource):
+    class Meta:
+        model = SecurityAlert
+        import_id_fields = ['id']
+
+
+class EmailAutomationResource(resources.ModelResource):
+    class Meta:
+        model = EmailAutomation
+        import_id_fields = ['id']
+
+
+class EmailFolderResource(resources.ModelResource):
+    class Meta:
+        model = EmailFolder
+        import_id_fields = ['id']
+
+
+class EmailLabelResource(resources.ModelResource):
+    class Meta:
+        model = EmailLabel
+        import_id_fields = ['id']
+
+
+class MessageLabelResource(resources.ModelResource):
+    class Meta:
+        model = MessageLabel
+        import_id_fields = ['id']
+
+
+class EmailHistoryResource(resources.ModelResource):
+    class Meta:
+        model = EmailHistory
+        import_id_fields = ['id']
+
+
+class EmailConfigurationResource(resources.ModelResource):
+    class Meta:
+        model = EmailConfiguration
+        import_id_fields = ['id']
+        exclude = ('email_host_password',)
+
+
+class IncomingMailConfigurationResource(resources.ModelResource):
+    class Meta:
+        model = IncomingMailConfiguration
+        import_id_fields = ['id']
+        exclude = ('password',)
+
+
+class EmailTemplateResource(resources.ModelResource):
+    class Meta:
+        model = EmailTemplate
+        import_id_fields = ['id']
+
+
+class ScheduledEmailResource(resources.ModelResource):
+    class Meta:
+        model = ScheduledEmail
+        import_id_fields = ['id']
+
+
+class EmailGuardianRuleResource(resources.ModelResource):
+    class Meta:
+        model = EmailGuardianRule
+        import_id_fields = ['id']
+
+
+class EmailScanResultResource(resources.ModelResource):
+    class Meta:
+        model = EmailScanResult
+        import_id_fields = ['id']
+
+
 @admin.register(EmailInbox)
-class EmailInboxAdmin(admin.ModelAdmin):
+class EmailInboxAdmin(ImportExportModelAdmin):
+    resource_class = EmailInboxResource
     list_display = ('name', 'email_address', 'status_icon', 'message_count', 'created_at')
     list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'email_address')
@@ -104,7 +207,8 @@ class EmailInboxAdmin(admin.ModelAdmin):
     fetch_inbox_emails.short_description = "Fetch emails from selected inboxes"
 
 @admin.register(EmailMessage)
-class EmailMessageAdmin(admin.ModelAdmin):
+class EmailMessageAdmin(ImportExportModelAdmin):
+    resource_class = EmailMessageResource
     list_display = ('subject', 'from_email', 'inbox', 'status_badge', 'read_status', 'created_at')
     list_filter = ('status', 'is_read', 'inbox', 'created_at')
     search_fields = ('subject', 'from_email', 'body')
@@ -186,7 +290,8 @@ class EmailMessageAdmin(admin.ModelAdmin):
     mark_as_not_favorite.short_description = "Remove favorite mark from selected messages"
 
 @admin.register(EmailAttachment)
-class EmailAttachmentAdmin(admin.ModelAdmin):
+class EmailAttachmentAdmin(ImportExportModelAdmin):
+    resource_class = EmailAttachmentResource
     list_display = ('filename', 'get_message_subject', 'file_size', 'file_type', 'created_at')
     list_filter = ('created_at', 'content_type')
     search_fields = ('filename', 'message__subject')
@@ -247,7 +352,8 @@ class EmailAttachmentAdmin(admin.ModelAdmin):
     )
 
 @admin.register(EmailGuardian)
-class EmailGuardianAdmin(admin.ModelAdmin):
+class EmailGuardianAdmin(ImportExportModelAdmin):
+    resource_class = EmailGuardianResource
     list_display = ('name', 'severity_badge', 'status_icon', 'rules_count', 'created_at')
     list_filter = ('severity', 'is_active', 'created_at')
     search_fields = ('name', 'description')
@@ -307,7 +413,8 @@ class EmailGuardianAdmin(admin.ModelAdmin):
     deactivate_guardians.short_description = "Deactivate selected guardians"
 
 @admin.register(SecurityAlert)
-class SecurityAlertAdmin(admin.ModelAdmin):
+class SecurityAlertAdmin(ImportExportModelAdmin):
+    resource_class = SecurityAlertResource
     list_display = ('alert_type_badge', 'get_guardian_name', 'get_message_subject', 'resolution_status', 'created_at')
     list_filter = ('alert_type', 'is_resolved', 'created_at')
     search_fields = ('description', 'message__subject')
@@ -376,7 +483,8 @@ class SecurityAlertAdmin(admin.ModelAdmin):
     mark_as_unresolved.short_description = "Mark selected alerts as unresolved"
 
 @admin.register(EmailAutomation)
-class EmailAutomationAdmin(admin.ModelAdmin):
+class EmailAutomationAdmin(ImportExportModelAdmin):
+    resource_class = EmailAutomationResource
     list_display = ('name', 'trigger_badge', 'action_badge', 'status_icon', 'created_at')
     list_filter = ('trigger_type', 'action_type', 'is_active', 'created_at')
     search_fields = ('name', 'description')
@@ -448,7 +556,8 @@ class EmailAutomationAdmin(admin.ModelAdmin):
     deactivate_automations.short_description = "Deactivate selected automations"
 
 @admin.register(EmailFolder)
-class EmailFolderAdmin(admin.ModelAdmin):
+class EmailFolderAdmin(ImportExportModelAdmin):
+    resource_class = EmailFolderResource
     list_display = ('name', 'parent_folder_display', 'message_count', 'created_by', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('name', 'description')
@@ -480,7 +589,8 @@ class EmailFolderAdmin(admin.ModelAdmin):
     )
 
 @admin.register(EmailLabel)
-class EmailLabelAdmin(admin.ModelAdmin):
+class EmailLabelAdmin(ImportExportModelAdmin):
+    resource_class = EmailLabelResource
     list_display = ('name', 'color_swatch', 'message_count', 'created_by', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('name',)
@@ -512,7 +622,8 @@ class EmailLabelAdmin(admin.ModelAdmin):
     )
 
 @admin.register(MessageLabel)
-class MessageLabelAdmin(admin.ModelAdmin):
+class MessageLabelAdmin(ImportExportModelAdmin):
+    resource_class = MessageLabelResource
     list_display = ('get_message_subject', 'get_label_name', 'get_label_color', 'created_at')
     list_filter = ('created_at', 'label')
     search_fields = ('message__subject', 'label__name')
@@ -551,7 +662,8 @@ class MessageLabelAdmin(admin.ModelAdmin):
     )
 
 @admin.register(EmailHistory)
-class EmailHistoryAdmin(admin.ModelAdmin):
+class EmailHistoryAdmin(ImportExportModelAdmin):
+    resource_class = EmailHistoryResource
     list_display = ('colored_email_type', 'recipient_email', 'subject_preview', 'status_badge', 'sent_at', 'get_error_preview')
     list_filter = ('email_type', 'status', 'sent_at')
     search_fields = ('recipient_email', 'subject', 'body', 'error_message')
@@ -668,7 +780,8 @@ class EmailHistoryAdmin(admin.ModelAdmin):
     retry_failed_emails.short_description = "Retry sending failed emails"
 
 @admin.register(EmailConfiguration)
-class EmailConfigurationAdmin(admin.ModelAdmin):
+class EmailConfigurationAdmin(ImportExportModelAdmin):
+    resource_class = EmailConfigurationResource
     list_display = ('name', 'email_host', 'email_host_user', 'is_default', 'test_buttons')
     list_filter = ('is_default', 'email_use_tls', 'email_use_ssl', 'created_at')
     search_fields = ('name', 'email_host', 'email_host_user')
@@ -953,7 +1066,8 @@ class EmailConfigurationAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context)
 
 @admin.register(IncomingMailConfiguration)
-class IncomingMailConfigurationAdmin(admin.ModelAdmin):
+class IncomingMailConfigurationAdmin(ImportExportModelAdmin):
+    resource_class = IncomingMailConfigurationResource
     list_display = ('name', 'email_address', 'protocol_badge', 'security_badge', 'status_icon', 'last_fetched')
     list_filter = ('protocol', 'connection_security', 'is_active', 'created_at')
     search_fields = ('name', 'email_address', 'mail_server', 'username')
@@ -1068,7 +1182,8 @@ class IncomingMailConfigurationAdmin(admin.ModelAdmin):
     fetch_emails_action.short_description = "Fetch emails for selected configurations"
 
 @admin.register(EmailTemplate)
-class EmailTemplateAdmin(admin.ModelAdmin):
+class EmailTemplateAdmin(ImportExportModelAdmin):
+    resource_class = EmailTemplateResource
     list_display = ('name', 'template_type_badge', 'is_active_icon', 'created_at', 'updated_at')
     list_filter = ('template_type', 'is_active', 'created_at')
     search_fields = ('name', 'subject', 'html_content', 'plain_text_content')
@@ -1145,7 +1260,8 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     deactivate_templates.short_description = "Deactivate selected templates"
 
 @admin.register(ScheduledEmail)
-class ScheduledEmailAdmin(admin.ModelAdmin):
+class ScheduledEmailAdmin(ImportExportModelAdmin):
+    resource_class = ScheduledEmailResource
     list_display = ('template', 'subject_preview', 'scheduled_time', 'status_badge', 'attempts', 'created_at')
     list_filter = ('status', 'scheduled_time', 'created_at', 'attempts')
     search_fields = ('template__name', 'subject_override', 'error_message')
@@ -1219,7 +1335,8 @@ class ScheduledEmailAdmin(admin.ModelAdmin):
     reset_attempts.short_description = "Reset attempts counter"
 
 @admin.register(EmailGuardianRule)
-class EmailGuardianRuleAdmin(admin.ModelAdmin):
+class EmailGuardianRuleAdmin(ImportExportModelAdmin):
+    resource_class = EmailGuardianRuleResource
     list_display = ('name', 'get_guardian', 'get_action', 'is_active', 'created_at')
     list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'description', 'pattern')
@@ -1247,7 +1364,8 @@ class EmailGuardianRuleAdmin(admin.ModelAdmin):
     )
 
 @admin.register(EmailScanResult)
-class EmailScanResultAdmin(admin.ModelAdmin):
+class EmailScanResultAdmin(ImportExportModelAdmin):
+    resource_class = EmailScanResultResource
     list_display = ('get_email_subject', 'get_rule_name', 'scan_date', 'action_taken')
     list_filter = ('action_taken', 'scan_date')
     search_fields = ('email__subject', 'guardian_rule__name', 'matched_content')

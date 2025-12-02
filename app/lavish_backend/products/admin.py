@@ -3,9 +3,42 @@ from django.contrib import messages
 from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import ShopifyProduct, ShopifyProductVariant, ShopifyProductImage, ShopifyProductMetafield, ProductSyncLog
 from .realtime_sync import sync_products_realtime, get_product_sync_stats
 from .bidirectional_sync import bidirectional_sync
+
+
+# Import-Export Resources
+class ShopifyProductResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyProduct
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyProductVariantResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyProductVariant
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyProductImageResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyProductImage
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyProductMetafieldResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyProductMetafield
+        import_id_fields = ['shopify_id']
+
+
+class ProductSyncLogResource(resources.ModelResource):
+    class Meta:
+        model = ProductSyncLog
+        import_id_fields = ['id']
 
 
 class ShopifyProductVariantInline(admin.TabularInline):
@@ -54,7 +87,8 @@ class ShippingConfigInline(admin.StackedInline):
 
 
 @admin.register(ShopifyProduct)
-class ShopifyProductAdmin(admin.ModelAdmin):
+class ShopifyProductAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyProductResource
     list_display = ('title', 'vendor', 'product_type', 'status_badge', 'cutoff_days_display', 'sync_status_badge', 'last_synced')
     list_filter = ('status', 'vendor', 'product_type', 'created_in_django', 'needs_shopify_push', 'store_domain', 'last_synced')
     search_fields = ('title', 'handle', 'vendor', 'product_type', 'shopify_id')
@@ -337,7 +371,8 @@ class ShopifyProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyProductVariant)
-class ShopifyProductVariantAdmin(admin.ModelAdmin):
+class ShopifyProductVariantAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyProductVariantResource
     list_display = ('product', 'title', 'sku', 'price', 'inventory_quantity', 'available')
     list_filter = ('available', 'requires_shipping', 'product__vendor', 'store_domain')
     search_fields = ('title', 'sku', 'product__title', 'shopify_id')
@@ -345,7 +380,8 @@ class ShopifyProductVariantAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyProductImage)
-class ShopifyProductImageAdmin(admin.ModelAdmin):
+class ShopifyProductImageAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyProductImageResource
     list_display = ('product', 'alt_text', 'src_preview', 'position')
     list_filter = ('product__vendor', 'store_domain')
     search_fields = ('product__title', 'alt_text', 'shopify_id')
@@ -359,7 +395,8 @@ class ShopifyProductImageAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyProductMetafield)
-class ShopifyProductMetafieldAdmin(admin.ModelAdmin):
+class ShopifyProductMetafieldAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyProductMetafieldResource
     list_display = ('product', 'namespace', 'key', 'value_preview', 'value_type')
     list_filter = ('namespace', 'key', 'value_type', 'store_domain')
     search_fields = ('product__title', 'namespace', 'key', 'value', 'shopify_id')
@@ -373,7 +410,8 @@ class ShopifyProductMetafieldAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductSyncLog)
-class ProductSyncLogAdmin(admin.ModelAdmin):
+class ProductSyncLogAdmin(ImportExportModelAdmin):
+    resource_class = ProductSyncLogResource
     list_display = ('operation_type', 'status', 'products_processed', 'products_created', 'products_updated', 'started_at', 'completed_at')
     list_filter = ('operation_type', 'status', 'store_domain', 'started_at')
     readonly_fields = ('started_at', 'completed_at')
