@@ -427,3 +427,16 @@ class ShopifyFinanceKYC(models.Model):
     
     def __str__(self):
         return f"KYC - {self.legal_name or 'Unnamed Business'} ({self.country})"
+
+
+# ====================================================================================
+# AFTERPAY MODELS
+# ====================================================================================
+
+from .afterpay_models import (
+    AfterpayConfiguration,
+    AfterpayCheckout,
+    AfterpayPaymentEvent,
+    AfterpayRefund,
+    AfterpayWebhook
+)
