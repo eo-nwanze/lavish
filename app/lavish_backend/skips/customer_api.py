@@ -15,7 +15,7 @@ import logging
 from customer_subscriptions.models import CustomerSubscription
 from skips.models import SubscriptionSkip, SubscriptionSkipPolicy
 from skips.helpers import json_response, error_response
-from customer_subscriptions.email_service import send_cancellation_confirmation
+from customer_subscriptions.email_service import SubscriptionEmailService
 from customer_subscriptions.bidirectional_sync import SubscriptionBidirectionalSync
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ def cancel_subscription(request, subscription_id):
             
             # Send confirmation email
             try:
-                send_cancellation_confirmation(
+                SubscriptionEmailService.send_cancellation_confirmation(
                     subscription, 
                     feedback_reason=reason,
                     recipient_email=subscription.customer.email

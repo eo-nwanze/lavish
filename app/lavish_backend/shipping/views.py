@@ -169,7 +169,7 @@ def fulfillment_order_list(request):
         location_id = request.GET.get('location_id', '')
         
         # Build base queryset
-        queryset = ShopifyFulfillmentOrder.objects.select_related('order', 'location').prefetch_related('line_items')
+        queryset = ShopifyFulfillmentOrder.objects.select_related('order', 'location')
         
         # Apply filters
         if order_id:

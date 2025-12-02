@@ -990,8 +990,8 @@ def order_status(request, shopify_id):
                     'completed': True,
                 })
         
-        # Sort by date
-        timeline_events.sort((a, b) => new Date(a.date) - new Date(b.date))
+        # Sort by date (Python implementation)
+        timeline_events.sort(key=lambda x: datetime.strptime(x['date'], '%B %d, %Y at %I:%M %p') if x['date'] else datetime.min)
         
         # Check if status changed
         status_changed = request.GET.get('last_status') != order.financial_status
