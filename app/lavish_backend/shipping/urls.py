@@ -12,6 +12,11 @@ urlpatterns = [
     
     # Fulfillment orders
     path('fulfillment-orders/', views.fulfillment_order_list, name='fulfillment_order_list'),
+    path('fulfillment-orders/<str:shopify_id>/', views.fulfillment_order_detail, name='fulfillment_order_detail'),
+    path('fulfillment-orders/create/', views.fulfillment_create, name='fulfillment_create'),
+    path('fulfillment-orders/<str:shopify_id>/update-tracking/', views.fulfillment_update_tracking, name='fulfillment_update_tracking'),
+    path('fulfillment-orders/<str:shopify_id>/cancel/', views.fulfillment_cancel, name='fulfillment_cancel'),
+    path('fulfillment-statistics/', views.fulfillment_statistics, name='fulfillment_statistics'),
     
     # Shopify Carrier Service Callback (CSRF exempt for external webhook)
     path('calculate-rates/', views.calculate_shipping_rates, name='calculate_shipping_rates'),
