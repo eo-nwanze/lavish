@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -154,6 +155,149 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================================================
+# JAZZMIN CONFIGURATION - Lavish Library Admin Theme
+# ============================================================================
+
+JAZZMIN_SETTINGS = {
+    # Site branding
+    "site_title": "Lavish Library Admin",
+    "site_header": "Lavish Library",
+    "site_brand": "Lavish Library",
+    "site_logo": None,
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome to Lavish Library Admin",
+    "copyright": "Lavish Library",
+    "search_model": ["auth.User", "customers.Customer", "orders.Order", "products.Product"],
+    
+    # User menu
+    "user_avatar": None,
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "https://7fa66c-ac.myshopify.com/", "new_window": True},
+        {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "new_window": True},
+        {"model": "auth.User"},
+    ],
+    
+    # User menu (dropdown)
+    "usermenu_links": [
+        {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "icon": "fas fa-life-ring", "new_window": True},
+        {"model": "auth.user"}
+    ],
+    
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": [
+        "auth",
+        "customers",
+        "customer_subscriptions",
+        "orders",
+        "skips",
+        "products",
+        "inventory",
+        "shipping",
+        "payments",
+        "email_manager",
+        "locations",
+        "shopify_integration",
+    ],
+    
+    # Icons for models - Font Awesome
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "customers.Customer": "fas fa-user-circle",
+        "customers.CustomerAddress": "fas fa-map-marker-alt",
+        "customers.CustomerPaymentMethod": "fas fa-credit-card",
+        "customer_subscriptions.Subscription": "fas fa-sync",
+        "customer_subscriptions.SubscriptionItem": "fas fa-box",
+        "orders.Order": "fas fa-shopping-cart",
+        "orders.OrderItem": "fas fa-list",
+        "orders.Fulfillment": "fas fa-truck",
+        "orders.FulfillmentLineItem": "fas fa-clipboard-list",
+        "orders.Delivery": "fas fa-shipping-fast",
+        "skips.Skip": "fas fa-forward",
+        "skips.SkipNotification": "fas fa-bell",
+        "products.Product": "fas fa-box-open",
+        "products.ProductVariant": "fas fa-boxes",
+        "inventory.InventoryItem": "fas fa-warehouse",
+        "inventory.InventoryLevel": "fas fa-layer-group",
+        "shipping.ShippingRate": "fas fa-dollar-sign",
+        "shipping.ShippingZone": "fas fa-globe",
+        "payments.Payment": "fas fa-money-bill-wave",
+        "payments.Transaction": "fas fa-exchange-alt",
+        "email_manager.EmailTemplate": "fas fa-envelope",
+        "email_manager.EmailLog": "fas fa-paper-plane",
+        "locations.Country": "fas fa-flag",
+        "locations.State": "fas fa-map",
+        "locations.City": "fas fa-city",
+        "locations.Location": "fas fa-map-pin",
+        "shopify_integration": "fab fa-shopify",
+    },
+    
+    # Icons for apps
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    
+    # UI Tweaks
+    "related_modal_active": False,
+    "custom_css": "admin/css/custom.css",
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    
+    # Change forms
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
+    },
+    
+    # Language chooser
+    "language_chooser": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-purple",
+    "accent": "accent-purple",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-purple",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'

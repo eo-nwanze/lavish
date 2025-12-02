@@ -1,0 +1,594 @@
+/* ============================================================================
+   LAVISH LIBRARY ADMIN CUSTOM STYLES
+   Matching enhanced-account.liquid design system
+   ============================================================================ */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ============================================================================
+   CSS VARIABLES - Lavish Library Design System
+   ============================================================================ */
+
+:root {
+    /* Brand Colors */
+    --lavish-purple: #6200ee;
+    --lavish-purple-light: #7c3aed;
+    --lavish-purple-dark: #4c00b0;
+    --lavish-cream: #FFF6EA;
+    --lavish-cream-hover: #f5ebd8;
+    --lavish-text: #4C5151;
+    --lavish-text-light: #6b7280;
+    
+    /* Status Colors */
+    --lavish-danger: #910F3F;
+    --lavish-danger-light: #dc3545;
+    --lavish-success: #4CAF50;
+    --lavish-success-light: #66bb6a;
+    --lavish-warning: #ffc107;
+    --lavish-info: #2196F3;
+    
+    /* Background Colors */
+    --lavish-bg-card: rgba(0, 0, 0, 0.04);
+    --lavish-bg-hover: rgba(0, 0, 0, 0.08);
+    --lavish-bg-light: #f8f9fa;
+    
+    /* Borders & Shadows */
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-sm: 6px;
+    --transition-speed: 0.3s;
+    --box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.1);
+    --box-shadow-hover: 0 0.4rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================================
+   GLOBAL STYLES
+   ============================================================================ */
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    background-color: var(--lavish-bg-light) !important;
+    color: var(--lavish-text) !important;
+}
+
+/* ============================================================================
+   SIDEBAR STYLING
+   ============================================================================ */
+
+.sidebar-dark-purple {
+    background: linear-gradient(180deg, var(--lavish-purple) 0%, var(--lavish-purple-dark) 100%) !important;
+}
+
+.sidebar .nav-link {
+    border-radius: var(--border-radius) !important;
+    transition: all var(--transition-speed) ease !important;
+    margin: 0.3rem 0.8rem !important;
+    padding: 1rem 1.2rem !important;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(4px);
+    box-shadow: var(--box-shadow);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.8rem;
+    font-size: 1.1rem;
+}
+
+/* ============================================================================
+   NAVBAR STYLING
+   ============================================================================ */
+
+.navbar-purple {
+    background-color: var(--lavish-purple) !important;
+}
+
+.navbar-white {
+    background-color: white !important;
+    border-bottom: 2px solid var(--lavish-purple) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.brand-link {
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    color: var(--lavish-purple) !important;
+}
+
+/* ============================================================================
+   BUTTON STYLING - Match Cream Button Design
+   ============================================================================ */
+
+.btn-primary {
+    background-color: var(--lavish-cream) !important;
+    color: var(--lavish-text) !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+    padding: 0.8rem 1.8rem !important;
+    font-weight: 500 !important;
+    transition: all var(--transition-speed) ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--lavish-cream-hover) !important;
+    color: var(--lavish-text) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover) !important;
+}
+
+.btn-danger {
+    background-color: var(--lavish-danger) !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+    transition: all var(--transition-speed) ease !important;
+}
+
+.btn-danger:hover {
+    background-color: var(--lavish-danger-light) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover) !important;
+}
+
+.btn-success {
+    background-color: var(--lavish-success) !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+}
+
+.btn-success:hover {
+    background-color: var(--lavish-success-light) !important;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background-color: var(--lavish-warning) !important;
+    color: #000 !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+}
+
+.btn-info {
+    background-color: var(--lavish-info) !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+}
+
+/* Small buttons */
+.btn-sm {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* ============================================================================
+   CARD STYLING - Match Enhanced Account Cards
+   ============================================================================ */
+
+.card {
+    background-color: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--box-shadow) !important;
+    transition: all var(--transition-speed) ease !important;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover) !important;
+}
+
+.card-header {
+    background-color: var(--lavish-bg-card) !important;
+    border-bottom: 2px solid var(--lavish-purple) !important;
+    font-weight: 600 !important;
+    color: var(--lavish-text) !important;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+    padding: 1.2rem 1.5rem !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+}
+
+.card-footer {
+    background-color: var(--lavish-bg-light) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg) !important;
+}
+
+/* ============================================================================
+   FORM STYLING
+   ============================================================================ */
+
+.form-control {
+    border-radius: var(--border-radius) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    padding: 0.8rem 1rem !important;
+    transition: all var(--transition-speed) ease !important;
+}
+
+.form-control:focus {
+    border-color: var(--lavish-purple) !important;
+    box-shadow: 0 0 0 0.2rem rgba(98, 0, 238, 0.1) !important;
+}
+
+.form-group label {
+    font-weight: 500 !important;
+    color: var(--lavish-text) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234C5151' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* ============================================================================
+   TABLE STYLING - Match Enhanced Account Table
+   ============================================================================ */
+
+.table {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: var(--lavish-bg-card) !important;
+    border-bottom: 2px solid var(--lavish-purple) !important;
+    font-weight: 600 !important;
+    color: var(--lavish-text) !important;
+    padding: 1rem 1.2rem !important;
+}
+
+.table tbody tr {
+    transition: all var(--transition-speed) ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--lavish-bg-hover) !important;
+}
+
+.table tbody td {
+    padding: 1rem 1.2rem !important;
+    vertical-align: middle;
+}
+
+/* ============================================================================
+   BADGE STYLING - Status Indicators
+   ============================================================================ */
+
+.badge {
+    border-radius: var(--border-radius-sm) !important;
+    padding: 0.4rem 0.8rem !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+}
+
+.badge-success {
+    background-color: var(--lavish-success) !important;
+}
+
+.badge-warning {
+    background-color: var(--lavish-warning) !important;
+    color: #000 !important;
+}
+
+.badge-danger {
+    background-color: var(--lavish-danger) !important;
+}
+
+.badge-info {
+    background-color: var(--lavish-info) !important;
+}
+
+.badge-secondary {
+    background-color: var(--lavish-text-light) !important;
+}
+
+/* ============================================================================
+   CONTENT WRAPPER
+   ============================================================================ */
+
+.content-wrapper {
+    background-color: var(--lavish-bg-light) !important;
+    padding: 2rem !important;
+}
+
+.content-header {
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    color: var(--lavish-text) !important;
+    font-weight: 700 !important;
+    font-size: 2rem !important;
+}
+
+/* ============================================================================
+   BREADCRUMB
+   ============================================================================ */
+
+.breadcrumb {
+    background-color: transparent !important;
+    border-radius: var(--border-radius) !important;
+    padding: 0.8rem 1rem !important;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item a {
+    color: var(--lavish-purple) !important;
+    text-decoration: none;
+    transition: all var(--transition-speed) ease;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--lavish-purple-dark) !important;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--lavish-text-light) !important;
+}
+
+/* ============================================================================
+   ALERTS
+   ============================================================================ */
+
+.alert {
+    border-radius: var(--border-radius) !important;
+    border: none !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.alert-success {
+    background-color: rgba(76, 175, 80, 0.1) !important;
+    color: var(--lavish-success) !important;
+    border-left: 4px solid var(--lavish-success) !important;
+}
+
+.alert-danger {
+    background-color: rgba(145, 15, 63, 0.1) !important;
+    color: var(--lavish-danger) !important;
+    border-left: 4px solid var(--lavish-danger) !important;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    color: #856404 !important;
+    border-left: 4px solid var(--lavish-warning) !important;
+}
+
+.alert-info {
+    background-color: rgba(33, 150, 243, 0.1) !important;
+    color: var(--lavish-info) !important;
+    border-left: 4px solid var(--lavish-info) !important;
+}
+
+/* ============================================================================
+   PAGINATION
+   ============================================================================ */
+
+.pagination .page-link {
+    color: var(--lavish-purple) !important;
+    border-radius: var(--border-radius-sm) !important;
+    margin: 0 0.2rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--lavish-cream) !important;
+    color: var(--lavish-text) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--lavish-purple) !important;
+    border-color: var(--lavish-purple) !important;
+}
+
+/* ============================================================================
+   MODAL STYLING
+   ============================================================================ */
+
+.modal-content {
+    border-radius: var(--border-radius-lg) !important;
+    border: none !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modal-header {
+    background-color: var(--lavish-purple) !important;
+    color: white !important;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+    border-bottom: none !important;
+    padding: 1.5rem !important;
+}
+
+.modal-title {
+    font-weight: 600 !important;
+}
+
+.modal-body {
+    padding: 2rem !important;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    padding: 1.5rem !important;
+}
+
+/* ============================================================================
+   LOGIN PAGE STYLING
+   ============================================================================ */
+
+.login-page {
+    background: linear-gradient(135deg, var(--lavish-purple) 0%, var(--lavish-purple-dark) 100%) !important;
+}
+
+.login-box {
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.login-card-body {
+    background-color: white !important;
+    border-radius: var(--border-radius-lg) !important;
+}
+
+.login-box-msg {
+    color: var(--lavish-text) !important;
+    font-weight: 500 !important;
+    font-size: 1.2rem !important;
+}
+
+/* ============================================================================
+   DASHBOARD WIDGETS
+   ============================================================================ */
+
+.small-box {
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--box-shadow) !important;
+    transition: all var(--transition-speed) ease !important;
+}
+
+.small-box:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--box-shadow-hover) !important;
+}
+
+.small-box .icon {
+    font-size: 4rem !important;
+}
+
+/* ============================================================================
+   SEARCH BOX
+   ============================================================================ */
+
+.navbar-search input {
+    border-radius: var(--border-radius) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.navbar-search input:focus {
+    border-color: var(--lavish-purple) !important;
+    box-shadow: 0 0 0 0.2rem rgba(98, 0, 238, 0.1) !important;
+}
+
+/* ============================================================================
+   TABS
+   ============================================================================ */
+
+.nav-tabs {
+    border-bottom: 2px solid var(--lavish-purple) !important;
+}
+
+.nav-tabs .nav-link {
+    border: none !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    color: var(--lavish-text-light) !important;
+    font-weight: 500 !important;
+    transition: all var(--transition-speed) ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: var(--lavish-bg-hover) !important;
+    color: var(--lavish-text) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: var(--lavish-cream) !important;
+    color: var(--lavish-text) !important;
+    border-bottom: 3px solid var(--lavish-purple) !important;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .btn-primary {
+        padding: 0.7rem 1.5rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .content-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.8rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        padding: 0.6rem 1.2rem !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .content-header h1 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card,
+.alert {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.text-lavish-purple {
+    color: var(--lavish-purple) !important;
+}
+
+.bg-lavish-purple {
+    background-color: var(--lavish-purple) !important;
+}
+
+.text-lavish-cream {
+    color: var(--lavish-cream) !important;
+}
+
+.bg-lavish-cream {
+    background-color: var(--lavish-cream) !important;
+}
+
+.border-lavish-purple {
+    border-color: var(--lavish-purple) !important;
+}
