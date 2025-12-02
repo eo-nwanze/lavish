@@ -39,6 +39,23 @@ ALLOWED_HOSTS = [
 ]
 
 
+# ============================================================================
+# EMAIL CONFIGURATION
+# ============================================================================
+
+# Use console backend for development (prints emails to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production with SMTP, use these settings instead:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@lavish.com')
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -176,7 +193,7 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "welcome_sign": "Welcome to Lavish Library Admin",
     "copyright": "Lavish Library",
-    "search_model": ["auth.User", "customers.Customer", "orders.Order", "products.Product"],
+    "search_model": ["auth.User", "customers.ShopifyCustomer", "orders.ShopifyOrder", "products.ShopifyProduct"],
     
     # User menu
     "user_avatar": None,
@@ -226,14 +243,15 @@ JAZZMIN_SETTINGS = {
         "customers.shopifycustomeraddress": "fas fa-map-marker-alt",
         "customers.customersynclog": "fas fa-sync-alt",
         
-        # Customer Subscriptions app
-        "customer_subscriptions.subscription": "fas fa-sync",
-        "customer_subscriptions.subscriptionitem": "fas fa-box",
+        # Customer Subscriptions app (8 models)
+        "customer_subscriptions.sellingplan": "fas fa-calendar-check",
         "customer_subscriptions.customersubscription": "fas fa-sync-alt",
-        "customer_subscriptions.subscriptionaddress": "fas fa-map-marked-alt",
+        "customer_subscriptions.subscriptionbillingattempt": "fas fa-credit-card",
         "customer_subscriptions.subscriptionsynclog": "fas fa-history",
-        "customer_subscriptions.shippingcutofflog": "fas fa-clock",
+        "customer_subscriptions.subscriptionaddress": "fas fa-map-marked-alt",
         "customer_subscriptions.orderaddressoverride": "fas fa-map-signs",
+        "customer_subscriptions.productshippingconfig": "fas fa-cog",
+        "customer_subscriptions.shippingcutofflog": "fas fa-clock",
         
         # Orders app
         "orders.shopifyorder": "fas fa-shopping-cart",
@@ -261,10 +279,16 @@ JAZZMIN_SETTINGS = {
         "inventory.inventoryadjustment": "fas fa-sliders-h",
         "inventory.inventorysynclog": "fas fa-sync-alt",
         
-        # Shipping app
+        # Shipping app (9 models)
         "shipping.shippingrate": "fas fa-dollar-sign",
-        "shipping.shippingzone": "fas fa-globe",
+        "shipping.shopifycarrierservice": "fas fa-truck",
+        "shipping.shopifydeliveryprofile": "fas fa-clipboard-list",
+        "shipping.shopifydeliveryzone": "fas fa-map-marked",
+        "shipping.shopifydeliverymethod": "fas fa-shipping-fast",
+        "shipping.shopifyfulfillmentorder": "fas fa-box-open",
         "shipping.shopifyfulfillmentservice": "fab fa-shopify",
+        "shipping.shippingsynclog": "fas fa-sync-alt",
+        "shipping.fulfillmenttrackinginfo": "fas fa-route",
         
         # Payments app
         "payments.shopifypaymentsaccount": "fas fa-university",
@@ -295,7 +319,22 @@ JAZZMIN_SETTINGS = {
         "locations.state": "fas fa-map",
         "locations.city": "fas fa-city",
         "locations.location": "fas fa-map-pin",
+        
+        # Accounts app (7 models)
+        "accounts.companyrole": "fas fa-user-tag",
+        "accounts.companystaff": "fas fa-users",
+        "accounts.bankdetail": "fas fa-university",
+        "accounts.carddetail": "fas fa-credit-card",
+        "accounts.payid": "fas fa-mobile-alt",
+        "accounts.usersession": "fas fa-key",
+        "accounts.companysite": "fas fa-building",
+        
+        # Shopify Integration app (4 models)
         "shopify_integration": "fab fa-shopify",
+        "shopify_integration.shopifystore": "fas fa-store",
+        "shopify_integration.syncoperation": "fas fa-sync",
+        "shopify_integration.webhookendpoint": "fas fa-webhook",
+        "shopify_integration.apiratelimit": "fas fa-tachometer-alt",
     },
     
     # Icons for apps
@@ -312,8 +351,8 @@ JAZZMIN_SETTINGS = {
     # Change forms
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
-        "auth.user": "collapsible",
-        "auth.group": "vertical_tabs",
+        "auth.User": "collapsible",
+        "auth.Group": "vertical_tabs",
     },
     
     # Language chooser
