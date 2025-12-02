@@ -193,23 +193,23 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "welcome_sign": "Welcome to Lavish Library Admin",
     "copyright": "Lavish Library",
-    "search_model": ["auth.User", "customers.ShopifyCustomer", "orders.ShopifyOrder", "products.ShopifyProduct"],
+    "search_model": ["accounts.CustomUser", "customers.ShopifyCustomer", "orders.ShopifyOrder", "products.ShopifyProduct"],
     
     # User menu
     "user_avatar": None,
     
     # Top Menu
     "topmenu_links": [
-        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Home", "url": "admin:index", "permissions": ["accounts.view_customuser"]},
         {"name": "View Site", "url": "https://7fa66c-ac.myshopify.com/", "new_window": True},
         {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "new_window": True},
-        {"model": "auth.User"},
+        {"model": "accounts.CustomUser"},
     ],
     
     # User menu (dropdown)
     "usermenu_links": [
         {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "icon": "fas fa-life-ring", "new_window": True},
-        {"model": "auth.user"}
+        {"model": "accounts.CustomUser"}
     ],
     
     # Side Menu
@@ -235,10 +235,11 @@ JAZZMIN_SETTINGS = {
     # Icons for models - Font Awesome (use lowercase model names)
     "icons": {
         "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
         "auth.group": "fas fa-users",
         
-        # Customers app
+        # Accounts app
+        "accounts.customuser": "fas fa-user",
+        "accounts.companyrole": "fas fa-user-tag",
         "customers.shopifycustomer": "fas fa-user-circle",
         "customers.shopifycustomeraddress": "fas fa-map-marker-alt",
         "customers.customersynclog": "fas fa-sync-alt",
@@ -320,8 +321,7 @@ JAZZMIN_SETTINGS = {
         "locations.city": "fas fa-city",
         "locations.location": "fas fa-map-pin",
         
-        # Accounts app (7 models)
-        "accounts.companyrole": "fas fa-user-tag",
+        # Accounts app (continued)
         "accounts.companystaff": "fas fa-users",
         "accounts.bankdetail": "fas fa-university",
         "accounts.carddetail": "fas fa-credit-card",
@@ -351,7 +351,7 @@ JAZZMIN_SETTINGS = {
     # Change forms
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
-        "auth.User": "collapsible",
+        "accounts.CustomUser": "collapsible",
         "auth.Group": "vertical_tabs",
     },
     
