@@ -322,6 +322,7 @@ JAZZMIN_SETTINGS = {
         "locations.location": "fas fa-map-pin",
         
         # Accounts app (continued)
+        "accounts.industrytype": "fas fa-industry",
         "accounts.companystaff": "fas fa-users",
         "accounts.bankdetail": "fas fa-university",
         "accounts.carddetail": "fas fa-credit-card",
@@ -329,11 +330,14 @@ JAZZMIN_SETTINGS = {
         "accounts.usersession": "fas fa-key",
         "accounts.companysite": "fas fa-building",
         
+        # Skips app
+        "skips.skipanalytics": "fas fa-chart-bar",
+        
         # Shopify Integration app (4 models)
         "shopify_integration": "fab fa-shopify",
         "shopify_integration.shopifystore": "fas fa-store",
         "shopify_integration.syncoperation": "fas fa-sync",
-        "shopify_integration.webhookendpoint": "fas fa-webhook",
+        "shopify_integration.webhookendpoint": "fas fa-plug",
         "shopify_integration.apiratelimit": "fas fa-tachometer-alt",
     },
     
