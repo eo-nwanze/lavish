@@ -220,9 +220,13 @@ JAZZMIN_SETTINGS = {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.group": "fas fa-users",
-        "customers.customer": "fas fa-user-circle",
-        "customers.customeraddress": "fas fa-map-marker-alt",
-        "customers.customerpaymentmethod": "fas fa-credit-card",
+        
+        # Customers app
+        "customers.shopifycustomer": "fas fa-user-circle",
+        "customers.shopifycustomeraddress": "fas fa-map-marker-alt",
+        "customers.customersynclog": "fas fa-sync-alt",
+        
+        # Customer Subscriptions app
         "customer_subscriptions.subscription": "fas fa-sync",
         "customer_subscriptions.subscriptionitem": "fas fa-box",
         "customer_subscriptions.customersubscription": "fas fa-sync-alt",
@@ -230,24 +234,47 @@ JAZZMIN_SETTINGS = {
         "customer_subscriptions.subscriptionsynclog": "fas fa-history",
         "customer_subscriptions.shippingcutofflog": "fas fa-clock",
         "customer_subscriptions.orderaddressoverride": "fas fa-map-signs",
-        "orders.order": "fas fa-shopping-cart",
-        "orders.orderitem": "fas fa-list",
-        "orders.fulfillment": "fas fa-truck",
-        "orders.fulfillmentlineitem": "fas fa-clipboard-list",
-        "orders.delivery": "fas fa-shipping-fast",
+        
+        # Orders app
+        "orders.shopifyorder": "fas fa-shopping-cart",
+        "orders.shopifyorderlineitem": "fas fa-list",
+        "orders.shopifyorderaddress": "fas fa-map-marker-alt",
+        "orders.ordersynclog": "fas fa-sync-alt",
+        
+        # Skips app
         "skips.skip": "fas fa-forward",
         "skips.skipnotification": "fas fa-bell",
         "skips.subscriptionskip": "fas fa-step-forward",
         "skips.subscriptionskippolicy": "fas fa-tasks",
-        "products.product": "fas fa-box-open",
-        "products.productvariant": "fas fa-boxes",
-        "inventory.inventoryitem": "fas fa-warehouse",
-        "inventory.inventorylevel": "fas fa-layer-group",
+        
+        # Products app
+        "products.shopifyproduct": "fas fa-box-open",
+        "products.shopifyproductvariant": "fas fa-boxes",
+        "products.shopifyproductimage": "fas fa-image",
+        "products.shopifyproductmetafield": "fas fa-tags",
+        "products.productsynclog": "fas fa-sync-alt",
+        
+        # Inventory app
+        "inventory.shopifylocation": "fas fa-map-pin",
+        "inventory.shopifyinventoryitem": "fas fa-warehouse",
+        "inventory.shopifyinventorylevel": "fas fa-layer-group",
+        "inventory.inventoryadjustment": "fas fa-sliders-h",
+        "inventory.inventorysynclog": "fas fa-sync-alt",
+        
+        # Shipping app
         "shipping.shippingrate": "fas fa-dollar-sign",
         "shipping.shippingzone": "fas fa-globe",
         "shipping.shopifyfulfillmentservice": "fab fa-shopify",
-        "payments.payment": "fas fa-money-bill-wave",
-        "payments.transaction": "fas fa-exchange-alt",
+        
+        # Payments app
+        "payments.shopifypaymentsaccount": "fas fa-university",
+        "payments.shopifybalancetransaction": "fas fa-exchange-alt",
+        "payments.shopifypayout": "fas fa-money-bill-wave",
+        "payments.shopifybankaccount": "fas fa-piggy-bank",
+        "payments.shopifydispute": "fas fa-gavel",
+        "payments.shopifydisputeevidence": "fas fa-file-contract",
+        "payments.shopifyfinancekyc": "fas fa-id-card",
+        "payments.shopifypaymentssynclog": "fas fa-sync-alt",
         "email_manager.emailtemplate": "fas fa-envelope",
         "email_manager.emailhistory": "fas fa-paper-plane",
         "email_manager.emailconfiguration": "fas fa-cog",
