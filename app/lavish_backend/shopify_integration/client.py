@@ -445,6 +445,272 @@ class ShopifyAPIClient:
         
         return self.graphql_query(query, variables)
     
+    def get_order(self, order_id):
+        """Get a single order by ID"""
+        query = """
+        query GetOrder($id: ID!) {
+            order(id: $id) {
+                id
+                name
+                email
+                phone
+                createdAt
+                updatedAt
+                processedAt
+                cancelledAt
+                financialStatus
+                fulfillmentStatus
+                totalPrice
+                subtotalPrice
+                totalTax
+                totalShippingPrice
+                currencyCode
+                tags
+                note
+                customer {
+                    id
+                    email
+                    firstName
+                    lastName
+                }
+                lineItems(first: 100) {
+                    nodes {
+                        id
+                        title
+                        quantity
+                        variant {
+                            id
+                            sku
+                            title
+                            price
+                        }
+                        product {
+                            id
+                            title
+                        }
+                    }
+                }
+                shippingAddress {
+                    firstName
+                    lastName
+                    company
+                    address1
+                    address2
+                    city
+                    province
+                    country
+                    zip
+                    phone
+                }
+                billingAddress {
+                    firstName
+                    lastName
+                    company
+                    address1
+                    address2
+                    city
+                    province
+                    country
+                    zip
+                    phone
+                }
+                fulfillments(first: 10) {
+                    nodes {
+                        id
+                        status
+                        trackingInfo {
+                            company
+                            number
+                            url
+                        }
+                        createdAt
+                        updatedAt
+                    }
+                }
+            }
+        }
+        """
+        
+        variables = {'id': order_id}
+        result = self.graphql_query(query, variables)
+        
+        if 'error' not in result and 'data' in result:
+            return result['data']['order']
+        else:
+            return None
+    
+    def create_fulfillment(self, order_id, fulfillment_data):
+        """Create a fulfillment for an order"""
+        mutation = """
+        mutation FulfillmentCreateV2($fulfillment: FulfillmentV2Input!) {
+            fulfillmentCreateV2(fulfillment: $fulfillment) {
+                fulfillment {
+                    id
+                    status
+                    trackingInfo {
+                        company
+                        number
+                        url
+                    }
+                    createdAt
+                    updatedAt
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+        """
+        
+        variables = {'fulfillment': fulfillment_data}
+        result = self.graphql_query(mutation, variables)
+        
+        if 'error' not in result and 'data' in result:
+            fulfillment_result = result['data']['fulfillmentCreateV2']
+            if not fulfillment_result['userErrors']:
+                return fulfillment_result
+            else:
+                return {'error': fulfillment_result['userErrors']}
+        else:
+            return {'error': result.get('error', 'Unknown error')}
+    
+    def update_fulfillment_tracking(self, fulfillment_id, update_data):
+        """Update fulfillment tracking information"""
+        mutation = """
+        mutation FulfillmentUpdateTrackingV2($fulfillmentId: ID!, $trackingInfo: FulfillmentTrackingInput!) {
+            fulfillmentUpdateTrackingV2(fulfillmentId: $fulfillmentId, trackingInfo: $trackingInfo) {
+                fulfillment {
+                    id
+                    status
+                    trackingInfo {
+                        company
+                        number
+                        url
+                    }
+                    updatedAt
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+        """
+        
+        # Extract tracking info from update_data
+        tracking_info = update_data['fulfillment'].get('trackingInfo', {
+            'company': update_data['fulfillment'].get('tracking_company', ''),
+            'numbers': update_data['fulfillment'].get('tracking_numbers', []),
+            'urls': update_data['fulfillment'].get('tracking_urls', [])
+        })
+        
+        variables = {
+            'fulfillmentId': fulfillment_id,
+            'trackingInfo': tracking_info
+        }
+        
+        result = self.graphql_query(mutation, variables)
+        
+        if 'error' not in result and 'data' in result:
+            fulfillment_result = result['data']['fulfillmentUpdateTrackingV2']
+            if not fulfillment_result['userErrors']:
+                return fulfillment_result
+            else:
+                return {'error': fulfillment_result['userErrors']}
+        else:
+            return {'error': result.get('error', 'Unknown error')}
+    
+    def cancel_fulfillment(self, fulfillment_id, reason):
+        """Cancel a fulfillment"""
+        mutation = """
+        mutation FulfillmentCancel($fulfillmentId: ID!) {
+            fulfillmentCancel(fulfillmentId: $fulfillmentId) {
+                fulfillment {
+                    id
+                    status
+                    cancelledAt
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+        """
+        
+        variables = {'fulfillmentId': fulfillment_id}
+        result = self.graphql_query(mutation, variables)
+        
+        if 'error' not in result and 'data' in result:
+            fulfillment_result = result['data']['fulfillmentCancel']
+            if not fulfillment_result['userErrors']:
+                return fulfillment_result
+            else:
+                return {'error': fulfillment_result['userErrors']}
+        else:
+            return {'error': result.get('error', 'Unknown error')}
+    
+    def get_fulfillment_orders(self, order_id):
+        """Get fulfillment orders for a specific order"""
+        query = """
+        query GetFulfillmentOrders($orderId: ID!) {
+            order(id: $orderId) {
+                fulfillmentOrders(first: 20) {
+                    nodes {
+                        id
+                        status
+                        requestStatus
+                        fulfillAt
+                        fulfillBy
+                        deliveryMethod {
+                            methodType
+                        }
+                        internationalDuties {
+                            duties {
+                                price {
+                                    amount
+                                    currencyCode
+                                }
+                            }
+                        }
+                        assignedLocation {
+                            id
+                            name
+                        }
+                        lineItems(first: 50) {
+                            nodes {
+                                id
+                                quantity
+                                variant {
+                                    id
+                                    sku
+                                    title
+                                }
+                                product {
+                                    id
+                                    title
+                                }
+                            }
+                        }
+                        createdAt
+                        updatedAt
+                    }
+                }
+            }
+        }
+        """
+        
+        variables = {'orderId': order_id}
+        result = self.graphql_query(query, variables)
+        
+        if 'error' not in result and 'data' in result:
+            order_data = result['data']['order']
+            if order_data:
+                return order_data['fulfillmentOrders']['nodes']
+        
+        return []
+    
     def test_connection(self):
         """Test API connection"""
         query = """
@@ -507,6 +773,13 @@ class ShopifyWebhookHandler:
             'products/update': self._handle_product_update,
             'orders/create': self._handle_order_create,
             'orders/updated': self._handle_order_update,
+            'orders/cancelled': self._handle_order_cancelled,
+            'orders/fulfilled': self._handle_order_fulfilled,
+            'orders/partially_fulfilled': self._handle_order_partially_fulfilled,
+            'fulfillments/create': self._handle_fulfillment_create,
+            'fulfillments/update': self._handle_fulfillment_update,
+            'inventory_levels/update': self._handle_inventory_update,
+            'app/uninstalled': self._handle_app_uninstalled,
         }
         
         handler = handlers.get(topic)
@@ -558,3 +831,99 @@ class ShopifyWebhookHandler:
         
         service = OrderSyncService()
         return service.sync_order_from_webhook(data)
+    
+    def _handle_order_cancelled(self, data):
+        """Handle order cancellation webhook"""
+        from orders.services import OrderSyncService
+        
+        service = OrderSyncService()
+        return service.sync_order_from_webhook(data)
+    
+    def _handle_order_fulfilled(self, data):
+        """Handle order fulfillment webhook"""
+        from orders.services import OrderSyncService
+        from shipping.services import FulfillmentSyncService
+        
+        # Sync order status
+        order_service = OrderSyncService()
+        order_result = order_service.sync_order_from_webhook(data)
+        
+        # Sync fulfillment details
+        fulfillment_service = FulfillmentSyncService()
+        fulfillment_result = fulfillment_service.sync_fulfillment_from_webhook(data)
+        
+        return {
+            'order_sync': order_result,
+            'fulfillment_sync': fulfillment_result
+        }
+    
+    def _handle_order_partially_fulfilled(self, data):
+        """Handle partial order fulfillment webhook"""
+        from orders.services import OrderSyncService
+        from shipping.services import FulfillmentSyncService
+        
+        # Sync order status
+        order_service = OrderSyncService()
+        order_result = order_service.sync_order_from_webhook(data)
+        
+        # Sync fulfillment details
+        fulfillment_service = FulfillmentSyncService()
+        fulfillment_result = fulfillment_service.sync_fulfillment_from_webhook(data)
+        
+        return {
+            'order_sync': order_result,
+            'fulfillment_sync': fulfillment_result
+        }
+    
+    def _handle_fulfillment_create(self, data):
+        """Handle fulfillment creation webhook"""
+        from shipping.services import FulfillmentSyncService
+        
+        service = FulfillmentSyncService()
+        return service.sync_fulfillment_from_webhook(data)
+    
+    def _handle_fulfillment_update(self, data):
+        """Handle fulfillment update webhook"""
+        from shipping.services import FulfillmentSyncService
+        
+        service = FulfillmentSyncService()
+        return service.sync_fulfillment_from_webhook(data)
+    
+    def _handle_inventory_update(self, data):
+        """Handle inventory level update webhook"""
+        from inventory.services import InventorySyncService
+        
+        service = InventorySyncService()
+        return service.sync_inventory_from_webhook(data)
+    
+    def _handle_app_uninstalled(self, data):
+        """Handle app uninstallation webhook"""
+        logger.warning("App was uninstalled from store")
+        
+        # Mark store as inactive
+        from django.contrib.auth import get_user_model
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        User = get_user_model()
+        
+        try:
+            # Find store admin users and notify them
+            admin_users = User.objects.filter(is_staff=True, is_active=True)
+            
+            for admin in admin_users:
+                if admin.email:
+                    send_mail(
+                        subject='⚠️ Lavish App Uninstalled',
+                        message=f'The Lavish app has been uninstalled from the store. Please check your Shopify store settings.',
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@lavish.com'),
+                        recipient_list=[admin.email],
+                        fail_silently=True,
+                    )
+            
+            logger.info(f"Notified {admin_users.count()} admin users about app uninstallation")
+            
+        except Exception as e:
+            logger.error(f"Failed to notify admin users about app uninstallation: {e}")
+        
+        return True

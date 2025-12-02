@@ -1,0 +1,1175 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  /* Enhanced Order Tracking Styles */
+  .order-tracking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-paid {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-fulfilled {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .fulfillment-timeline {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f9fafb;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .timeline-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 2rem;
+    bottom: -1.5rem;
+    width: 2px;
+    background-color: #e5e7eb;
+  }
+
+  .timeline-item:last-child::before {
+    display: none;
+  }
+
+  .timeline-marker {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timeline-marker.completed {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+
+  .timeline-marker.current {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+  }
+
+  .timeline-content {
+    flex: 1;
+  }
+
+  .timeline-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-date {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .tracking-info {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .tracking-number {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #0369a1;
+  }
+
+  .tracking-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-tracking {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+  }
+
+  .btn-tracking:hover {
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e5e7eb;
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-order-action {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-order-action:hover {
+    text-decoration: none;
+  }
+
+  .address-management {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .address-form {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+  }
+
+  .address-form.active {
+    display: block;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .notification.show {
+    transform: translateX(0);
+  }
+
+  .notification.success {
+    background-color: #10b981;
+  }
+
+  .notification.error {
+    background-color: #ef4444;
+  }
+
+  .notification.info {
+    background-color: #3b82f6;
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 749px) {
+    .order-tracking-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .tracking-actions {
+      flex-direction: column;
+    }
+
+    .order-actions {
+      flex-direction: column;
+    }
+
+    .btn-order-action {
+      width: 100%;
+      text-align: center;
+    }
+  }
+{%- endstyle -%}
+
+<div class="customer order section-{{ section.id }}-padding">
+  <svg style="display:none">
+    <symbol id="icon-discount" viewBox="0 0 12 12">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M7 0h3a2 2 0 012 2v3a1 1 0 01-.3.7l-6 6a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4l6-6A1 1 0 017 0zm2 2a1 1 0 102 0 1 1 0 00-2 0z" fill="currentColor">
+    </symbol>
+    <symbol id="icon-package" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+    </symbol>
+    <symbol id="icon-truck" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+    </symbol>
+  </svg>
+
+  <div>
+    <div class="order-tracking-header">
+      <div>
+        <h1 class="customer__title">Order {{ order.name }}</h1>
+        <p>{{ 'customer.order.date_html' | t: date: order.created_at | time_tag: format: 'date_at_time' }}</p>
+      </div>
+      <div>
+        <span class="order-status-badge status-{{ order.financial_status }}" id="order-status-badge">
+          {{ order.financial_status_label }}
+        </span>
+      </div>
+    </div>
+
+    <a href="{{ routes.account_url }}" class="btn-secondary btn-order-action">{{ 'customer.account.return' | t }}</a>
+
+    <!-- Enhanced Fulfillment Timeline -->
+    <div class="fulfillment-timeline" id="fulfillment-timeline">
+      <h3>Order Status & Tracking</h3>
+      <div id="timeline-content">
+        <div class="timeline-item">
+          <div class="timeline-marker completed">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <use href="#icon-check"/>
+            </svg>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">Order Placed</div>
+            <div class="timeline-description">Your order has been received and is being processed</div>
+            <div class="timeline-date">{{ order.created_at | time_tag: format: 'date_at_time' }}</div>
+          </div>
+        </div>
+
+        {% if order.financial_status == 'paid' %}
+        <div class="timeline-item">
+          <div class="timeline-marker completed">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <use href="#icon-check"/>
+            </svg>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">Payment Confirmed</div>
+            <div class="timeline-description">Your payment has been successfully processed</div>
+            <div class="timeline-date">{{ order.updated_at | time_tag: format: 'date_at_time' }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if order.fulfillment_status == 'fulfilled' %}
+        <div class="timeline-item">
+          <div class="timeline-marker completed">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <use href="#icon-check"/>
+            </svg>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">Order Shipped</div>
+            <div class="timeline-description">Your order has been shipped and is on its way</div>
+            <div class="timeline-date">{{ order.updated_at | time_tag: format: 'date_at_time' }}</div>
+            
+            {% for fulfillment in order.fulfillments %}
+            {% if fulfillment.tracking_numbers.size > 0 %}
+            <div class="tracking-info">
+              <div><strong>Tracking Number:</strong> <span class="tracking-number">{{ fulfillment.tracking_numbers.first }}</span></div>
+              <div><strong>Carrier:</strong> {{ fulfillment.tracking_company }}</div>
+              {% if fulfillment.tracking_url %}
+              <div class="tracking-actions">
+                <a href="{{ fulfillment.tracking_url }}" target="_blank" class="btn-tracking btn-primary">Track Package</a>
+                <button onclick="copyTrackingNumber('{{ fulfillment.tracking_numbers.first }}')" class="btn-tracking btn-secondary">Copy Number</button>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if order.fulfillment_status == 'unfulfilled' %}
+        <div class="timeline-item">
+          <div class="timeline-marker current">
+            <div class="loading-spinner"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">Processing</div>
+            <div class="timeline-description">Your order is being prepared for shipment</div>
+            <div class="timeline-date">Estimated ship date: 2-3 business days</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Order Details Table -->
+    <div>
+      <h2>Order Details</h2>
+      <table role="table" class="order-details mobile-order-table">
+        <caption class="visually-hidden">
+          {{ 'customer.order.title' | t: name: order.name }}
+        </caption>
+        <thead role="rowgroup">
+          <tr role="row">
+            <th id="ColumnProduct" scope="col" role="columnheader">{{ 'customer.order.product' | t }}</th>
+            <th id="ColumnSku" scope="col" role="columnheader">{{ 'customer.order.sku' | t }}</th>
+            <th id="ColumnPrice" scope="col" role="columnheader">{{ 'customer.order.price' | t }}</th>
+            <th id="ColumnQuantity" scope="col" role="columnheader">{{ 'customer.order.quantity' | t }}</th>
+            <th id="ColumnTotal" scope="col" role="columnheader">{{ 'customer.order.total' | t }}</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {%- for line_item in order.line_items -%}
+            <tr role="row">
+              <td
+                id="Row{{ line_item.key }}"
+                headers="ColumnProduct"
+                role="rowheader"
+                scope="row"
+                data-label="{{ 'customer.order.product' | t }}"
+              >
+                <div>
+                  {%- if line_item.url != blank -%}
+                    <a href="{{ line_item.url }}">{{ line_item.title }}</a>
+                  {%- else -%}
+                    <p>{{ line_item.title }}</p>
+                  {%- endif -%}
+                  {%- assign property_size = line_item.properties | size -%}
+                  {%- unless line_item.selling_plan_allocation == null and property_size == 0 -%}
+                    <div class="properties">
+                      {%- unless line_item.product.has_only_default_variant -%}
+                        <span>
+                          {{ line_item.variant.title }}
+                        </span>
+                      {%- endunless -%}
+                      {%- unless line_item.selling_plan_allocation == null -%}
+                        <span>
+                          {{ line_item.selling_plan_allocation.selling_plan.name }}
+                        </span>
+                      {%- endunless -%}
+                      {%- if property_size != 0 -%}
+                        {%- for property in line_item.properties -%}
+                          {% assign property_first_char = property.first | slice: 0 %}
+                          {%- if property.last != blank and property_first_char != '_' -%}
+                            <span>{{ property.first }}:</span>
+                            <span>
+                              {%- if property.last contains '/uploads/' -%}
+                                <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                              {%- else -%}
+                                {{ property.last }}
+                              {%- endif -%}
+                            </span>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endunless -%}
+
+                  {%- if line_item.line_level_discount_allocations != blank -%}
+                    <ul role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                      {%- for discount_allocation in line_item.line_level_discount_allocations -%}
+                        <li>
+                          <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12">
+                            <use href="#icon-discount" />
+                          </svg>
+                          {{- discount_allocation.discount_application.title }} (-
+                          {{- discount_allocation.amount | money -}}
+                          )
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+
+                  {%- if line_item.fulfillment -%}
+                    <div class="fulfillment">
+                      {%- assign created_at = line_item.fulfillment.created_at | time_tag: format: 'date' -%}
+                      <span>{{ 'customer.order.fulfilled_at_html' | t: date: created_at }}</span>
+
+                      {%- if line_item.fulfillment.tracking_url -%}
+                        <a href="{{ line_item.fulfillment.tracking_url }}">
+                          {{ 'customer.order.track_shipment' | t }}
+                        </a>
+                      {%- endif -%}
+                      <span>
+                        {{ line_item.fulfillment.tracking_company }}
+                        {%- if line_item.fulfillment.tracking_number -%}
+                          #{{ line_item.fulfillment.tracking_number }}
+                        {%- endif -%}
+                      </span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              </td>
+              <td
+                headers="Row{{ line_item.key }} ColumnSku"
+                role="cell"
+                data-label="{{ 'customer.order.sku' | t }}"
+              >
+                {{ line_item.sku }}
+              </td>
+              <td
+                headers="Row{{ line_item.key }} ColumnPrice"
+                role="cell"
+                data-label="{{ 'customer.order.price' | t }}"
+              >
+                {%- if line_item.original_price != line_item.final_price or line_item.unit_price_measurement -%}
+                  <dl>
+                    {%- if line_item.original_price != line_item.final_price -%}
+                      <dt>
+                        <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                      </dt>
+                      <dd class="regular-price">
+                        <s>{{ line_item.original_price | money }}</s>
+                      </dd>
+                      <dt>
+                        <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+                      </dt>
+                      <dd>
+                        <span>{{ line_item.final_price | money }}</span>
+                      </dd>
+                    {%- else -%}
+                      <dt>
+                        <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                      </dt>
+                      <dd>
+                        {{ line_item.original_price | money }}
+                      </dd>
+                    {%- endif -%}
+                    {%- if line_item.unit_price_measurement -%}
+                      <dt>
+                        <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+                      </dt>
+                      <dd class="unit-price">
+                        <span>
+                          {%- capture unit_price_separator -%}
+                            <span aria-hidden="true">/</span
+                            ><span class="visually-hidden">{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+                          {%- endcapture -%}
+                          {%- capture unit_price_base_unit -%}
+                            {%- if line_item.unit_price_measurement.reference_value != 1 -%}
+                              {{- line_item.unit_price_measurement.reference_value -}}
+                            {%- endif -%}
+                            {{ line_item.unit_price_measurement.reference_unit }}
+                          {%- endcapture -%}
+                          <span data-unit-price>{{ line_item.unit_price | money }}</span>
+                          {{- unit_price_separator -}}
+                          {{- unit_price_base_unit -}}
+                        </span>
+                      </dd>
+                    {%- endif -%}
+                  </dl>
+                {%- else -%}
+                  <span>{{ line_item.final_price | money }}</span>
+                {%- endif -%}
+              </td>
+              <td
+                headers="Row{{ line_item.key }} ColumnQuantity"
+                role="cell"
+                data-label="{{ 'customer.order.quantity' | t }}"
+              >
+                {{ line_item.quantity }}
+              </td>
+              <td
+                headers="Row{{ line_item.key }} ColumnTotal"
+                role="cell"
+                data-label="{{ 'customer.order.total' | t }}"
+              >
+                {%- if line_item.original_line_price != line_item.final_line_price -%}
+                  <dl>
+                    <dt>
+                      <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                    </dt>
+                    <dd class="regular-price">
+                      <s>{{ line_item.original_line_price | money }}</s>
+                    </dd>
+                    <dt>
+                      <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+                    </dt>
+                    <dd>
+                      <span>{{ line_item.final_line_price | money }}</span>
+                    </dd>
+                  </dl>
+                {%- else -%}
+                  {{ line_item.original_line_price | money }}
+                {%- endif -%}
+              </td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+        <tfoot role="rowgroup">
+          <tr role="row">
+            <td id="RowSubtotal" role="rowheader" scope="row" colspan="4">
+              {{ 'customer.order.subtotal' | t }}
+            </td>
+            <td headers="RowSubtotal" role="cell" data-label="{{ 'customer.order.subtotal' | t }}">
+              {{ order.line_items_subtotal_price | money }}
+            </td>
+          </tr>
+          {%- if order.cart_level_discount_applications != blank -%}
+            <tr role="row">
+              {%- for discount_application in order.cart_level_discount_applications -%}
+                <td id="RowDiscount" role="rowheader" scope="row" colspan="4">
+                  {{ 'customer.order.discount' | t }}
+                  <span class="cart-discount">
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12">
+                      <use href="#icon-discount" />
+                    </svg>
+                    {{- discount_application.title -}}
+                  </span>
+                </td>
+                <td headers="RowDiscount" role="cell" data-label="{{ 'customer.order.discount' | t }}">
+                  <div>
+                    <span>-{{ discount_application.total_allocated_amount | money }}</span>
+                    <span class="cart-discount">
+                      <svg aria-hidden="true" focusable="false" viewBox="0 0 12 12">
+                        <use href="#icon-discount" />
+                      </svg>
+                      {{- discount_application.title -}}
+                    </span>
+                  </div>
+                </td>
+              {%- endfor -%}
+            </tr>
+          {%- endif -%}
+          {%- for shipping_method in order.shipping_methods -%}
+            <tr role="row">
+              <td id="RowShipping" role="rowheader" scope="row" colspan="4">
+                {{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})
+              </td>
+              <td
+                headers="RowShipping"
+                role="cell"
+                data-label="{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})"
+              >
+                {{ shipping_method.price | money }}
+              </td>
+            </tr>
+          {%- endfor -%}
+          {%- for tax_line in order.tax_lines -%}
+            <tr role="row">
+              <td id="RowTax" role="rowheader" scope="row" colspan="4">
+                {{ 'customer.order.tax' | t }} ({{ tax_line.title }}
+                {{ tax_line.rate | times: 100 }}%)
+              </td>
+              <td
+                headers="RowTax"
+                role="cell"
+                data-label="{{ 'customer.order.tax' | t }} ({{ tax_line.title }} {{ tax_line.rate | times: 100 }}%)"
+              >
+                {{ tax_line.price | money }}
+              </td>
+            </tr>
+          {%- endfor -%}
+          {%- if order.total_duties -%}
+            <tr role="row">
+              <td id="RowDuties" role="rowheader" scope="row" colspan="4">{{ 'customer.order.total_duties' | t }}</td>
+              <td headers="RowDuties" role="cell" data-label="{{ 'customer.order.total_duties' | t }}">
+                {{ order.total_duties | money }}
+              </td>
+            </tr>
+          {%- endif -%}
+          {%- if order.total_refunded_amount > 0 -%}
+            <tr role="row">
+              <td id="RowTotalRefund" role="rowheader" scope="row" colspan="3">
+                {{ 'customer.order.total_refunded' | t }}
+              </td>
+              <td
+                headers="RowTotalRefund"
+                role="cell"
+                colspan="2"
+                data-label="{{ 'customer.order.total_refunded' | t }}"
+              >
+                -{{ order.total_refunded_amount | money_with_currency }}
+              </td>
+            </tr>
+          {%- endif -%}
+          <tr role="row">
+            <td id="RowTotal" role="rowheader" scope="row" colspan="3">{{ 'customer.order.total' | t }}</td>
+            <td headers="RowTotal" role="cell" colspan="2" data-label="{{ 'customer.order.total' | t }}">
+              {{ order.total_net_amount | money_with_currency }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Address Management -->
+    <div class="address-management">
+      <h3>Delivery Information</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1rem;">
+        <div>
+          <h4>Shipping Address</h4>
+          <p><strong>Status:</strong> {{ order.fulfillment_status_label }}</p>
+          <div id="shipping-address-display">
+            {{ order.shipping_address | format_address }}
+          </div>
+          {% if order.fulfillment_status == 'unfulfilled' %}
+          <button onclick="toggleAddressForm('shipping')" class="btn-tracking btn-secondary" style="margin-top: 1rem;">
+            Update Address
+          </button>
+          {% endif %}
+        </div>
+        
+        <div>
+          <h4>Billing Address</h4>
+          <p><strong>Payment Status:</strong> {{ order.financial_status_label }}</p>
+          <div id="billing-address-display">
+            {{ order.billing_address | format_address }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Update Form (Hidden by default) -->
+      <div id="shipping-address-form" class="address-form">
+        <h4>Update Shipping Address</h4>
+        <form id="address-update-form" onsubmit="updateShippingAddress(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" name="first_name" required>
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" name="last_name" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="company">Company (Optional)</label>
+            <input type="text" id="company" name="company">
+          </div>
+          
+          <div class="form-group">
+            <label for="address1">Address</label>
+            <input type="text" id="address1" name="address1" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="address2">Apartment, suite, etc. (Optional)</label>
+            <input type="text" id="address2" name="address2">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" required>
+            </div>
+            <div class="form-group">
+              <label for="province">State/Province</label>
+              <input type="text" id="province" name="province" required>
+            </div>
+            <div class="form-group">
+              <label for="zip">ZIP/Postal Code</label>
+              <input type="text" id="zip" name="zip" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="country">Country</label>
+            <select id="country" name="country" required>
+              <option value="">Select Country</option>
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="UK">United Kingdom</option>
+              <!-- Add more countries as needed -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-tracking btn-primary">Update Address</button>
+            <button type="button" onclick="toggleAddressForm('shipping')" class="btn-tracking btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order Actions -->
+    <div class="order-actions">
+      {% if order.financial_status == 'pending' %}
+      <button onclick="cancelOrder()" class="btn-order-action btn-secondary">Cancel Order</button>
+      {% endif %}
+      
+      <button onclick="downloadInvoice()" class="btn-order-action btn-secondary">Download Invoice</button>
+      
+      <button onclick="printOrder()" class="btn-order-action btn-secondary">Print Order Details</button>
+      
+      {% if order.fulfillment_status == 'fulfilled' %}
+      <button onclick="reorderItems()" class="btn-order-action btn-primary">Reorder Items</button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notification" class="notification"></div>
+
+{% schema %}
+{
+  "name": "t:sections.main-order.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+// Enhanced Order Tracking JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-refresh order status every 30 seconds
+  setInterval(checkOrderStatus, 30000);
+  
+  // Initialize real-time updates
+  initializeRealTimeUpdates();
+});
+
+function toggleAddressForm(type) {
+  const form = document.getElementById(type + '-address-form');
+  form.classList.toggle('active');
+  
+  if (form.classList.contains('active')) {
+    // Pre-fill form with current address data
+    prefillAddressForm(type);
+  }
+}
+
+function prefillAddressForm(type) {
+  // This would typically fetch current address data from the backend
+  // For now, we'll use placeholder data
+  const formData = {
+    first_name: 'John',
+    last_name: 'Doe',
+    company: '',
+    address1: '123 Main St',
+    address2: '',
+    city: 'New York',
+    province: 'NY',
+    zip: '10001',
+    country: 'US',
+    phone: '555-123-4567'
+  };
+  
+  Object.keys(formData).forEach(key => {
+    const input = document.getElementById(key.replace('_', '-'));
+    if (input) {
+      input.value = formData[key];
+    }
+  });
+}
+
+function updateShippingAddress(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  const addressData = Object.fromEntries(formData.entries());
+  
+  // Show loading state
+  showNotification('Updating address...', 'info');
+  
+  // Send update request to backend
+  fetch('/api/orders/{{ order.id }}/update-address/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify(addressData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showNotification('Address updated successfully!', 'success');
+      toggleAddressForm('shipping');
+      // Update displayed address
+      updateAddressDisplay('shipping', addressData);
+    } else {
+      showNotification('Failed to update address: ' + data.error, 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating address:', error);
+    showNotification('An error occurred while updating your address', 'error');
+  });
+}
+
+function updateAddressDisplay(type, addressData) {
+  const display = document.getElementById(type + '-address-display');
+  const formattedAddress = `
+    ${addressData.first_name} ${addressData.last_name}<br>
+    ${addressData.company ? addressData.company + '<br>' : ''}
+    ${addressData.address1}<br>
+    ${addressData.address2 ? addressData.address2 + '<br>' : ''}
+    ${addressData.city}, ${addressData.province} ${addressData.zip}<br>
+    ${addressData.country}<br>
+    ${addressData.phone}
+  `;
+  display.innerHTML = formattedAddress;
+}
+
+function copyTrackingNumber(trackingNumber) {
+  navigator.clipboard.writeText(trackingNumber).then(() => {
+    showNotification('Tracking number copied to clipboard!', 'success');
+  }).catch(err => {
+    console.error('Failed to copy tracking number:', err);
+    showNotification('Failed to copy tracking number', 'error');
+  });
+}
+
+function cancelOrder() {
+  if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+    showNotification('Cancelling order...', 'info');
+    
+    fetch('/api/orders/{{ order.id }}/cancel/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showNotification('Order cancelled successfully', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        showNotification('Failed to cancel order: ' + data.error, 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error cancelling order:', error);
+      showNotification('An error occurred while cancelling your order', 'error');
+    });
+  }
+}
+
+function downloadInvoice() {
+  showNotification('Generating invoice...', 'info');
+  
+  fetch('/api/orders/{{ order.id }}/invoice/', {
+    method: 'GET',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken')
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.blob();
+    }
+    throw new Error('Failed to generate invoice');
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'invoice-{{ order.name }}.pdf';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    showNotification('Invoice downloaded successfully', 'success');
+  })
+  .catch(error => {
+    console.error('Error downloading invoice:', error);
+    showNotification('Failed to download invoice', 'error');
+  });
+}
+
+function printOrder() {
+  window.print();
+}
+
+function reorderItems() {
+  showNotification('Adding items to cart...', 'info');
+  
+  // Get all line items from the order
+  const lineItems = {{ order.line_items | json }};
+  
+  // Add each item to cart
+  let promises = lineItems.map(item => {
+    return fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: item.variant_id,
+        quantity: item.quantity
+      })
+    });
+  });
+  
+  Promise.all(promises)
+  .then(() => {
+    showNotification('Items added to cart successfully!', 'success');
+    setTimeout(() => {
+      window.location.href = '/cart';
+    }, 2000);
+  })
+  .catch(error => {
+    console.error('Error adding items to cart:', error);
+    showNotification('Failed to add items to cart', 'error');
+  });
+}
+
+function checkOrderStatus() {
+  fetch('/api/orders/{{ order.id }}/status/', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.status_changed) {
+      // Update status badge
+      const badge = document.getElementById('order-status-badge');
+      badge.className = `order-status-badge status-${data.financial_status}`;
+      badge.textContent = data.financial_status_label;
+      
+      // Update timeline
+      updateTimeline(data.timeline_events);
+      
+      // Show notification
+      showNotification('Order status updated!', 'info');
+    }
+  })
+  .catch(error => {
+    console.error('Error checking order status:', error);
+  });
+}
+
+function updateTimeline(events) {
+  const timelineContent = document.getElementById('timeline-content');
+  
+  events.forEach(event => {
+    // Check if event already exists
+    if (document.getElementById(`timeline-${event.id}`)) {
+      return;
+    }
+    
+    const timelineItem = document.createElement('div');
+    timelineItem.className = 'timeline-item';
+    timelineItem.id = `timeline-${event.id}`;
+    
+    const markerClass = event.completed ? 'completed' : 'current';
+    const icon = event.completed ? 'icon-check' : '';
+    
+    timelineItem.innerHTML = `
+      <div class="timeline-marker ${markerClass}">
+        ${icon ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><use href="#${icon}"/></svg>` : ''}
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-title">${event.title}</div>
+        <div class="timeline-description">${event.description}</div>
+        <div class="timeline-date">${event.date}</div>
+      </div>
+    `;
+    
+    timelineContent.appendChild(timelineItem);
+  });
+}
+
+function initializeRealTimeUpdates() {
+  // WebSocket connection for real-time updates (if implemented)
+  // For now, we'll use polling
+  console.log('Real-time updates initialized');
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${type}`;
+  notification.classList.add('show');
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 5000);
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Mobile responsive adjustments
+if (window.innerWidth <= 749) {
+  function adjustMobileLayout() {
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach(item => {
+      const marker = item.querySelector('.timeline-marker');
+      const content = item.querySelector('.timeline-content');
+      
+      if (marker && content) {
+        marker.style.marginRight = '0.75rem';
+        content.style.marginLeft = '0';
+      }
+    });
+  }
+  
+  adjustMobileLayout();
+  window.addEventListener('resize', adjustMobileLayout);
+}
+</script>

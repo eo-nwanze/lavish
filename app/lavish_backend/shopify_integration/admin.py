@@ -53,7 +53,7 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
         from inventory.models import ShopifyInventoryItem, ShopifyInventoryLevel
         from shipping.models import ShopifyCarrierService, ShopifyDeliveryProfile
         from payments.models import ShopifyPaymentsAccount, ShopifyBalanceTransaction, ShopifyPayout, ShopifyDispute, ShopifyFinanceKYC
-        # Note: subscriptions module doesn't exist, skipping webhook imports
+        from shopify_integration.models import WebhookEndpoint, SyncOperation
         
         # Get recent product images for gallery
         product_images = ShopifyProductImage.objects.select_related('product').order_by('-created_at')[:12]
@@ -79,8 +79,8 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                 'payouts': ShopifyPayout.objects.count(),
                 'disputes': ShopifyDispute.objects.count(),
                 'kyc_info': ShopifyFinanceKYC.objects.count(),
-                'webhook_subscriptions': 0,  # Webhook module not implemented yet
-                'webhook_deliveries': 0,  # Webhook module not implemented yet
+                'webhook_endpoints': WebhookEndpoint.objects.count(),
+                'sync_operations': SyncOperation.objects.count(),
             },
             'product_images': product_images,
         }
@@ -1030,7 +1030,7 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                     account, created = ShopifyPaymentsAccount.objects.update_or_create(
                         shopify_id=account_data['id'],
                         defaults={
-                            'account_opener_name': account_data.get('accountOpenerName', ''),
+                            'account_opener_name': '',  # Field not available in API
                             'activated': account_data.get('activated', False),
                             'country': account_data.get('country', ''),
                             'default_currency': account_data.get('defaultCurrency', ''),
@@ -1048,8 +1048,8 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                         print("Fetching KYC information...")
                         kyc_response = payments_client.fetch_finance_kyc_info()
                         
-                        if 'data' in kyc_response and 'financeKycInformation' in kyc_response['data']:
-                            kyc_data = kyc_response['data']['financeKycInformation']
+                        if 'data' in kyc_response and kyc_response['data']:
+                            kyc_data = kyc_response['data']
                             if kyc_data:
                                 business_address = kyc_data.get('businessAddress', {})
                                 industry = kyc_data.get('industry', {})
@@ -1082,6 +1082,10 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                                 )
                                 kyc_count = 1
                                 print(f"✓ Synced KYC information")
+                            else:
+                                print("⚠ KYC information not available")
+                        else:
+                            print("⚠ KYC information not available")
                     except Exception as e:
                         print(f"⚠ KYC info not available: {e}")
                     
@@ -1192,16 +1196,12 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
     
     def _sync_webhooks_data(self, client):
         """Sync webhook subscriptions data"""
-        try:
-            from subscriptions.models import ShopifyWebhookSubscription, ShopifyWebhookSyncLog
-            from subscriptions.shopify_webhooks_client import ShopifyWebhooksClient
-        except ImportError:
-            print("Webhook module not available, skipping webhook sync")
-            return
+        # TODO: Implement webhook sync functionality when webhook models are available
+        print("Webhook sync functionality not yet implemented")
+        return
         
-        print("Fetching webhook subscriptions from Shopify API...")
-        
-        webhooks_client = ShopifyWebhooksClient()
+        # The following code is commented out until webhook models are properly implemented
+        """
         subscription_count = 0
         created_count = 0
         updated_count = 0
@@ -1274,6 +1274,7 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
         print(f"  Total: {subscription_count}")
         print(f"  Created: {created_count}")
         print(f"  Updated: {updated_count}")
+        """
 
 
 # Import models

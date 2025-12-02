@@ -1,0 +1,887 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  /* Order History Styles */
+  .order-history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .order-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    min-width: 150px;
+  }
+
+  .order-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .order-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .order-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .order-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-info {
+    flex: 1;
+  }
+
+  .order-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+  }
+
+  .order-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .order-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-paid {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-fulfilled {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .order-total {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .order-items {
+    margin-bottom: 1rem;
+  }
+
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .order-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .item-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 0.5rem;
+    object-fit: cover;
+    background-color: #f9fafb;
+  }
+
+  .item-details {
+    flex: 1;
+  }
+
+  .item-title {
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+  }
+
+  .item-variant {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .item-quantity {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .item-price {
+    font-weight: 500;
+    color: #1f2937;
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-order {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-order:hover {
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e5e7eb;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .pagination button:hover:not(:disabled) {
+    background-color: #f9fafb;
+  }
+
+  .pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination .page-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+  }
+
+  .empty-state svg {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: #d1d5db;
+  }
+
+  .search-bar {
+    position: relative;
+    max-width: 400px;
+  }
+
+  .search-bar input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .search-bar svg {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: #6b7280;
+  }
+
+  /* Mobile Responsive */
+  @media screen and (max-width: 749px) {
+    .order-history-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .order-filters {
+      flex-direction: column;
+    }
+
+    .filter-group {
+      width: 100%;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      min-width: auto;
+    }
+
+    .order-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .order-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .order-status {
+      align-items: flex-start;
+    }
+
+    .order-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .item-image {
+      width: 50px;
+      height: 50px;
+    }
+
+    .search-bar {
+      max-width: 100%;
+    }
+  }
+{%- endstyle -%}
+
+<div class="customer order-history section-{{ section.id }}-padding">
+  <svg style="display:none">
+    <symbol id="icon-search" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </symbol>
+    <symbol id="icon-package" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+    </symbol>
+    <symbol id="icon-document" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </symbol>
+  </svg>
+
+  <div class="order-history-container">
+    <div class="order-history-header">
+      <div>
+        <h1 class="customer__title">Order History</h1>
+        <p>View and manage your past orders</p>
+      </div>
+      <div class="search-bar">
+        <svg><use href="#icon-search"/></svg>
+        <input type="text" id="order-search" placeholder="Search orders..." onkeyup="searchOrders()">
+      </div>
+    </div>
+
+    <a href="{{ routes.account_url }}" class="btn-order btn-secondary">Back to Account</a>
+
+    <!-- Order Statistics -->
+    <div class="order-stats" id="order-stats">
+      <div class="stat-card">
+        <div class="stat-value" id="total-orders">-</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="pending-orders">-</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="fulfilled-orders">-</div>
+        <div class="stat-label">Fulfilled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-spent">-</div>
+        <div class="stat-label">Total Spent</div>
+      </div>
+    </div>
+
+    <!-- Order Filters -->
+    <div class="order-filters">
+      <div class="filter-group">
+        <label for="status-filter">Status</label>
+        <select id="status-filter" onchange="filterOrders()">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="fulfilled">Fulfilled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="date-filter">Date Range</label>
+        <select id="date-filter" onchange="filterOrders()">
+          <option value="">All Time</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="365">Last Year</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="sort-filter">Sort By</label>
+        <select id="sort-filter" onchange="filterOrders()">
+          <option value="created_at-desc">Newest First</option>
+          <option value="created_at-asc">Oldest First</option>
+          <option value="total_price-desc">Highest Total</option>
+          <option value="total_price-asc">Lowest Total</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Order Grid -->
+    <div class="order-grid" id="order-grid">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination">
+      <button id="prev-page" onclick="changePage(-1)" disabled>Previous</button>
+      <span class="page-info" id="page-info">Page 1 of 1</span>
+      <button id="next-page" onclick="changePage(1)" disabled>Next</button>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.order-history.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+// Order History JavaScript
+let currentPage = 1;
+let totalPages = 1;
+let allOrders = [];
+let filteredOrders = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadOrderHistory();
+});
+
+function loadOrderHistory() {
+  showLoading();
+  
+  fetch('/api/orders/customer-orders/', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      allOrders = data.orders;
+      filteredOrders = [...allOrders];
+      updateStatistics(data.statistics);
+      displayOrders();
+    } else {
+      showError('Failed to load order history');
+    }
+  })
+  .catch(error => {
+    console.error('Error loading order history:', error);
+    showError('An error occurred while loading your order history');
+  });
+}
+
+function updateStatistics(stats) {
+  document.getElementById('total-orders').textContent = stats.total_orders || 0;
+  document.getElementById('pending-orders').textContent = stats.pending_orders || 0;
+  document.getElementById('fulfilled-orders').textContent = stats.fulfilled_orders || 0;
+  document.getElementById('total-spent').textContent = '$' + (stats.total_spent || 0).toFixed(2);
+}
+
+function displayOrders() {
+  const orderGrid = document.getElementById('order-grid');
+  
+  if (filteredOrders.length === 0) {
+    orderGrid.innerHTML = `
+      <div class="empty-state">
+        <svg><use href="#icon-document"/></svg>
+        <h3>No orders found</h3>
+        <p>When you place orders, they will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const ordersPerPage = 10;
+  totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const endIndex = startIndex + ordersPerPage;
+  const pageOrders = filteredOrders.slice(startIndex, endIndex);
+  
+  const ordersHTML = pageOrders.map(order => createOrderCard(order)).join('');
+  orderGrid.innerHTML = ordersHTML;
+  
+  updatePagination();
+}
+
+function createOrderCard(order) {
+  const statusClass = getStatusClass(order.financial_status);
+  const statusText = getStatusText(order.financial_status);
+  
+  const itemsHTML = order.line_items.slice(0, 3).map(item => `
+    <div class="order-item">
+      <img src="${item.image || '/placeholder-image.jpg'}" alt="${item.title}" class="item-image">
+      <div class="item-details">
+        <div class="item-title">${item.title}</div>
+        ${item.variant_title ? `<div class="item-variant">${item.variant_title}</div>` : ''}
+        <div class="item-quantity">Qty: ${item.quantity}</div>
+      </div>
+      <div class="item-price">$${(item.price || 0).toFixed(2)}</div>
+    </div>
+  `).join('');
+  
+  const moreItemsText = order.line_items.length > 3 ? 
+    `<div style="text-align: center; color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
+      +${order.line_items.length - 3} more items
+    </div>` : '';
+  
+  return `
+    <div class="order-card">
+      <div class="order-card-header">
+        <div class="order-info">
+          <div class="order-name">${order.name}</div>
+          <div class="order-date">${formatDate(order.created_at)}</div>
+        </div>
+        <div class="order-status">
+          <span class="status-badge ${statusClass}">${statusText}</span>
+          <div class="order-total">$${(order.total_price || 0).toFixed(2)}</div>
+        </div>
+      </div>
+      
+      <div class="order-items">
+        ${itemsHTML}
+        ${moreItemsText}
+      </div>
+      
+      <div class="order-actions">
+        <a href="/account/orders/${order.shopify_id}" class="btn-order btn-primary">View Details</a>
+        ${order.financial_status === 'pending' ? 
+          `<button onclick="cancelOrder('${order.shopify_id}')" class="btn-order btn-secondary">Cancel</button>` : ''}
+        ${order.financial_status === 'fulfilled' ? 
+          `<button onclick="reorderItems('${order.shopify_id}')" class="btn-order btn-secondary">Reorder</button>` : ''}
+        <button onclick="downloadInvoice('${order.shopify_id}')" class="btn-order btn-secondary">Invoice</button>
+      </div>
+    </div>
+  `;
+}
+
+function getStatusClass(status) {
+  const statusMap = {
+    'pending': 'status-pending',
+    'paid': 'status-paid',
+    'fulfilled': 'status-fulfilled',
+    'cancelled': 'status-cancelled'
+  };
+  return statusMap[status] || 'status-pending';
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    'pending': 'Pending',
+    'paid': 'Paid',
+    'fulfilled': 'Fulfilled',
+    'cancelled': 'Cancelled'
+  };
+  return statusMap[status] || status;
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+function filterOrders() {
+  const statusFilter = document.getElementById('status-filter').value;
+  const dateFilter = document.getElementById('date-filter').value;
+  const sortFilter = document.getElementById('sort-filter').value;
+  
+  filteredOrders = allOrders.filter(order => {
+    // Status filter
+    if (statusFilter && order.financial_status !== statusFilter) {
+      return false;
+    }
+    
+    // Date filter
+    if (dateFilter) {
+      const orderDate = new Date(order.created_at);
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - parseInt(dateFilter));
+      if (orderDate < cutoffDate) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+  
+  // Sort
+  const [sortField, sortOrder] = sortFilter.split('-');
+  filteredOrders.sort((a, b) => {
+    let aVal = a[sortField];
+    let bVal = b[sortField];
+    
+    if (sortField === 'created_at') {
+      aVal = new Date(aVal);
+      bVal = new Date(bVal);
+    }
+    
+    if (sortOrder === 'asc') {
+      return aVal > bVal ? 1 : -1;
+    } else {
+      return aVal < bVal ? 1 : -1;
+    }
+  });
+  
+  currentPage = 1;
+  displayOrders();
+}
+
+function searchOrders() {
+  const searchTerm = document.getElementById('order-search').value.toLowerCase();
+  
+  if (searchTerm === '') {
+    filteredOrders = [...allOrders];
+  } else {
+    filteredOrders = allOrders.filter(order => {
+      return order.name.toLowerCase().includes(searchTerm) ||
+             (order.customer_email && order.customer_email.toLowerCase().includes(searchTerm)) ||
+             order.line_items.some(item => 
+               item.title.toLowerCase().includes(searchTerm) ||
+               (item.variant_sku && item.variant_sku.toLowerCase().includes(searchTerm))
+             );
+    });
+  }
+  
+  currentPage = 1;
+  displayOrders();
+}
+
+function changePage(direction) {
+  currentPage += direction;
+  displayOrders();
+}
+
+function updatePagination() {
+  const prevButton = document.getElementById('prev-page');
+  const nextButton = document.getElementById('next-page');
+  const pageInfo = document.getElementById('page-info');
+  
+  prevButton.disabled = currentPage === 1;
+  nextButton.disabled = currentPage === totalPages;
+  
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+}
+
+function cancelOrder(orderId) {
+  if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+    fetch(`/api/orders/${orderId}/cancel/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Order cancelled successfully');
+        loadOrderHistory(); // Reload the order history
+      } else {
+        alert('Failed to cancel order: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error cancelling order:', error);
+      alert('An error occurred while cancelling your order');
+    });
+  }
+}
+
+function reorderItems(orderId) {
+  const order = allOrders.find(o => o.shopify_id === orderId);
+  if (!order) return;
+  
+  let promises = order.line_items.map(item => {
+    return fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: item.variant_shopify_id,
+        quantity: item.quantity
+      })
+    });
+  });
+  
+  Promise.all(promises)
+  .then(() => {
+    alert('Items added to cart successfully!');
+    window.location.href = '/cart';
+  })
+  .catch(error => {
+    console.error('Error adding items to cart:', error);
+    alert('Failed to add items to cart');
+  });
+}
+
+function downloadInvoice(orderId) {
+  fetch(`/api/orders/${orderId}/invoice/`, {
+    method: 'GET',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken')
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.blob();
+    }
+    throw new Error('Failed to generate invoice');
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  })
+  .catch(error => {
+    console.error('Error downloading invoice:', error);
+    alert('Failed to download invoice');
+  });
+}
+
+function showLoading() {
+  const orderGrid = document.getElementById('order-grid');
+  orderGrid.innerHTML = `
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+  `;
+}
+
+function showError(message) {
+  const orderGrid = document.getElementById('order-grid');
+  orderGrid.innerHTML = `
+    <div class="empty-state">
+      <h3>Error</h3>
+      <p>${message}</p>
+      <button onclick="loadOrderHistory()" class="btn-order btn-primary">Try Again</button>
+    </div>
+  `;
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>

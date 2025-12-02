@@ -224,12 +224,12 @@
             <div class="stat-label">📋 KYC Info</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">{{ data_counts.webhook_subscriptions|default:0 }}</div>
-            <div class="stat-label">🔔 Webhook Subscriptions</div>
+            <div class="stat-number">{{ data_counts.webhook_endpoints|default:0 }}</div>
+            <div class="stat-label">🔔 Webhook Endpoints</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">{{ data_counts.webhook_deliveries|default:0 }}</div>
-            <div class="stat-label">📬 Webhook Deliveries</div>
+            <div class="stat-number">{{ data_counts.sync_operations|default:0 }}</div>
+            <div class="stat-label">📊 Sync Operations</div>
         </div>
     </div>
     
@@ -353,8 +353,7 @@
             <a href="{% url 'admin:inventory_shopifyinventoryitem_changelist' %}" class="sync-button">View Inventory</a>
             <a href="{% url 'admin:shipping_shopifycarrierservice_changelist' %}" class="sync-button">View Shipping</a>
             <a href="{% url 'admin:payments_shopifypaymentsaccount_changelist' %}" class="sync-button">View Payments</a>
-            {# Webhook admin not yet implemented #}
-            {# <a href="{% url 'admin:subscriptions_shopifywebhooksubscription_changelist' %}" class="sync-button">View Webhooks</a> #}
+            <a href="{% url 'admin:shopify_integration_webhookendpoint_changelist' %}" class="sync-button">View Webhooks</a>
         </p>
     </div>
 </div>

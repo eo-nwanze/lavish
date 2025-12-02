@@ -68,6 +68,10 @@ class ShopifyOrder(models.Model):
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
     
+    # Order metadata
+    tags = models.TextField(blank=True, help_text="Comma-separated tags")
+    note = models.TextField(blank=True, help_text="Order notes")
+    
     # Sync tracking
     last_synced = models.DateTimeField(auto_now=True)
     sync_status = models.CharField(max_length=20, default='synced', choices=[

@@ -20,21 +20,13 @@ from .models import (
     SubscriptionSkipPolicy,
     SkipNotification
 )
+from .helpers import json_response, error_response
+from .customer_api import (
+    cancel_subscription, pause_subscription, resume_subscription, 
+    change_subscription_frequency, subscription_management_options
+)
 
 logger = logging.getLogger(__name__)
-
-
-def json_response(data, status=200):
-    """Helper to return consistent JSON responses"""
-    return JsonResponse(data, status=status)
-
-
-def error_response(message, status=400, errors=None):
-    """Helper to return error responses"""
-    response = {'success': False, 'error': message}
-    if errors:
-        response['errors'] = errors
-    return JsonResponse(response, status=status)
 
 
 @csrf_exempt
@@ -124,6 +116,82 @@ def skip_next_payment(request):
 
 
 @require_http_methods(["GET"])
+def subscription_renewal_info(request, subscription_id):
+    """
+    Get detailed renewal information for a subscription
+    
+    GET /api/skips/subscriptions/{subscription_id}/renewal-info/
+    """
+    try:
+        subscription = get_object_or_404(
+            CustomerSubscription,
+            shopify_id=subscription_id
+        )
+        
+        # Calculate renewal urgency
+        now = timezone.now()
+        next_billing = subscription.next_billing_date
+        
+        if not next_billing:
+            return error_response('No next billing date found', status=404)
+        
+        days_until_renewal = (next_billing.date() - now.date()).days
+        
+        # Calculate cycle progress
+        last_billing = subscription.last_billing_date or now - timedelta(days=30)
+        cycle_length = (next_billing.date() - last_billing.date()).days
+        days_in_cycle = (now.date() - last_billing.date()).days
+        cycle_progress = min(100, max(0, (days_in_cycle / cycle_length) * 100))
+        
+        # Determine urgency level
+        if days_until_renewal <= 3:
+            urgency_level = 'high'
+            urgency_text = f'{days_until_renewal} days'
+            urgency_message = 'Renewal imminent - Action required'
+        elif days_until_renewal <= 7:
+            urgency_level = 'medium'
+            urgency_text = f'{days_until_renewal} days'
+            urgency_message = 'Renewal approaching - Be prepared'
+        else:
+            urgency_level = 'low'
+            urgency_text = f'{days_until_renewal} days'
+            urgency_message = 'Renewal scheduled - No action needed'
+        
+        # Calculate cutoff date
+        cutoff_date = next_billing.date() - timedelta(days=14)
+        days_until_cutoff = (cutoff_date - now.date()).days
+        
+        renewal_info = {
+            'subscription_id': subscription.shopify_id,
+            'next_billing_date': next_billing.isoformat(),
+            'last_billing_date': last_billing.isoformat(),
+            'days_until_renewal': days_until_renewal,
+            'urgency_level': urgency_level,
+            'urgency_text': urgency_text,
+            'urgency_message': urgency_message,
+            'cycle_progress': {
+                'percentage': round(cycle_progress, 1),
+                'days_in_cycle': days_in_cycle,
+                'cycle_length': cycle_length,
+                'days_remaining': max(0, cycle_length - days_in_cycle)
+            },
+            'cutoff_date': cutoff_date.isoformat(),
+            'days_until_cutoff': days_until_cutoff,
+            'billing_amount': str(subscription.price or '0.00'),
+            'billing_frequency': f"{subscription.billing_policy_interval_count} {subscription.billing_policy_interval.lower()}ly"
+        }
+        
+        return json_response({
+            'success': True,
+            'renewal_info': renewal_info
+        })
+        
+    except Exception as e:
+        logger.error(f'Error getting renewal info: {str(e)}', exc_info=True)
+        return error_response('An error occurred while fetching renewal information', status=500)
+
+
+@require_http_methods(["GET"])
 def subscription_details(request, subscription_id):
     """
     Get subscription details including skip information
@@ -144,6 +212,20 @@ def subscription_details(request, subscription_id):
         # Check skip eligibility
         can_skip, skip_message = subscription.can_skip_next_order()
         
+        # Calculate cutoff date information
+        from datetime import date
+        cutoff_date = subscription.get_cutoff_date()
+        days_until_cutoff = None
+        cutoff_urgency = 'normal'
+        
+        if cutoff_date:
+            today = date.today()
+            days_until_cutoff = (cutoff_date - today).days
+            if days_until_cutoff <= 3:
+                cutoff_urgency = 'urgent'
+            elif days_until_cutoff <= 7:
+                cutoff_urgency = 'warning'
+        
         return json_response({
             'success': True,
             'subscription': {
@@ -162,6 +244,12 @@ def subscription_details(request, subscription_id):
                     'shipping_price': str(subscription.shipping_price),
                     'total_price': str(subscription.total_price),
                     'currency': subscription.currency_code
+                },
+                'cutoff_info': {
+                    'cutoff_date': cutoff_date.isoformat() if cutoff_date else None,
+                    'days_until_cutoff': days_until_cutoff,
+                    'urgency': cutoff_urgency,
+                    'message': f'Order cutoff in {days_until_cutoff} days' if days_until_cutoff and days_until_cutoff > 0 else 'Cutoff passed' if days_until_cutoff and days_until_cutoff <= 0 else 'No cutoff set'
                 },
                 'skip_info': {
                     'can_skip': can_skip,
@@ -257,6 +345,20 @@ def skip_quota(request, subscription_id):
         
         can_skip, message = subscription.can_skip_next_order()
         
+        # Calculate cutoff date information
+        from datetime import date
+        cutoff_date = subscription.get_cutoff_date()
+        days_until_cutoff = None
+        cutoff_urgency = 'normal'
+        
+        if cutoff_date:
+            today = date.today()
+            days_until_cutoff = (cutoff_date - today).days
+            if days_until_cutoff <= 3:
+                cutoff_urgency = 'urgent'
+            elif days_until_cutoff <= 7:
+                cutoff_urgency = 'warning'
+        
         return json_response({
             'success': True,
             'has_skip_policy': True,
@@ -270,6 +372,12 @@ def skip_quota(request, subscription_id):
                 'current_consecutive_skips': subscription.consecutive_skips,
                 'advance_notice_days': subscription.skip_policy.advance_notice_days,
                 'skip_fee': str(subscription.skip_policy.skip_fee)
+            },
+            'cutoff_info': {
+                'cutoff_date': cutoff_date.isoformat() if cutoff_date else None,
+                'days_until_cutoff': days_until_cutoff,
+                'urgency': cutoff_urgency,
+                'message': f'Order cutoff in {days_until_cutoff} days' if days_until_cutoff and days_until_cutoff > 0 else 'Cutoff passed' if days_until_cutoff and days_until_cutoff <= 0 else 'No cutoff set'
             }
         })
         
