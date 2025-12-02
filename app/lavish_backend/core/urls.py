@@ -36,6 +36,9 @@ urlpatterns = [
     
     # Subscription skip management
     path('api/skips/', include('skips.urls', namespace='skips')),
+    
+    # Email manager (for test email functionality)
+    path('email/', include('email_manager.urls', namespace='email_manager')),
 ]
 
 # Serve media files in development
