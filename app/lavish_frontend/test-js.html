@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Syntax Test</h1>
+    <div id="test-result">Testing...</div>
+    
+    <script>
+        // Test if customerId variable can be declared without errors
+        const customerId = 'test123';
+        
+        // Test basic functionality
+        try {
+            // Test DOM manipulation
+            document.getElementById('test-result').innerHTML = '✅ JavaScript is working correctly!';
+            
+            // Test variable scope
+            console.log('customerId:', customerId);
+            
+            // Test function declarations
+            function testFunction() {
+                return 'Function works!';
+            }
+            
+            console.log('Function test:', testFunction());
+            
+            // Test object creation
+            const testObj = {
+                method: function() {
+                    return 'Object method works!';
+                }
+            };
+            
+            console.log('Object test:', testObj.method());
+            
+        } catch (error) {
+            document.getElementById('test-result').innerHTML = '❌ JavaScript error: ' + error.message;
+            console.error('JavaScript error:', error);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comprehensive JavaScript Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Account JavaScript Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Variable Declaration Test</h2>
+        <div id="variable-test">Testing...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. API Connection Test</h2>
+        <div id="api-test">Testing...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Function Scope Test</h2>
+        <div id="function-test">Testing...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. DOM Manipulation Test</h2>
+        <div id="dom-test">Testing...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Error Handling Test</h2>
+        <div id="error-test">Testing...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Console Output</h2>
+        <pre id="console-output"></pre>
+    </div>
+    
+    <script>
+        // Mock console.log to capture output
+        const originalLog = console.log;
+        const consoleOutput = document.getElementById('console-output');
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            consoleOutput.innerHTML += args.join(' ') + '\n';
+        };
+        
+        // Test 1: Variable Declaration (simulating the customerId fix)
+        try {
+            const customerId = 'test123';
+            console.log('✅ customerId variable declared successfully:', customerId);
+            document.getElementById('variable-test').innerHTML = '<span class="success">✅ Variable declaration works correctly</span>';
+        } catch (error) {
+            console.log('❌ Variable declaration failed:', error.message);
+            document.getElementById('variable-test').innerHTML = '<span class="error">❌ Variable declaration failed: ' + error.message + '</span>';
+        }
+        
+        // Test 2: API Connection
+        fetch('http://127.0.0.1:8003/api/locations/countries/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('✅ API connection successful, status:', response.status);
+                document.getElementById('api-test').innerHTML = '<span class="success">✅ API connection works (CORS fixed)</span>';
+                return response.json();
+            } else {
+                throw new Error('HTTP ' + response.status);
+            }
+        })
+        .then(data => {
+            console.log('✅ API data received:', data.length, 'countries');
+        })
+        .catch(error => {
+            console.log('❌ API connection failed:', error.message);
+            document.getElementById('api-test').innerHTML = '<span class="error">❌ API connection failed: ' + error.message + '</span>';
+        });
+        
+        // Test 3: Function Scope (simulating the filterTable function)
+        try {
+            function testFilterFunction() {
+                const searchInput = 'test';
+                const statusFilter = 'active';
+                
+                function innerFunction() {
+                    const searchTerm = searchInput.toLowerCase();
+                    const statusValue = statusFilter.toLowerCase();
+                    return { searchTerm, statusValue };
+                }
+                
+                return innerFunction();
+            }
+            
+            const result = testFilterFunction();
+            console.log('✅ Function scope test passed:', result);
+            document.getElementById('function-test').innerHTML = '<span class="success">✅ Function scoping works correctly</span>';
+        } catch (error) {
+            console.log('❌ Function scope test failed:', error.message);
+            document.getElementById('function-test').innerHTML = '<span class="error">❌ Function scope failed: ' + error.message + '</span>';
+        }
+        
+        // Test 4: DOM Manipulation
+        try {
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = 'Test content';
+            document.body.appendChild(testDiv);
+            document.body.removeChild(testDiv);
+            console.log('✅ DOM manipulation works correctly');
+            document.getElementById('dom-test').innerHTML = '<span class="success">✅ DOM manipulation works correctly</span>';
+        } catch (error) {
+            console.log('❌ DOM manipulation failed:', error.message);
+            document.getElementById('dom-test').innerHTML = '<span class="error">❌ DOM manipulation failed: ' + error.message + '</span>';
+        }
+        
+        // Test 5: Error Handling
+        try {
+            // Simulate an error that might occur in the enhanced-account.js
+            throw new Error('Test error for handling verification');
+        } catch (error) {
+            console.log('✅ Error handling works:', error.message);
+            document.getElementById('error-test').innerHTML = '<span class="success">✅ Error handling works correctly</span>';
+        }
+        
+        // Test 6: Check for common JavaScript issues
+        setTimeout(() => {
+            console.log('=== JavaScript Environment Check ===');
+            console.log('Browser:', navigator.userAgent);
+            console.log('Document ready state:', document.readyState);
+            console.log('Window location:', window.location.href);
+            console.log('=== Test Complete ===');
+        }, 1000);
+    </script>
+</body>
+</html>

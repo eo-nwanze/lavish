@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API CORS Test</h1>
+    <div id="test-result">Testing API connection...</div>
+    <div id="api-response"></div>
+    
+    <script>
+        // Test API connection
+        fetch('http://127.0.0.1:8003/api/locations/countries/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .then(data => {
+            document.getElementById('test-result').innerHTML = '✅ API connection successful!';
+            document.getElementById('api-response').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            console.log('API data:', data);
+        })
+        .catch(error => {
+            document.getElementById('test-result').innerHTML = '❌ API connection failed: ' + error.message;
+            console.error('API error:', error);
+        });
+    </script>
+</body>
+</html>

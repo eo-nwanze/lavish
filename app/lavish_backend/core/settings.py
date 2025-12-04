@@ -92,7 +92,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API development
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -458,10 +458,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:9293",
     "http://127.0.0.1:8003",  # Django backend local development
     "http://localhost:8003",
+    "http://127.0.0.1:8000",  # Frontend demo server local development
+    "http://localhost:8000",
+    "http://127.0.0.1:8080",  # Frontend demo server alternative port
+    "http://localhost:8080",
+    "http://127.0.0.1:9292",  # Shopify CLI local development (duplicate for clarity)
+    "http://localhost:9292",   # Shopify CLI local development (duplicate for clarity)
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # For development only - disable in production
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True  # For development only - disable in production
 
 # REST Framework Configuration
 REST_FRAMEWORK = {

@@ -367,7 +367,7 @@
                 <button onclick="showTab('subscriptions')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
                   ⚙️ Manage
                 </button>
-                <button onclick="skipNextPayment('{{ customer.subscriptions.first.id }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                <button onclick="skipNextPayment('{{ customer.subscriptions.first.id | default: '' }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
                   ⏭️ Skip
                 </button>
               </div>
@@ -629,15 +629,15 @@
                 </div>
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                   <div>
-                    <button onclick="editAddress('{{ address.id }}')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    <button onclick="editAddress('{{ address.id | default: '' }}')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
                       ✏️ Edit
                     </button>
-                    <button onclick="setDefaultAddress('{{ address.id }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    <button onclick="setDefaultAddress('{{ address.id | default: '' }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
                       ⭐ Set Default
                     </button>
                   </div>
                   <div>
-                    <button onclick="showDeleteModal('address', '{{ address.id }}', '{{ address.first_name }} {{ address.last_name }}')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
+                    <button onclick="showDeleteModal('address', '{{ address.id | default: '' }}', '{{ address.first_name | default: '' }} {{ address.last_name | default: '' }}')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
                       🗑️ Delete
                     </button>
                   </div>
@@ -1433,14 +1433,14 @@
                           <td data-label="Total" class="order-total">{{ order.total_price | money }}</td>
                           <td class="actions-cell">
                             <div class="action-dropdown">
-                              <div class="action-toggle" onclick="toggleActionDropdown('actions-{{ order.id }}')">
+                              <div class="action-toggle" onclick="toggleActionDropdown('actions-{{ order.id | default: '' }}')">
                                 <i class="more-icon">⋯</i>
                               </div>
                               <div id="actions-{{ order.id }}" class="action-menu">
-                                <a href="#" onclick="viewOrderDetails('{{ order.id }}')" class="action-item">
+                                <a href="#" onclick="viewOrderDetails('{{ order.id | default: '' }}')" class="action-item">
                                   <i class="action-icon">👁️</i> View Details
                                 </a>
-                                <a href="#" onclick="downloadInvoice('{{ order.id }}')" class="action-item">
+                                <a href="#" onclick="downloadInvoice('{{ order.id | default: '' }}')" class="action-item">
                                   <i class="action-icon">📄</i> Download Invoice
                                 </a>
                               </div>
@@ -2823,9 +2823,5 @@
   ]
 }
 {% endschema %}
-
-<script>
-  const customerId = {{ customer.id | json }};
-</script>
 
 {{ 'enhanced-account.js' | asset_url | script_tag }}

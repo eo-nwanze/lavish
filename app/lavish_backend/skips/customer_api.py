@@ -320,10 +320,14 @@ def subscription_management_options(request, subscription_id):
     GET /api/subscriptions/{subscription_id}/options/
     """
     try:
-        subscription = get_object_or_404(
-            CustomerSubscription,
-            shopify_id=subscription_id
-        )
+        # First check if subscription_id is valid
+        if not subscription_id or subscription_id == 'undefined' or subscription_id == 'null':
+            return error_response('Invalid subscription ID', status=400)
+        
+        try:
+            subscription = CustomerSubscription.objects.get(shopify_id=subscription_id)
+        except CustomerSubscription.DoesNotExist:
+            return error_response(f'Subscription with ID {subscription_id} not found', status=404)
         
         # Check what options are available
         can_cancel = subscription.status in ['ACTIVE', 'PAUSED']

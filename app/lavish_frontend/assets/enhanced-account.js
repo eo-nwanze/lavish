@@ -1278,7 +1278,16 @@ class RenewalCalendarManager {
 
   async loadSubscriptionRenewalData(subscriptionId) {
     try {
-      const response = await fetch(`/api/skips/subscriptions/${subscriptionId}/renewal-info/`);
+      const response = await fetch(`http://127.0.0.1:8003/api/skips/subscriptions/${subscriptionId}/renewal-info/`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`Subscription ${subscriptionId} not found, skipping renewal data`);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (data.success) {
@@ -2109,7 +2118,7 @@ window.renewalCalendarManager = renewalCalendarManager;
 // Renewal Display Manager
 class RenewalDisplayManager {
   constructor() {
-    this.baseApiUrl = '/api/skips/subscriptions';
+    this.baseApiUrl = 'http://127.0.0.1:8003/api/skips/subscriptions';
     this.renewalData = new Map();
     this.init();
   }
@@ -2276,7 +2285,7 @@ window.cutoffDateManager = cutoffDateManager;
 // Subscription Management Functions
 class SubscriptionManager {
   constructor() {
-    this.baseApiUrl = '/api/skips/subscriptions';
+    this.baseApiUrl = 'http://127.0.0.1:8003/api/skips/subscriptions';
   }
 
   async cancelSubscription(subscriptionId, reason, feedback) {
@@ -2431,6 +2440,14 @@ class SubscriptionManager {
           'Content-Type': 'application/json'
         }
       });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`Subscription ${subscriptionId} not found, returning default options`);
+          return { success: false, error: 'Subscription not found' };
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
       return data;

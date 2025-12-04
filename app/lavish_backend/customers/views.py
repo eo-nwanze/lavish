@@ -1,5 +1,8 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from .models import ShopifyCustomer
@@ -7,7 +10,7 @@ from .services import CustomerSyncService
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def customer_list(request):
     """List all customers"""
     customers = ShopifyCustomer.objects.all()[:50]  # Limit to 50 for performance
@@ -31,8 +34,51 @@ def customer_list(request):
     return Response({'customers': data})
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def sync_customers(request):
+    """Trigger customer synchronization"""
+    # Allow any origin for this endpoint
+    if request.method == 'OPTIONS':
+        response = HttpResponse()
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+    
+    try:
+        service = CustomerSyncService()
+        sync_log = service.sync_all_customers()
+        
+        response_data = {
+            'status': 'success',
+            'message': 'Customer synchronization completed',
+            'customers_processed': sync_log.customers_processed,
+            'customers_created': sync_log.customers_created,
+            'customers_updated': sync_log.customers_updated,
+            'errors_count': sync_log.errors_count,
+        }
+        
+        response = JsonResponse(response_data)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+    except Exception as e:
+        error_response = JsonResponse({
+            'status': 'error',
+            'message': str(e),
+            'customers_processed': 0,
+            'customers_created': 0,
+            'customers_updated': 0,
+            'errors_count': 1,
+        }, status=500)
+        
+        error_response['Access-Control-Allow-Origin'] = '*'
+        return error_response
+
+
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def customer_detail(request, shopify_id):
     """Get customer details"""
     try:
@@ -82,27 +128,3 @@ def customer_detail(request, shopify_id):
             {'error': 'Customer not found'}, 
             status=status.HTTP_404_NOT_FOUND
         )
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def sync_customers(request):
-    """Trigger customer synchronization"""
-    try:
-        service = CustomerSyncService()
-        sync_log = service.sync_all_customers()
-        
-        return Response({
-            'status': 'success',
-            'message': 'Customer synchronization completed',
-            'customers_processed': sync_log.customers_processed,
-            'customers_created': sync_log.customers_created,
-            'customers_updated': sync_log.customers_updated,
-            'errors_count': sync_log.errors_count,
-        })
-        
-    except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

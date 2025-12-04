@@ -11,6 +11,7 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from datetime import timedelta
 import json
 import logging
 
@@ -123,10 +124,14 @@ def subscription_renewal_info(request, subscription_id):
     GET /api/skips/subscriptions/{subscription_id}/renewal-info/
     """
     try:
-        subscription = get_object_or_404(
-            CustomerSubscription,
-            shopify_id=subscription_id
-        )
+        # First check if subscription_id is valid
+        if not subscription_id or subscription_id == 'undefined' or subscription_id == 'null':
+            return error_response('Invalid subscription ID', status=400)
+        
+        try:
+            subscription = CustomerSubscription.objects.get(shopify_id=subscription_id)
+        except CustomerSubscription.DoesNotExist:
+            return error_response(f'Subscription with ID {subscription_id} not found', status=404)
         
         # Calculate renewal urgency
         now = timezone.now()

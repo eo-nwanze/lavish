@@ -8,8 +8,10 @@
 class DjangoIntegration {
     constructor() {
         // Detect environment and set appropriate base URL
-        if (window.location.hostname === 'localhost' || window.location.hostname.includes('myshopify.com')) {
-            this.baseUrl = 'http://localhost:8003/api'; // Development
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.includes('myshopify.com')) {
+            this.baseUrl = 'http://127.0.0.1:8003/api'; // Development
         } else {
             this.baseUrl = 'https://lavish-backend.endevops.net/api'; // Production
         }
