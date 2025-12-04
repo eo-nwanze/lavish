@@ -514,6 +514,14 @@ def test_email_config(request, config_id):
         smtp_error = None
         
         try:
+            # First, verify we can resolve the hostname
+            try:
+                logger.info(f"Attempting to resolve hostname: {config.email_host}")
+                socket.getaddrinfo(config.email_host, config.email_port, socket.AF_UNSPEC, socket.SOCK_STREAM)
+                logger.info(f"Successfully resolved {config.email_host}")
+            except socket.gaierror as e:
+                raise ConnectionError(f"Cannot resolve hostname '{config.email_host}'. Please check your email configuration. Error: {e}")
+            
             # Use direct SMTP connection with SSL context for maximum reliability
             if config.email_use_ssl:
                 # SSL connection

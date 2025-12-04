@@ -1,7 +1,9 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/change_list.html" %}
 {% load static %}
 
 {% block title %}Shopify Integration Dashboard{% endblock %}
+
+{% block sidebar %}{{ block.super }}{% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
@@ -224,12 +226,12 @@
             <div class="stat-label">📋 KYC Info</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">{{ data_counts.webhook_subscriptions|default:0 }}</div>
-            <div class="stat-label">🔔 Webhook Subscriptions</div>
+            <div class="stat-number">{{ data_counts.webhook_endpoints|default:0 }}</div>
+            <div class="stat-label">🔔 Webhook Endpoints</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number">{{ data_counts.webhook_deliveries|default:0 }}</div>
-            <div class="stat-label">📬 Webhook Deliveries</div>
+            <div class="stat-number">{{ data_counts.sync_operations|default:0 }}</div>
+            <div class="stat-label">📊 Sync Operations</div>
         </div>
     </div>
     

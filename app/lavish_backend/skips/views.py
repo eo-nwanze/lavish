@@ -84,17 +84,9 @@ def skip_next_payment(request):
             # Auto-confirm skip (can be changed to require admin approval)
             skip.confirm_skip()
             
-            # Create notification
-            SkipNotification.objects.create(
-                skip=skip,
-                subscription=subscription,
-                notification_type='skip_confirmed',
-                channel='email',
-                recipient_email=subscription.customer_email,
-                subject=f'Your {subscription.subscription_name} order has been skipped',
-                message=f'Your next order scheduled for {subscription.original_order_date} '
-                       f'has been successfully skipped. Your new order date is {new_order_date}.'
-            )
+            # Send notification via email_manager
+            from .notification_service import SkipNotificationService
+            SkipNotificationService.send_skip_confirmed_notification(skip, subscription)
         
         logger.info(f'Skip created for subscription {subscription_id}: {skip.pk}')
         

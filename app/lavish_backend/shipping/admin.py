@@ -1,14 +1,72 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import (
     ShopifyCarrierService, ShopifyDeliveryProfile, ShopifyDeliveryZone,
     ShopifyDeliveryMethod, ShopifyFulfillmentOrder, ShopifyFulfillmentService,
-    ShippingSyncLog
+    ShippingSyncLog, ShippingRate, FulfillmentTrackingInfo
 )
 
 
+# Import-Export Resources
+class ShopifyCarrierServiceResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyCarrierService
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyDeliveryProfileResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyDeliveryProfile
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyDeliveryZoneResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyDeliveryZone
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyDeliveryMethodResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyDeliveryMethod
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyFulfillmentOrderResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyFulfillmentOrder
+        import_id_fields = ['shopify_id']
+
+
+class ShopifyFulfillmentServiceResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyFulfillmentService
+        import_id_fields = ['shopify_id']
+
+
+class ShippingSyncLogResource(resources.ModelResource):
+    class Meta:
+        model = ShippingSyncLog
+        import_id_fields = ['id']
+
+
+class ShippingRateResource(resources.ModelResource):
+    class Meta:
+        model = ShippingRate
+        import_id_fields = ['id']
+
+
+class FulfillmentTrackingInfoResource(resources.ModelResource):
+    class Meta:
+        model = FulfillmentTrackingInfo
+        import_id_fields = ['id']
+
+
 @admin.register(ShopifyCarrierService)
-class ShopifyCarrierServiceAdmin(admin.ModelAdmin):
+class ShopifyCarrierServiceAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyCarrierServiceResource
     list_display = ('name', 'carrier_service_type', 'active_status', 'service_discovery', 'store_domain')
     list_filter = ('active', 'carrier_service_type', 'service_discovery', 'store_domain')
     search_fields = ('name', 'shopify_id', 'callback_url')
@@ -35,7 +93,8 @@ class ShopifyCarrierServiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyDeliveryProfile)
-class ShopifyDeliveryProfileAdmin(admin.ModelAdmin):
+class ShopifyDeliveryProfileAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyDeliveryProfileResource
     list_display = ('name', 'active_status', 'default_status', 'zones_count', 'store_domain')
     list_filter = ('active', 'default', 'store_domain')
     search_fields = ('name', 'shopify_id')
@@ -59,7 +118,8 @@ class ShopifyDeliveryProfileAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyDeliveryZone)
-class ShopifyDeliveryZoneAdmin(admin.ModelAdmin):
+class ShopifyDeliveryZoneAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyDeliveryZoneResource
     list_display = ('name', 'profile', 'countries_list', 'methods_count', 'store_domain')
     list_filter = ('profile', 'store_domain')
     search_fields = ('name', 'shopify_id', 'profile__name')
@@ -100,7 +160,8 @@ class ShopifyDeliveryZoneAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyDeliveryMethod)
-class ShopifyDeliveryMethodAdmin(admin.ModelAdmin):
+class ShopifyDeliveryMethodAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyDeliveryMethodResource
     list_display = ('name', 'zone', 'method_type', 'profile_name', 'store_domain')
     list_filter = ('method_type', 'zone__profile', 'store_domain')
     search_fields = ('name', 'shopify_id', 'zone__name')
@@ -126,7 +187,8 @@ class ShopifyDeliveryMethodAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyFulfillmentOrder)
-class ShopifyFulfillmentOrderAdmin(admin.ModelAdmin):
+class ShopifyFulfillmentOrderAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyFulfillmentOrderResource
     list_display = ('shopify_id_short', 'order', 'status', 'request_status', 'location', 'created_at')
     list_filter = ('status', 'request_status', 'location', 'store_domain', 'created_at')
     search_fields = ('shopify_id', 'order__name', 'order__shopify_id')
@@ -159,7 +221,8 @@ class ShopifyFulfillmentOrderAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyFulfillmentService)
-class ShopifyFulfillmentServiceAdmin(admin.ModelAdmin):
+class ShopifyFulfillmentServiceAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyFulfillmentServiceResource
     list_display = ('name', 'handle', 'service_name', 'tracking_support', 'requires_shipping_method', 'store_domain')
     list_filter = ('tracking_support', 'requires_shipping_method', 'include_pending_stock', 'store_domain')
     search_fields = ('name', 'handle', 'shopify_id', 'email')
@@ -184,7 +247,8 @@ class ShopifyFulfillmentServiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShippingSyncLog)
-class ShippingSyncLogAdmin(admin.ModelAdmin):
+class ShippingSyncLogAdmin(ImportExportModelAdmin):
+    resource_class = ShippingSyncLogResource
     list_display = ('operation_type', 'status', 'carriers_processed', 'profiles_processed', 
                     'zones_processed', 'methods_processed', 'started_at', 'completed_at')
     list_filter = ('operation_type', 'status', 'store_domain', 'started_at')
@@ -214,3 +278,118 @@ class ShippingSyncLogAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         return False  # Sync logs are created automatically
+
+
+@admin.register(ShippingRate)
+class ShippingRateAdmin(ImportExportModelAdmin):
+    resource_class = ShippingRateResource
+    list_display = ('carrier_or_method', 'title', 'destination_country', 'price_display', 
+                    'delivery_estimate', 'active_status', 'last_synced')
+    list_filter = ('carrier', 'destination_country', 'active', 'price_currency', 
+                   'delivery_method__zone__profile')
+    search_fields = ('title', 'handle', 'description', 'carrier__name', 
+                    'destination_country', 'destination_zone')
+    readonly_fields = ('last_synced',)
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('carrier', 'delivery_method', 'handle', 'title', 'description', 'active')
+        }),
+        ('Pricing', {
+            'fields': ('price_amount', 'price_currency')
+        }),
+        ('Delivery Information', {
+            'fields': ('min_delivery_days', 'max_delivery_days', 'phone_required')
+        }),
+        ('Geographic Coverage', {
+            'fields': ('origin_country', 'destination_country', 'destination_zone')
+        }),
+        ('Sample Parameters', {
+            'fields': ('sample_weight_grams', 'sample_value_cents'),
+            'classes': ('collapse',),
+            'description': 'Parameters used to generate this rate'
+        }),
+        ('Metadata', {
+            'fields': ('service_code', 'last_synced'),
+            'classes': ('collapse',)
+        }),
+        ('Store Reference', {
+            'fields': ('store_domain',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def carrier_or_method(self, obj):
+        """Show carrier if available, otherwise show delivery method info"""
+        if obj.carrier:
+            return format_html('<span style="color: green;"><strong>{}</strong></span>', obj.carrier.name)
+        elif obj.delivery_method:
+            profile = obj.delivery_method.zone.profile.name
+            zone = obj.delivery_method.zone.name
+            return format_html('<span style="color: #666;">{}<br><small>{}</small></span>', profile, zone)
+        return format_html('<span style="color: #999;">Unknown</span>')
+    carrier_or_method.short_description = "Carrier / Method"
+    
+    def price_display(self, obj):
+        return f"{obj.price_amount:.2f} {obj.price_currency}"
+    price_display.short_description = "Price"
+    price_display.admin_order_field = "price_amount"
+    
+    def delivery_estimate(self, obj):
+        if obj.min_delivery_days and obj.max_delivery_days:
+            return f"{obj.min_delivery_days}-{obj.max_delivery_days} days"
+        elif obj.min_delivery_days:
+            return f"{obj.min_delivery_days}+ days"
+        elif obj.max_delivery_days:
+            return f"Up to {obj.max_delivery_days} days"
+        return "Not specified"
+    delivery_estimate.short_description = "Delivery Time"
+    
+    def active_status(self, obj):
+        if obj.active:
+            return format_html('<span style="color: green;">✓ Active</span>')
+        return format_html('<span style="color: red;">✗ Inactive</span>')
+    active_status.short_description = "Status"
+
+
+@admin.register(FulfillmentTrackingInfo)
+class FulfillmentTrackingInfoAdmin(ImportExportModelAdmin):
+    resource_class = FulfillmentTrackingInfoResource
+    list_display = ('fulfillment_order_id', 'company', 'number', 'tracking_link', 
+                    'is_active', 'created_at')
+    list_filter = ('company', 'is_active', 'created_at', 'store_domain')
+    search_fields = ('number', 'company', 'fulfillment_order__shopify_id', 'url')
+    readonly_fields = ('created_at', 'updated_at', 'tracking_url_display')
+    
+    fieldsets = (
+        ('Fulfillment Reference', {
+            'fields': ('fulfillment_order',)
+        }),
+        ('Tracking Information', {
+            'fields': ('company', 'number', 'url', 'is_active')
+        }),
+        ('Auto-Generated URL', {
+            'fields': ('tracking_url_display',),
+            'classes': ('collapse',),
+            'description': 'Automatically generated tracking URL based on carrier and tracking number'
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+        ('Store Reference', {
+            'fields': ('store_domain',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def fulfillment_order_id(self, obj):
+        return obj.fulfillment_order.shopify_id.split('/')[-1] if '/' in obj.fulfillment_order.shopify_id else obj.fulfillment_order.shopify_id
+    fulfillment_order_id.short_description = "Fulfillment Order"
+    
+    def tracking_link(self, obj):
+        url = obj.get_tracking_url()
+        if url:
+            return format_html('<a href="{}" target="_blank" style="color: #0066cc;">🔗 Track Shipment</a>', url)
+        return format_html('<span style="color: #999;">No tracking URL</span>')
+    tracking_link.short_description = "Tracking"

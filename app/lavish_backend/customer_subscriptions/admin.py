@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.utils.html import format_html
 from django.urls import path
 from django.http import HttpResponseRedirect
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import (
     SellingPlan, CustomerSubscription, SubscriptionBillingAttempt, 
     SubscriptionSyncLog, SubscriptionAddress, OrderAddressOverride,
@@ -11,8 +13,58 @@ from .models import (
 from .bidirectional_sync import subscription_sync
 
 
+# Import-Export Resources
+class SellingPlanResource(resources.ModelResource):
+    class Meta:
+        model = SellingPlan
+        import_id_fields = ['shopify_id']
+
+
+class CustomerSubscriptionResource(resources.ModelResource):
+    class Meta:
+        model = CustomerSubscription
+        import_id_fields = ['shopify_id']
+
+
+class SubscriptionBillingAttemptResource(resources.ModelResource):
+    class Meta:
+        model = SubscriptionBillingAttempt
+        import_id_fields = ['shopify_id']
+
+
+class SubscriptionSyncLogResource(resources.ModelResource):
+    class Meta:
+        model = SubscriptionSyncLog
+        import_id_fields = ['id']
+
+
+class SubscriptionAddressResource(resources.ModelResource):
+    class Meta:
+        model = SubscriptionAddress
+        import_id_fields = ['id']
+
+
+class OrderAddressOverrideResource(resources.ModelResource):
+    class Meta:
+        model = OrderAddressOverride
+        import_id_fields = ['id']
+
+
+class ProductShippingConfigResource(resources.ModelResource):
+    class Meta:
+        model = ProductShippingConfig
+        import_id_fields = ['id']
+
+
+class ShippingCutoffLogResource(resources.ModelResource):
+    class Meta:
+        model = ShippingCutoffLog
+        import_id_fields = ['id']
+
+
 @admin.register(SellingPlan)
-class SellingPlanAdmin(admin.ModelAdmin):
+class SellingPlanAdmin(ImportExportModelAdmin):
+    resource_class = SellingPlanResource
     list_display = ('name', 'interval_display', 'price_display', 'status_badge', 'created_in_django', 'needs_shopify_push', 'product_count')
     list_filter = ('billing_interval', 'is_active', 'created_in_django', 'needs_shopify_push', 'price_adjustment_type')
     search_fields = ('name', 'description', 'shopify_id')
@@ -106,7 +158,8 @@ class SellingPlanAdmin(admin.ModelAdmin):
 
 
 @admin.register(CustomerSubscription)
-class CustomerSubscriptionAdmin(admin.ModelAdmin):
+class CustomerSubscriptionAdmin(ImportExportModelAdmin):
+    resource_class = CustomerSubscriptionResource
     list_display = ('customer_display', 'selling_plan_display', 'status_badge', 'next_billing_date', 'total_price', 'created_in_django', 'needs_shopify_push')
     list_filter = ('status', 'created_in_django', 'needs_shopify_push', 'billing_policy_interval', 'next_billing_date')
     search_fields = ('shopify_id', 'customer__email', 'customer__first_name', 'customer__last_name', 'notes')
@@ -293,7 +346,8 @@ class CustomerSubscriptionAdmin(admin.ModelAdmin):
 
 
 @admin.register(SubscriptionBillingAttempt)
-class SubscriptionBillingAttemptAdmin(admin.ModelAdmin):
+class SubscriptionBillingAttemptAdmin(ImportExportModelAdmin):
+    resource_class = SubscriptionBillingAttemptResource
     list_display = ('subscription_display', 'status_badge', 'amount_display', 'attempted_at', 'completed_at')
     list_filter = ('status', 'attempted_at', 'currency')
     search_fields = ('shopify_id', 'shopify_order_id', 'error_message', 'subscription__customer__email')
@@ -343,7 +397,8 @@ class SubscriptionBillingAttemptAdmin(admin.ModelAdmin):
 
 
 @admin.register(SubscriptionSyncLog)
-class SubscriptionSyncLogAdmin(admin.ModelAdmin):
+class SubscriptionSyncLogAdmin(ImportExportModelAdmin):
+    resource_class = SubscriptionSyncLogResource
     list_display = ('operation_type', 'status_badge', 'stats_display', 'started_at', 'duration')
     list_filter = ('operation_type', 'status', 'started_at')
     search_fields = ('error_message',)
@@ -406,7 +461,8 @@ class SubscriptionSyncLogAdmin(admin.ModelAdmin):
 # =============================================================================
 
 @admin.register(SubscriptionAddress)
-class SubscriptionAddressAdmin(admin.ModelAdmin):
+class SubscriptionAddressAdmin(ImportExportModelAdmin):
+    resource_class = SubscriptionAddressResource
     """Admin for Primary Subscription Addresses - editable anytime, changes propagate to unshipped orders"""
     
     list_display = ('customer_email', 'address_display', 'city', 'province', 'country', 'is_validated', 'last_updated', 'needs_sync_badge')
@@ -489,7 +545,8 @@ class SubscriptionAddressAdmin(admin.ModelAdmin):
 
 
 @admin.register(OrderAddressOverride)
-class OrderAddressOverrideAdmin(admin.ModelAdmin):
+class OrderAddressOverrideAdmin(ImportExportModelAdmin):
+    resource_class = OrderAddressOverrideResource
     """Admin for Per-Order Address Overrides - Edit address for this delivery only"""
     
     list_display = ('order_name', 'customer_email', 'address_display', 'city', 'is_temporary', 'reason', 'created_at')
@@ -539,7 +596,8 @@ class OrderAddressOverrideAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductShippingConfig)
-class ProductShippingConfigAdmin(admin.ModelAdmin):
+class ProductShippingConfigAdmin(ImportExportModelAdmin):
+    resource_class = ProductShippingConfigResource
     """Admin for Per-Product Shipping Configuration - Cutoff logic and shipping settings"""
     
     list_display = ('product_title', 'cutoff_days', 'reminder_days', 'processing_days', 'international_shipping', 'special_handling')
@@ -597,7 +655,8 @@ class ProductShippingConfigAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShippingCutoffLog)
-class ShippingCutoffLogAdmin(admin.ModelAdmin):
+class ShippingCutoffLogAdmin(ImportExportModelAdmin):
+    resource_class = ShippingCutoffLogResource
     """Admin for Shipping Cutoff Logs - Track notifications and reminders"""
     
     list_display = ('order_name', 'customer_email', 'notification_type', 'cutoff_date', 'delivery_status', 'sent_at')

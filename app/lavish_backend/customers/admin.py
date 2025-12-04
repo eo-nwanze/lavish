@@ -4,8 +4,28 @@ from django.contrib import messages
 from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import ShopifyCustomer, ShopifyCustomerAddress, CustomerSyncLog
 from .realtime_sync import sync_customers_realtime, get_customer_sync_stats
+
+
+# Import-Export Resources
+class ShopifyCustomerResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyCustomer
+        import_id_fields = ('shopify_id',)
+
+
+class ShopifyCustomerAddressResource(resources.ModelResource):
+    class Meta:
+        model = ShopifyCustomerAddress
+        import_id_fields = ('shopify_id',)
+
+
+class CustomerSyncLogResource(resources.ModelResource):
+    class Meta:
+        model = CustomerSyncLog
 
 
 class ShopifyCustomerAddressInline(admin.TabularInline):
@@ -15,7 +35,8 @@ class ShopifyCustomerAddressInline(admin.TabularInline):
 
 
 @admin.register(ShopifyCustomer)
-class ShopifyCustomerAdmin(admin.ModelAdmin):
+class ShopifyCustomerAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyCustomerResource
     list_display = ('full_name', 'email', 'phone', 'state', 'number_of_orders', 'verified_email', 'last_synced')
     list_filter = ('state', 'verified_email', 'tax_exempt', 'store_domain', 'last_synced')
     search_fields = ('first_name', 'last_name', 'email', 'phone', 'shopify_id')
@@ -99,7 +120,8 @@ class ShopifyCustomerAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShopifyCustomerAddress)
-class ShopifyCustomerAddressAdmin(admin.ModelAdmin):
+class ShopifyCustomerAddressAdmin(ImportExportModelAdmin):
+    resource_class = ShopifyCustomerAddressResource
     list_display = ('customer', 'address_summary', 'city', 'province', 'country')
     list_filter = ('country', 'province', 'store_domain')
     search_fields = ('customer__first_name', 'customer__last_name', 'customer__email', 'address1', 'city')
@@ -111,7 +133,8 @@ class ShopifyCustomerAddressAdmin(admin.ModelAdmin):
 
 
 @admin.register(CustomerSyncLog)
-class CustomerSyncLogAdmin(admin.ModelAdmin):
+class CustomerSyncLogAdmin(ImportExportModelAdmin):
+    resource_class = CustomerSyncLogResource
     list_display = ('operation_type', 'status', 'customers_processed', 'customers_created', 'customers_updated', 'started_at', 'completed_at')
     list_filter = ('operation_type', 'status', 'store_domain', 'started_at')
     readonly_fields = ('started_at', 'completed_at')

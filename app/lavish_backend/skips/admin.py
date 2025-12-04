@@ -7,6 +7,8 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
 from customer_subscriptions.models import CustomerSubscription
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
 from .models import (
     SubscriptionSkipPolicy,
     SubscriptionSkip,
@@ -15,8 +17,34 @@ from .models import (
 )
 
 
+# Import-Export Resources
+class SubscriptionSkipPolicyResource(resources.ModelResource):
+    class Meta:
+        model = SubscriptionSkipPolicy
+        import_id_fields = ['id']
+
+
+class SubscriptionSkipResource(resources.ModelResource):
+    class Meta:
+        model = SubscriptionSkip
+        import_id_fields = ['id']
+
+
+class SkipNotificationResource(resources.ModelResource):
+    class Meta:
+        model = SkipNotification
+        import_id_fields = ['id']
+
+
+class SkipAnalyticsResource(resources.ModelResource):
+    class Meta:
+        model = SkipAnalytics
+        import_id_fields = ['id']
+
+
 @admin.register(SubscriptionSkipPolicy)
-class SubscriptionSkipPolicyAdmin(admin.ModelAdmin):
+class SubscriptionSkipPolicyAdmin(ImportExportModelAdmin):
+    resource_class = SubscriptionSkipPolicyResource
     list_display = ('name', 'max_skips_per_year', 'max_consecutive_skips', 
                     'advance_notice_days', 'skip_fee', 'is_active', 'created_at')
     list_filter = ('is_active', 'created_at')
@@ -54,7 +82,8 @@ class SubscriptionSkipInline(admin.TabularInline):
 
 
 @admin.register(SubscriptionSkip)
-class SubscriptionSkipAdmin(admin.ModelAdmin):
+class SubscriptionSkipAdmin(ImportExportModelAdmin):
+    resource_class = SubscriptionSkipResource
     list_display = ('subscription_link', 'original_order_date', 'new_order_date', 
                     'status_badge', 'skip_type', 'shopify_synced', 'created_at')
     list_filter = ('status', 'skip_type', 'shopify_synced', 'created_at')
@@ -113,7 +142,7 @@ class SubscriptionSkipAdmin(admin.ModelAdmin):
         )
     status_badge.short_description = 'Status'
     
-    actions = ['confirm_skips', 'cancel_skips', 'sync_to_shopify']
+    actions = ['confirm_skips', 'cancel_skips', 'sync_to_shopify', 'send_skip_notifications']
     
     def confirm_skips(self, request, queryset):
         confirmed = 0
@@ -121,6 +150,11 @@ class SubscriptionSkipAdmin(admin.ModelAdmin):
         for skip in queryset.filter(status='pending'):
             try:
                 skip.confirm_skip()
+                
+                # Send notification via email_manager
+                from .notification_service import SkipNotificationService
+                SkipNotificationService.send_skip_confirmed_notification(skip, skip.subscription)
+                
                 confirmed += 1
             except Exception as e:
                 errors.append(f"Skip {skip.pk}: {str(e)}")
@@ -146,10 +180,36 @@ class SubscriptionSkipAdmin(admin.ModelAdmin):
         count = queryset.filter(status='confirmed', shopify_synced=False).count()
         self.message_user(request, f'Would sync {count} skip(s) to Shopify (not implemented yet)')
     sync_to_shopify.short_description = 'Sync to Shopify'
+    
+    def send_skip_notifications(self, request, queryset):
+        """Send email notifications for selected skips"""
+        from .notification_service import SkipNotificationService
+        
+        sent = 0
+        failed = 0
+        
+        for skip in queryset.filter(status='confirmed'):
+            try:
+                success = SkipNotificationService.send_skip_confirmed_notification(skip, skip.subscription)
+                if success:
+                    sent += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                failed += 1
+                self.message_user(request, f'Error sending notification for skip {skip.pk}: {str(e)}', level='error')
+        
+        if sent > 0:
+            self.message_user(request, f'Successfully sent {sent} notification(s)', level='success')
+        if failed > 0:
+            self.message_user(request, f'Failed to send {failed} notification(s)', level='warning')
+    
+    send_skip_notifications.short_description = 'Send email notifications'
 
 
 @admin.register(SkipNotification)
-class SkipNotificationAdmin(admin.ModelAdmin):
+class SkipNotificationAdmin(ImportExportModelAdmin):
+    resource_class = SkipNotificationResource
     list_display = ('notification_type', 'channel', 'recipient_email', 
                     'delivered_badge', 'sent_at', 'created_at')
     list_filter = ('notification_type', 'channel', 'delivered', 'sent_at')
@@ -193,10 +253,60 @@ class SkipNotificationAdmin(admin.ModelAdmin):
                 '<span style="color: red;">✗ Not Sent</span>'
             )
     delivered_badge.short_description = 'Delivery Status'
+    
+    actions = ['resend_notifications', 'mark_as_delivered']
+    
+    def resend_notifications(self, request, queryset):
+        """Resend failed or unsent notifications"""
+        from .notification_service import SkipNotificationService
+        
+        sent = 0
+        failed = 0
+        
+        for notification in queryset.filter(delivered=False):
+            try:
+                if notification.skip:
+                    success = SkipNotificationService.send_skip_confirmed_notification(
+                        notification.skip, 
+                        notification.subscription
+                    )
+                elif notification.notification_type == 'skip_reminder':
+                    success = SkipNotificationService.send_skip_reminder_notification(
+                        notification.subscription,
+                        days_until_cutoff=7  # Default to 7 days
+                    )
+                elif notification.notification_type == 'skip_limit_reached':
+                    success = SkipNotificationService.send_skip_limit_reached_notification(
+                        notification.subscription
+                    )
+                else:
+                    success = False
+                
+                if success:
+                    sent += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                failed += 1
+        
+        if sent > 0:
+            self.message_user(request, f'Successfully resent {sent} notification(s)', level='success')
+        if failed > 0:
+            self.message_user(request, f'Failed to resend {failed} notification(s)', level='warning')
+    
+    resend_notifications.short_description = 'Resend failed notifications'
+    
+    def mark_as_delivered(self, request, queryset):
+        """Mark selected notifications as delivered"""
+        count = queryset.update(delivered=True)
+        self.message_user(request, f'Marked {count} notification(s) as delivered')
+    
+    mark_as_delivered.short_description = 'Mark as delivered'
 
 
 @admin.register(SkipAnalytics)
-class SkipAnalyticsAdmin(admin.ModelAdmin):
+class SkipAnalyticsAdmin(ImportExportModelAdmin):
+    resource_class = SkipAnalyticsResource
     list_display = ('period_type', 'period_start', 'period_end', 
                     'total_skips', 'confirmed_skips', 'unique_customers',
                     'revenue_deferred', 'generated_at')

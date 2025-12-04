@@ -39,9 +39,27 @@ ALLOWED_HOSTS = [
 ]
 
 
+# ============================================================================
+# EMAIL CONFIGURATION
+# ============================================================================
+
+# Use console backend for development (prints emails to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production with SMTP, use these settings instead:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@lavish.com')
+
+
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,6 +69,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'crispy_forms',
+    'import_export',
     
     # Custom apps
     'api',
@@ -148,11 +167,233 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================================================
+# JAZZMIN CONFIGURATION - Lavish Library Admin Theme
+# ============================================================================
+
+JAZZMIN_SETTINGS = {
+    # Site branding
+    "site_title": "Lavish Library Admin",
+    "site_header": "Lavish Library",
+    "site_brand": "Lavish Library",
+    "site_logo": None,
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome to Lavish Library Admin",
+    "copyright": "Lavish Library",
+    "search_model": ["accounts.CustomUser", "customers.ShopifyCustomer", "orders.ShopifyOrder", "products.ShopifyProduct"],
+    
+    # User menu
+    "user_avatar": None,
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["accounts.view_customuser"]},
+        {"name": "View Site", "url": "https://7fa66c-ac.myshopify.com/", "new_window": True},
+        {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "new_window": True},
+        {"model": "accounts.CustomUser"},
+    ],
+    
+    # User menu (dropdown)
+    "usermenu_links": [
+        {"name": "Support", "url": "https://github.com/eo-nwanze/lavish/issues", "icon": "fas fa-life-ring", "new_window": True},
+        {"model": "accounts.CustomUser"}
+    ],
+    
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": [
+        "auth",
+        "customers",
+        "customer_subscriptions",
+        "orders",
+        "skips",
+        "products",
+        "inventory",
+        "shipping",
+        "payments",
+        "email_manager",
+        "locations",
+        "shopify_integration",
+    ],
+    
+    # Icons for models - Font Awesome (use lowercase model names)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.group": "fas fa-users",
+        
+        # Accounts app
+        "accounts.customuser": "fas fa-user",
+        "accounts.companyrole": "fas fa-user-tag",
+        "customers.shopifycustomer": "fas fa-user-circle",
+        "customers.shopifycustomeraddress": "fas fa-map-marker-alt",
+        "customers.customersynclog": "fas fa-sync-alt",
+        
+        # Customer Subscriptions app (8 models)
+        "customer_subscriptions.sellingplan": "fas fa-calendar-check",
+        "customer_subscriptions.customersubscription": "fas fa-sync-alt",
+        "customer_subscriptions.subscriptionbillingattempt": "fas fa-credit-card",
+        "customer_subscriptions.subscriptionsynclog": "fas fa-history",
+        "customer_subscriptions.subscriptionaddress": "fas fa-map-marked-alt",
+        "customer_subscriptions.orderaddressoverride": "fas fa-map-signs",
+        "customer_subscriptions.productshippingconfig": "fas fa-cog",
+        "customer_subscriptions.shippingcutofflog": "fas fa-clock",
+        
+        # Orders app
+        "orders.shopifyorder": "fas fa-shopping-cart",
+        "orders.shopifyorderlineitem": "fas fa-list",
+        "orders.shopifyorderaddress": "fas fa-map-marker-alt",
+        "orders.ordersynclog": "fas fa-sync-alt",
+        
+        # Skips app
+        "skips.skip": "fas fa-forward",
+        "skips.skipnotification": "fas fa-bell",
+        "skips.subscriptionskip": "fas fa-step-forward",
+        "skips.subscriptionskippolicy": "fas fa-tasks",
+        
+        # Products app
+        "products.shopifyproduct": "fas fa-box-open",
+        "products.shopifyproductvariant": "fas fa-boxes",
+        "products.shopifyproductimage": "fas fa-image",
+        "products.shopifyproductmetafield": "fas fa-tags",
+        "products.productsynclog": "fas fa-sync-alt",
+        
+        # Inventory app
+        "inventory.shopifylocation": "fas fa-map-pin",
+        "inventory.shopifyinventoryitem": "fas fa-warehouse",
+        "inventory.shopifyinventorylevel": "fas fa-layer-group",
+        "inventory.inventoryadjustment": "fas fa-sliders-h",
+        "inventory.inventorysynclog": "fas fa-sync-alt",
+        
+        # Shipping app (9 models)
+        "shipping.shippingrate": "fas fa-dollar-sign",
+        "shipping.shopifycarrierservice": "fas fa-truck",
+        "shipping.shopifydeliveryprofile": "fas fa-clipboard-list",
+        "shipping.shopifydeliveryzone": "fas fa-map-marked",
+        "shipping.shopifydeliverymethod": "fas fa-shipping-fast",
+        "shipping.shopifyfulfillmentorder": "fas fa-box-open",
+        "shipping.shopifyfulfillmentservice": "fab fa-shopify",
+        "shipping.shippingsynclog": "fas fa-sync-alt",
+        "shipping.fulfillmenttrackinginfo": "fas fa-route",
+        
+        # Payments app
+        "payments.shopifypaymentsaccount": "fas fa-university",
+        "payments.shopifybalancetransaction": "fas fa-exchange-alt",
+        "payments.shopifypayout": "fas fa-money-bill-wave",
+        "payments.shopifybankaccount": "fas fa-piggy-bank",
+        "payments.shopifydispute": "fas fa-gavel",
+        "payments.shopifydisputeevidence": "fas fa-file-contract",
+        "payments.shopifyfinancekyc": "fas fa-id-card",
+        "payments.shopifypaymentssynclog": "fas fa-sync-alt",
+        "email_manager.emailtemplate": "fas fa-envelope",
+        "email_manager.emailhistory": "fas fa-paper-plane",
+        "email_manager.emailconfiguration": "fas fa-cog",
+        "email_manager.emailinbox": "fas fa-inbox",
+        "email_manager.emailmessage": "fas fa-envelope-open",
+        "email_manager.emailattachment": "fas fa-paperclip",
+        "email_manager.emailguardian": "fas fa-shield-alt",
+        "email_manager.securityalert": "fas fa-exclamation-triangle",
+        "email_manager.emailautomation": "fas fa-magic",
+        "email_manager.scheduledemail": "fas fa-calendar-alt",
+        "email_manager.incomingmailconfiguration": "fas fa-mail-bulk",
+        "email_manager.emailfolder": "fas fa-folder",
+        "email_manager.emaillabel": "fas fa-tag",
+        "email_manager.messagelabel": "fas fa-tags",
+        "email_manager.emailguardianrule": "fas fa-shield",
+        "email_manager.emailscanresult": "fas fa-search",
+        "locations.country": "fas fa-flag",
+        "locations.state": "fas fa-map",
+        "locations.city": "fas fa-city",
+        "locations.location": "fas fa-map-pin",
+        
+        # Accounts app (continued)
+        "accounts.industrytype": "fas fa-industry",
+        "accounts.companystaff": "fas fa-users",
+        "accounts.bankdetail": "fas fa-university",
+        "accounts.carddetail": "fas fa-credit-card",
+        "accounts.payid": "fas fa-mobile-alt",
+        "accounts.usersession": "fas fa-key",
+        "accounts.companysite": "fas fa-building",
+        
+        # Skips app
+        "skips.skipanalytics": "fas fa-chart-bar",
+        
+        # Shopify Integration app (4 models)
+        "shopify_integration": "fab fa-shopify",
+        "shopify_integration.shopifystore": "fas fa-store",
+        "shopify_integration.syncoperation": "fas fa-sync",
+        "shopify_integration.webhookendpoint": "fas fa-plug",
+        "shopify_integration.apiratelimit": "fas fa-tachometer-alt",
+    },
+    
+    # Icons for apps
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    
+    # UI Tweaks
+    "related_modal_active": False,
+    "custom_css": "admin/css/custom.css",
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    
+    # Change forms
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "accounts.CustomUser": "collapsible",
+        "auth.Group": "vertical_tabs",
+    },
+    
+    # Language chooser
+    "language_chooser": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-purple",
+    "accent": "accent-purple",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-purple",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
