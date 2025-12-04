@@ -307,6 +307,61 @@
     padding: 0.3rem;
     font-size: 0.8rem;
   }
+
+  /* Mobile-specific fix for Order #1415 unordered list text breaking */
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(1) {
+    position: relative;
+    padding-left: 1.5rem !important;
+    text-indent: -1.5rem !important;
+    line-height: 1.4 !important;
+    font-size: 0 !important;
+    color: transparent !important;
+  }
+
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(1)::before {
+    content: "• Ice Planet Barbarians Holographic";
+    font-size: 1.3rem !important;
+    color: rgba(var(--color-foreground), 0.8) !important;
+    display: block;
+    margin-bottom: 0.2rem;
+    font-weight: normal;
+  }
+
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(1)::after {
+    content: "Bookmarks - by CONKY (x1)";
+    font-size: 1.3rem !important;
+    color: rgba(var(--color-foreground), 0.8) !important;
+    display: block;
+    margin-left: 1.5rem;
+    text-indent: -1.5rem;
+  }
+
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(2) {
+    position: relative;
+    padding-left: 1.5rem !important;
+    text-indent: -1.5rem !important;
+    line-height: 1.4 !important;
+    font-size: 0 !important;
+    color: transparent !important;
+  }
+
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(2)::before {
+    content: "• Ice Planet Barbarians Stickers";
+    font-size: 1.3rem !important;
+    color: rgba(var(--color-foreground), 0.8) !important;
+    display: block;
+    margin-bottom: 0.2rem;
+    font-weight: normal;
+  }
+
+  .order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:nth-child(2)::after {
+    content: "- by CONKY (x1)";
+    font-size: 1.3rem !important;
+    color: rgba(var(--color-foreground), 0.8) !important;
+    display: block;
+    margin-left: 1.5rem;
+    text-indent: -1.5rem;
+  }
   
   .calendar-day-number {
     font-size: 0.8rem;
@@ -2524,6 +2579,65 @@ button[disabled]:hover {
 
 .order-card.cancelled {
   border-left-color: #dc3545;
+}
+
+/* Ensure Order #1415 unordered list matches other order cards container width */
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding-left: 1.5rem !important;
+  font-size: 1.3rem !important;
+  list-style-position: inside !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  overflow: hidden !important;
+}
+
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.5rem !important;
+  text-align: left !important;
+  overflow: hidden !important;
+}
+
+/* Ensure Order #1415 list items with long text wrap properly */
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li:contains("Ice Planet Barbarians") {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  max-width: calc(100% - 1.5rem) !important;
+  box-sizing: border-box !important;
+}
+
+/* Make Order #1415 list behave exactly like subscription-card lists */
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.order-card:not(.subscription-card) > div[style*="background-color: rgba"] ul li {
+  display: list-item !important;
+  list-style-position: inside !important;
+  text-indent: -1.5rem !important;
+  padding-left: 1.5rem !important;
 }
 
 .order-header {

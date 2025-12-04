@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cutoff Date Display Test</title>
+    <style>
+        :root {
+            --color-foreground: 51, 51, 51;
+            --color-background: 255, 255, 255;
+            --buttons-radius: 8px;
+            --media-radius: 12px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background-color: rgb(var(--color-background));
+            color: rgb(var(--color-foreground));
+        }
+
+        .subscription-card {
+            background-color: rgba(var(--color-foreground), 0.04);
+            border-radius: var(--media-radius);
+            padding: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            border: 1px solid rgba(var(--color-foreground), 0.1);
+        }
+
+        .subscription-dates p {
+            color: rgba(var(--color-foreground), 0.75);
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .cutoff-date-container {
+            position: relative;
+        }
+
+        .cutoff-date {
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--buttons-radius);
+            transition: all 0.3s ease;
+        }
+
+        .cutoff-date.urgent {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            animation: pulse-warning 2s infinite;
+        }
+
+        .cutoff-date.warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .cutoff-date.normal {
+            background-color: rgba(var(--color-foreground), 0.05);
+            color: rgba(var(--color-foreground), 0.8);
+        }
+
+        .cutoff-date.passed {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            text-decoration: line-through;
+        }
+
+        @keyframes pulse-warning {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .cutoff-progress-bar {
+            margin-top: 1rem;
+        }
+
+        .progress-label {
+            font-size: 1.2rem;
+            color: rgba(var(--color-foreground), 0.75);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            background-color: rgba(var(--color-foreground), 0.1);
+            border-radius: var(--buttons-radius);
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722);
+            border-radius: var(--buttons-radius);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .test-controls {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: rgba(var(--color-foreground), 0.05);
+            border-radius: var(--buttons-radius);
+        }
+
+        .test-controls button {
+            margin: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(var(--color-foreground), 0.3);
+            border-radius: var(--buttons-radius);
+            background-color: rgba(var(--color-background), 0.8);
+            cursor: pointer;
+        }
+
+        .test-controls button:hover {
+            background-color: rgba(var(--color-foreground), 0.1);
+        }
+
+        .status-display {
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: rgba(var(--color-foreground), 0.03);
+            border-radius: var(--buttons-radius);
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cutoff Date Display Test</h1>
+    
+    <div class="test-controls">
+        <h3>Test Controls</h3>
+        <button onclick="testUrgent()">Test Urgent (3 days)</button>
+        <button onclick="testWarning()">Test Warning (5 days)</button>
+        <button onclick="testNormal()">Test Normal (14 days)</button>
+        <button onclick="testPassed()">Test Passed</button>
+        <button onclick="testNoCutoff()">Test No Cutoff</button>
+        <button onclick="testError()">Test Error</button>
+    </div>
+
+    <div class="status-display" id="status">
+        Ready for testing...
+    </div>
+
+    <!-- Active Subscription 1 -->
+    <div class="subscription-card" data-subscription-id="1933365">
+        <div style="flex: 1; min-width: 250px;">
+            <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Lavish Library Monthly Box</h3>
+            <div class="subscription-dates">
+                <p><strong>Next renewal:</strong> <span class="next-renewal-date">July 4, 2025</span></p>
+                <p class="cutoff-date-container"><strong>⏰ Order cutoff:</strong> <span class="cutoff-date">Loading...</span></p>
+                <p><strong>Skips Reset On:</strong> January 1, 2026</p>
+            </div>
+            <div class="cutoff-progress-bar" style="display: none;">
+                <div class="progress-label"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: nowrap; justify-content: flex-end; flex-shrink: 0;">
+            <button style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer;">⚙️ Manage</button>
+            <button style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer;">⏭️ Skip</button>
+        </div>
+    </div>
+
+    <!-- Active Subscription 2 -->
+    <div class="subscription-card" data-subscription-id="1944521">
+        <div style="flex: 1; min-width: 250px;">
+            <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Fantasy Deluxe Package</h3>
+            <div class="subscription-dates">
+                <p><strong>Next renewal:</strong> <span class="next-renewal-date">August 15, 2025</span></p>
+                <p class="cutoff-date-container"><strong>⏰ Order cutoff:</strong> <span class="cutoff-date">Loading...</span></p>
+                <p><strong>Skips Reset On:</strong> January 1, 2026</p>
+            </div>
+            <div class="cutoff-progress-bar" style="display: none;">
+                <div class="progress-label"></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: nowrap; justify-content: flex-end; flex-shrink: 0;">
+            <button style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer;">⚙️ Manage</button>
+            <button style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer;">⏭️ Skip</button>
+        </div>
+    </div>
+
+    <script>
+        // Simplified CutoffDateManager for testing
+        class CutoffDateManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.loadAllCutoffDates();
+                });
+            }
+
+            async loadAllCutoffDates() {
+                const subscriptionCards = document.querySelectorAll('.subscription-card');
+                
+                for (const card of subscriptionCards) {
+                    const subscriptionId = card.dataset.subscriptionId;
+                    if (subscriptionId) {
+                        await this.loadCutoffDate(subscriptionId, card);
+                    }
+                }
+            }
+
+            async loadCutoffDate(subscriptionId, cardElement) {
+                try {
+                    const cutoffData = await this.fetchCutoffDate(subscriptionId);
+                    this.displayCutoffDate(cardElement, cutoffData);
+                    this.updateStatus(`✅ Loaded cutoff data for ${subscriptionId}: ${JSON.stringify(cutoffData)}`);
+                } catch (error) {
+                    console.error('Error loading cutoff date:', error);
+                    this.displayCutoffDate(cardElement, null);
+                    this.updateStatus(`❌ Error loading ${subscriptionId}: ${error.message}`);
+                }
+            }
+
+            async fetchCutoffDate(subscriptionId) {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Return mock data based on current test state
+                if (window.currentTestData) {
+                    return window.currentTestData[subscriptionId] || {
+                        cutoff_date: null,
+                        days_until_cutoff: null,
+                        urgency: 'normal',
+                        message: 'No cutoff set'
+                    };
+                }
+
+                // Default mock data
+                return {
+                    '1933365': {
+                        cutoff_date: '2025-06-27',
+                        days_until_cutoff: 3,
+                        urgency: 'urgent',
+                        message: 'Order cutoff in 3 days'
+                    },
+                    '1944521': {
+                        cutoff_date: '2025-08-08',
+                        days_until_cutoff: 38,
+                        urgency: 'normal',
+                        message: 'Order cutoff in 38 days'
+                    }
+                }[subscriptionId] || {
+                    cutoff_date: null,
+                    days_until_cutoff: null,
+                    urgency: 'normal',
+                    message: 'No cutoff set'
+                };
+            }
+
+            displayCutoffDate(cardElement, cutoffData) {
+                const cutoffDateElement = cardElement.querySelector('.cutoff-date');
+                const progressBar = cardElement.querySelector('.cutoff-progress-bar');
+                const progressLabel = cardElement.querySelector('.progress-label');
+                const progressFill = cardElement.querySelector('.progress-fill');
+
+                if (!cutoffData || !cutoffData.cutoff_date) {
+                    cutoffDateElement.textContent = 'No cutoff set';
+                    cutoffDateElement.className = 'cutoff-date normal';
+                    if (progressBar) progressBar.style.display = 'none';
+                    return;
+                }
+
+                // Format cutoff date
+                const cutoffDate = new Date(cutoffData.cutoff_date);
+                const formattedDate = cutoffDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                // Update cutoff date display
+                cutoffDateElement.textContent = formattedDate;
+                cutoffDateElement.className = `cutoff-date ${cutoffData.urgency}`;
+
+                // Show and update progress bar
+                if (progressBar && progressLabel && progressFill) {
+                    progressBar.style.display = 'block';
+                    
+                    if (cutoffData.days_until_cutoff > 0) {
+                        progressLabel.textContent = `${cutoffData.days_until_cutoff} days left to customize this box`;
+                        
+                        // Calculate progress percentage (assuming 14-day window)
+                        const totalDays = 14;
+                        const remainingDays = Math.min(cutoffData.days_until_cutoff, totalDays);
+                        const progressPercentage = (remainingDays / totalDays) * 100;
+                        
+                        progressFill.style.width = `${Math.max(5, progressPercentage)}%`;
+                        
+                        // Color based on urgency
+                        if (cutoffData.urgency === 'urgent') {
+                            progressFill.style.background = 'linear-gradient(90deg, #dc3545, #ff6b6b)';
+                        } else if (cutoffData.urgency === 'warning') {
+                            progressFill.style.background = 'linear-gradient(90deg, #ffc107, #ffdb4d)';
+                        } else {
+                            progressFill.style.background = 'linear-gradient(90deg, #4CAF50, #66bb6a)';
+                        }
+                    } else {
+                        progressLabel.textContent = 'Cutoff passed';
+                        progressFill.style.width = '100%';
+                        progressFill.style.background = 'linear-gradient(90deg, #6c757d, #868e96)';
+                    }
+                }
+
+                // Add tooltip
+                cutoffDateElement.title = cutoffData.message;
+                cutoffDateElement.style.cursor = 'help';
+            }
+
+            updateStatus(message) {
+                document.getElementById('status').textContent = message;
+            }
+
+            async refreshCutoffDates() {
+                await this.loadAllCutoffDates();
+            }
+        }
+
+        // Test functions
+        function testUrgent() {
+            window.currentTestData = {
+                '1933365': {
+                    cutoff_date: '2025-06-27',
+                    days_until_cutoff: 3,
+                    urgency: 'urgent',
+                    message: 'Order cutoff in 3 days'
+                },
+                '1944521': {
+                    cutoff_date: '2025-06-27',
+                    days_until_cutoff: 3,
+                    urgency: 'urgent',
+                    message: 'Order cutoff in 3 days'
+                }
+            };
+            cutoffDateManager.refreshCutoffDates();
+        }
+
+        function testWarning() {
+            window.currentTestData = {
+                '1933365': {
+                    cutoff_date: '2025-06-29',
+                    days_until_cutoff: 5,
+                    urgency: 'warning',
+                    message: 'Order cutoff in 5 days'
+                },
+                '1944521': {
+                    cutoff_date: '2025-06-29',
+                    days_until_cutoff: 5,
+                    urgency: 'warning',
+                    message: 'Order cutoff in 5 days'
+                }
+            };
+            cutoffDateManager.refreshCutoffDates();
+        }
+
+        function testNormal() {
+            window.currentTestData = {
+                '1933365': {
+                    cutoff_date: '2025-07-08',
+                    days_until_cutoff: 14,
+                    urgency: 'normal',
+                    message: 'Order cutoff in 14 days'
+                },
+                '1944521': {
+                    cutoff_date: '2025-07-08',
+                    days_until_cutoff: 14,
+                    urgency: 'normal',
+                    message: 'Order cutoff in 14 days'
+                }
+            };
+            cutoffDateManager.refreshCutoffDates();
+        }
+
+        function testPassed() {
+            window.currentTestData = {
+                '1933365': {
+                    cutoff_date: '2025-06-20',
+                    days_until_cutoff: -7,
+                    urgency: 'passed',
+                    message: 'Cutoff passed'
+                },
+                '1944521': {
+                    cutoff_date: '2025-06-20',
+                    days_until_cutoff: -7,
+                    urgency: 'passed',
+                    message: 'Cutoff passed'
+                }
+            };
+            cutoffDateManager.refreshCutoffDates();
+        }
+
+        function testNoCutoff() {
+            window.currentTestData = {
+                '1933365': {
+                    cutoff_date: null,
+                    days_until_cutoff: null,
+                    urgency: 'normal',
+                    message: 'No cutoff set'
+                },
+                '1944521': {
+                    cutoff_date: null,
+                    days_until_cutoff: null,
+                    urgency: 'normal',
+                    message: 'No cutoff set'
+                }
+            };
+            cutoffDateManager.refreshCutoffDates();
+        }
+
+        function testError() {
+            window.currentTestData = undefined;
+            // Simulate error by throwing exception
+            const originalFetch = cutoffDateManager.fetchCutoffDate;
+            cutoffDateManager.fetchCutoffDate = () => {
+                throw new Error('Network error - failed to fetch cutoff data');
+            };
+            cutoffDateManager.refreshCutoffDates().then(() => {
+                // Restore original method
+                cutoffDateManager.fetchCutoffDate = originalFetch;
+            });
+        }
+
+        // Initialize the cutoff date manager
+        const cutoffDateManager = new CutoffDateManager();
+    </script>
+</body>
+</html>
