@@ -321,9 +321,6 @@
                 <li class="admin-divider"><hr style="margin: 0.5rem 0; border: none; border-top: 1px solid rgba(var(--color-foreground), 0.2);"></li>
                 <li><a href="{{ routes.account_logout_url }}">Logout</a></li>
               </ul>
-              <div class="account-dropdown__django-status" id="header-django-status">
-                <span id="django-indicator">🔄 Checking Django...</span>
-              </div>
             </div>
           {%- else -%}
             <div class="account-dropdown">
@@ -479,56 +476,6 @@
   }
 
   customElements.define('sticky-header', StickyHeader);
-
-  // Django Integration Status for Header
-  document.addEventListener('DOMContentLoaded', function() {
-    const djangoIndicator = document.getElementById('django-indicator');
-    
-    if (djangoIndicator) {
-      checkHeaderDjangoStatus();
-    }
-  });
-
-  async function checkHeaderDjangoStatus() {
-    const indicator = document.getElementById('django-indicator');
-    
-    try {
-      if (window.djangoIntegration && window.djangoIntegration.initialized) {
-        // Test Django connection
-        const response = await window.djangoIntegration.makeRequest('/customers/status/');
-        
-        if (response) {
-          indicator.innerHTML = '✅ Django Connected';
-          indicator.className = 'django-connected';
-          
-          // Sync customer data if logged in
-          {% if customer %}
-            await window.djangoIntegration.makeRequest('/customers/sync/', 'POST', {
-              shopify_customer_id: {{ customer.id }},
-              customer_data: {
-                first_name: "{{ customer.first_name }}",
-                last_name: "{{ customer.last_name }}",
-                email: "{{ customer.email }}",
-                phone: "{{ customer.phone }}",
-                created_at: "{{ customer.created_at }}",
-                total_spent: {{ customer.total_spent | remove: ',' | times: 100 }},
-                orders_count: {{ customer.orders_count }}
-              }
-            });
-          {% endif %}
-        } else {
-          indicator.innerHTML = '⚠️ Django Partial';
-          indicator.className = 'django-disconnected';
-        }
-      } else {
-        indicator.innerHTML = '❌ Django Offline';
-        indicator.className = 'django-disconnected';
-      }
-    } catch (error) {
-      indicator.innerHTML = '❌ Connection Failed';
-      indicator.className = 'django-disconnected';
-    }
-  }
 
 {% endjavascript %}
 

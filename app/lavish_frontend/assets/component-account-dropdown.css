@@ -108,20 +108,4 @@ account-icon {
   transition: transform 0.2s ease;
 }
 
-/* Django integration indicator */
-.account-dropdown__django-status {
-  padding: 0.8rem 1.5rem;
-  background-color: rgba(var(--color-button), 0.1);
-  border-top: 0.1rem solid rgba(var(--color-foreground), 0.1);
-  font-size: 1.1rem;
-  color: rgba(var(--color-foreground), 0.7);
-  text-align: center;
-}
 
-.django-connected {
-  color: #22c55e;
-}
-
-.django-disconnected {
-  color: #ef4444;
-}

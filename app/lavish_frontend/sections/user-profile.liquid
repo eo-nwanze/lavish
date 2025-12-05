@@ -895,10 +895,6 @@
             <span class="badge">Verified Email</span>
           </div>
         </div>
-
-        <div class="django-sync-status">
-          <strong>Django Status:</strong> <span id="profile-django-status">Checking...</span>
-        </div>
       </div>
 
       <!-- Main Profile Content -->
@@ -1112,49 +1108,7 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  checkProfileDjangoStatus();
-});
 
-async function checkProfileDjangoStatus() {
-  const statusElement = document.getElementById('profile-django-status');
-  
-  try {
-    if (window.djangoIntegration && window.djangoIntegration.initialized) {
-      const response = await window.djangoIntegration.makeRequest('/customers/profile/', 'GET');
-      
-      if (response) {
-        statusElement.innerHTML = '✅ Synced';
-        statusElement.style.color = 'green';
-        
-        // Sync profile data
-        await window.djangoIntegration.makeRequest('/customers/profile/sync/', 'POST', {
-          shopify_customer_id: {{ customer.id | default: 'null' }},
-          profile_data: {
-            first_name: "{{ customer.first_name }}",
-            last_name: "{{ customer.last_name }}",
-            email: "{{ customer.email }}",
-            phone: "{{ customer.phone }}",
-            orders_count: {{ customer.orders_count | default: 0 }},
-            total_spent: {{ customer.total_spent | remove: ',' | times: 100 | default: 0 }},
-            created_at: "{{ customer.created_at }}",
-            last_login: new Date().toISOString()
-          }
-        });
-      } else {
-        statusElement.innerHTML = '⚠️ Partial';
-        statusElement.style.color = 'orange';
-      }
-    } else {
-      statusElement.innerHTML = '❌ Offline';
-      statusElement.style.color = 'red';
-    }
-  } catch (error) {
-    statusElement.innerHTML = '❌ Error';
-    statusElement.style.color = 'red';
-  }
-}
 
 function showSection(sectionId) {
   // Hide all sections

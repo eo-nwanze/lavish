@@ -2,19 +2,6 @@
 <div style="padding: 2rem; text-align: center;">
   <h1>Admin Dashboard Test</h1>
   <p>If you can see this, the page template is working!</p>
-  <p>Django Integration Status: <span id="django-status">Checking...</span></p>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const statusEl = document.getElementById('django-status');
-    
-    if (window.djangoIntegration) {
-      statusEl.textContent = '✅ Django Integration Available';
-      statusEl.style.color = 'green';
-    } else {
-      statusEl.textContent = '❌ Django Integration Not Available';
-      statusEl.style.color = 'red';
-    }
-  });
-</script>
+

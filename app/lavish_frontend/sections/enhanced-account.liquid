@@ -161,11 +161,6 @@
           </a>
         </div>
 
-        <!-- Django Sync Status -->
-        <div class="django-sync-status" style="background-color: rgba(var(--color-foreground), 0.04) !important;">
-          <strong>Django Integration:</strong> <span id="django-status">Checking connection...</span>
-        </div>
-
         <!-- Overview Tab -->
         <div id="overview" class="tab-content active">
           <h2>Account Overview</h2>
@@ -842,17 +837,17 @@
                   </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
-                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                <div style="display: grid; grid-template-columns: auto auto; gap: 0.3rem; justify-content: start;">
+                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     ⏭️ Skip
                   </button>
-                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     📍 Address
                   </button>
-                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     💳 Payment
                   </button>
-                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     ❌ Cancel
                   </button>
                 </div>
@@ -920,17 +915,17 @@
                   </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
-                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                <div style="display: grid; grid-template-columns: auto auto; gap: 0.3rem; justify-content: start;">
+                  <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     ⏭️ Skip
                   </button>
-                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="changeAddress('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     📍 Address
                   </button>
-                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="changePayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     💳 Payment
                   </button>
-                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.15rem 0.25rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.4rem; white-space: nowrap;">
+                  <button onclick="cancelSubscription('1944521')" style="background-color: #910F3F; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.1rem; white-space: nowrap;">
                     ❌ Cancel
                   </button>
                 </div>
