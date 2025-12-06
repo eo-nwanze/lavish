@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Lavish Library - Shopify Customer Account System
 
 A comprehensive customer account management system integrating Shopify themes with Django backend.
