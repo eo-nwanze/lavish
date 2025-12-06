@@ -42,12 +42,14 @@ class ProductBidirectionalSync:
                 logger.info(f"Product {product.id} has test/temp ID, will create in Shopify")
                 return self._create_new_product(product)
             
-            # Check if this is a new product or update
-            if has_valid_id and not product.created_in_django:
+            # Check if this is a new product or update based on Shopify ID
+            if has_valid_id:
                 # Product already exists in Shopify, update it
+                logger.info(f"Product {product.id} has valid Shopify ID, will update in Shopify")
                 return self._update_existing_product(product)
             else:
                 # New product, create in Shopify
+                logger.info(f"Product {product.id} has no valid Shopify ID, will create in Shopify")
                 return self._create_new_product(product)
                 
         except Exception as e:
@@ -120,14 +122,22 @@ class ProductBidirectionalSync:
                 product.sync_status = 'synced'
                 product.save()
                 
-                # Update variants with Shopify IDs
+                # Update variants with Shopify IDs and set inventory
                 shopify_variants = shopify_product.get("variants", {}).get("edges", [])
                 for idx, edge in enumerate(shopify_variants):
                     variant_node = edge.get("node", {})
                     if idx < product.variants.count():
                         django_variant = product.variants.all()[idx]
-                        django_variant.shopify_id = variant_node.get("id", "")
+                        shopify_variant_id = variant_node.get("id", "")
+                        django_variant.shopify_id = shopify_variant_id
                         django_variant.save()
+                        
+                        # Update inventory for this variant if it has quantity
+                        if django_variant.inventory_quantity > 0:
+                            self._update_variant_inventory(
+                                shopify_variant_id,
+                                django_variant.inventory_quantity
+                            )
             
             logger.info(f"Successfully created product {product.id} in Shopify: {shopify_id}")
             return {
@@ -165,6 +175,15 @@ class ProductBidirectionalSync:
                 product.last_pushed_to_shopify = timezone.now()
                 product.sync_status = 'synced'
                 product.save()
+                
+                # Also update variant inventory if variants exist
+                for variant in product.variants.all():
+                    if variant.shopify_id and variant.shopify_id.startswith('gid://shopify/ProductVariant/'):
+                        if variant.inventory_quantity > 0:
+                            self._update_variant_inventory(
+                                variant.shopify_id,
+                                variant.inventory_quantity
+                            )
             
             logger.info(f"Successfully updated product {product.id} in Shopify")
             return {
@@ -234,6 +253,71 @@ class ProductBidirectionalSync:
         
         return results
     
+    def _update_variant_inventory(self, variant_id: str, quantity: int) -> Dict:
+        """
+        Update inventory quantity for a variant in Shopify
+        
+        Args:
+            variant_id: Shopify variant ID (gid://shopify/ProductVariant/...)
+            quantity: Inventory quantity to set
+            
+        Returns:
+            Dict with success status
+        """
+        try:
+            # First, fetch the inventory item ID from the variant
+            query = """
+            query getVariantInventoryItem($id: ID!) {
+              productVariant(id: $id) {
+                id
+                inventoryItem {
+                  id
+                }
+              }
+            }
+            """
+            
+            result = self.client.execute_graphql_query(query, {"id": variant_id})
+            
+            if "errors" in result:
+                logger.error(f"Error fetching inventory item: {result['errors']}")
+                return {
+                    "success": False,
+                    "message": "Failed to fetch inventory item ID"
+                }
+            
+            variant_data = result.get("data", {}).get("productVariant", {})
+            inventory_item = variant_data.get("inventoryItem", {})
+            inventory_item_id = inventory_item.get("id")
+            
+            if not inventory_item_id:
+                logger.warning(f"No inventory item found for variant {variant_id}")
+                return {
+                    "success": False,
+                    "message": "No inventory item found"
+                }
+            
+            # Now update the inventory quantity
+            update_result = self.client.update_inventory_quantities(
+                inventory_item_id=inventory_item_id,
+                available_quantity=quantity
+            )
+            
+            if update_result.get("success"):
+                logger.info(f"Successfully updated inventory for variant {variant_id} to {quantity}")
+            else:
+                logger.warning(f"Failed to update inventory for variant {variant_id}: {update_result.get('message')}")
+            
+            return update_result
+            
+        except Exception as e:
+            logger.error(f"Exception updating variant inventory: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to update inventory: {e}"
+            }
+
     def sync_pending_products(self) -> Dict:
         """
         Sync all products that need to be pushed to Shopify

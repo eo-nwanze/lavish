@@ -1186,3 +1186,116 @@ class EnhancedShopifyAPIClient:
                 "error": str(e),
                 "message": f"Failed to create variant: {e}"
             }
+    
+    def update_inventory_quantities(self, inventory_item_id: str, available_quantity: int, location_id: str = None) -> Dict:
+        """
+        Update inventory quantities for a variant using inventorySetQuantities mutation
+        
+        Args:
+            inventory_item_id: Shopify inventory item ID (get from variant.inventoryItem.id)
+            available_quantity: The quantity to set
+            location_id: Location ID (defaults to primary location if not provided)
+            
+        Returns:
+            Dict with success status
+        """
+        # Get primary location if not provided
+        if not location_id:
+            location_query = """
+            {
+              locations(first: 1) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+            }
+            """
+            loc_result = self.execute_graphql_query(location_query)
+            locations = loc_result.get("data", {}).get("locations", {}).get("edges", [])
+            if locations:
+                location_id = locations[0]["node"]["id"]
+            else:
+                return {
+                    "success": False,
+                    "message": "No location found in Shopify"
+                }
+        
+        mutation = """
+        mutation inventorySetQuantities($input: InventorySetQuantitiesInput!) {
+          inventorySetQuantities(input: $input) {
+            inventoryAdjustmentGroup {
+              id
+              reason
+              changes {
+                name
+                delta
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variables = {
+            "input": {
+                "reason": "correction",
+                "name": "available",
+                "ignoreCompareQuantity": True,
+                "quantities": [
+                    {
+                        "inventoryItemId": inventory_item_id,
+                        "locationId": location_id,
+                        "quantity": int(available_quantity)
+                    }
+                ]
+            }
+        }
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                logger.error(f"GraphQL errors updating inventory: {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            inventory_data = result.get("data", {}).get("inventorySetQuantities", {})
+            user_errors = inventory_data.get("userErrors", [])
+            
+            if user_errors:
+                logger.error(f"Inventory update validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            adjustment = inventory_data.get("inventoryAdjustmentGroup")
+            if adjustment:
+                return {
+                    "success": True,
+                    "adjustment": adjustment,
+                    "message": "Inventory updated successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No adjustment data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception updating inventory: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to update inventory: {e}"
+            }
+

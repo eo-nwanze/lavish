@@ -28,6 +28,39 @@ class SubscriptionBidirectionalSync:
     
     # ==================== SELLING PLAN SYNC ====================
     
+    def _build_pricing_policies(self, selling_plan):
+        """Build pricing policies for selling plan"""
+        adjustment_type = selling_plan.price_adjustment_type
+        adjustment_value = float(selling_plan.price_adjustment_value)
+        
+        if adjustment_type == "PERCENTAGE":
+            return [{
+                "fixed": {
+                    "adjustmentType": "PERCENTAGE",
+                    "adjustmentValue": {
+                        "percentage": adjustment_value
+                    }
+                }
+            }]
+        elif adjustment_type == "FIXED_AMOUNT":
+            return [{
+                "fixed": {
+                    "adjustmentType": "FIXED_AMOUNT",
+                    "adjustmentValue": {
+                        "fixedValue": adjustment_value
+                    }
+                }
+            }]
+        else:  # PRICE
+            return [{
+                "fixed": {
+                    "adjustmentType": "PRICE",
+                    "adjustmentValue": {
+                        "price": adjustment_value
+                    }
+                }
+            }]
+    
     def create_selling_plan_in_shopify(self, selling_plan) -> Dict:
         """
         Create a selling plan (subscription plan) in Shopify
@@ -107,14 +140,7 @@ class SubscriptionBidirectionalSync:
                         "intervalCount": selling_plan.delivery_interval_count
                     }
                 },
-                "pricingPolicies": [{
-                    "fixed": {
-                        "adjustmentType": selling_plan.price_adjustment_type,
-                        "adjustmentValue": {
-                            "percentage" if selling_plan.price_adjustment_type == "PERCENTAGE" else "fixedValue": float(selling_plan.price_adjustment_value)
-                        }
-                    }
-                }]
+                "pricingPolicies": self._build_pricing_policies(selling_plan)
             }]
         }
         
@@ -198,7 +224,7 @@ class SubscriptionBidirectionalSync:
     
     def create_subscription_in_shopify(self, subscription) -> Dict:
         """
-        Create a subscription contract in Shopify
+        Create a subscription contract in Shopify using subscriptionContractCreate
         
         Args:
             subscription: CustomerSubscription instance
@@ -206,9 +232,16 @@ class SubscriptionBidirectionalSync:
         Returns:
             Dict with success status and details
         """
+        # Validate customer has Shopify ID
+        if not subscription.customer.shopify_id:
+            return {
+                "success": False,
+                "message": "Customer must be synced to Shopify first (no Shopify ID)"
+            }
+        
         mutation = """
-        mutation subscriptionDraftCreate($input: SubscriptionDraftInput!) {
-          subscriptionDraftCreate(input: $input) {
+        mutation subscriptionContractCreate($input: SubscriptionContractCreateInput!) {
+          subscriptionContractCreate(input: $input) {
             draft {
               id
             }
@@ -220,60 +253,95 @@ class SubscriptionBidirectionalSync:
         }
         """
         
-        # Build subscription draft input
-        draft_input = {
-            "customerId": subscription.customer.shopify_id,
-            "nextBillingDate": subscription.next_billing_date.isoformat() if subscription.next_billing_date else None,
-            "billingPolicy": {
-                "interval": subscription.billing_policy_interval,
-                "intervalCount": subscription.billing_policy_interval_count
-            },
-            "deliveryPolicy": {
-                "interval": subscription.delivery_policy_interval,
-                "intervalCount": subscription.delivery_policy_interval_count
-            },
-            "status": subscription.status,
-            "currencyCode": subscription.currency
-        }
-        
-        # Add line items
-        if subscription.line_items:
-            draft_input["lines"] = []
-            for item in subscription.line_items:
-                line = {
-                    "productVariantId": item.get("variant_id"),
-                    "quantity": item.get("quantity", 1)
-                }
-                if "selling_plan_id" in item:
-                    line["sellingPlanId"] = item["selling_plan_id"]
-                draft_input["lines"].append(line)
-        
-        # Add delivery address
-        if subscription.delivery_address:
-            draft_input["deliveryMethod"] = {
-                "shipping": {
-                    "address": subscription.delivery_address
-                }
+        # Build delivery address
+        delivery_address = subscription.get_address()
+        if not delivery_address:
+            return {
+                "success": False,
+                "message": "Subscription must have a delivery address"
             }
         
-        variables = {"input": draft_input}
+        # Build contract input
+        contract_input = {
+            "customerId": subscription.customer.shopify_id,
+            "nextBillingDate": subscription.next_billing_date.isoformat() if subscription.next_billing_date else date.today().isoformat(),
+            "currencyCode": subscription.currency,
+            "contract": {
+                "status": subscription.status,
+                "billingPolicy": {
+                    "interval": subscription.billing_policy_interval,
+                    "intervalCount": subscription.billing_policy_interval_count
+                },
+                "deliveryPolicy": {
+                    "interval": subscription.delivery_policy_interval,
+                    "intervalCount": subscription.delivery_policy_interval_count
+                },
+                "deliveryMethod": {
+                    "shipping": {
+                        "address": {
+                            "firstName": delivery_address.get("first_name", ""),
+                            "lastName": delivery_address.get("last_name", ""),
+                            "address1": delivery_address.get("address1", ""),
+                            "address2": delivery_address.get("address2", ""),
+                            "city": delivery_address.get("city", ""),
+                            "province": delivery_address.get("province", ""),
+                            "country": delivery_address.get("country", ""),
+                            "zip": delivery_address.get("zip", delivery_address.get("zip_code", ""))
+                        }
+                    }
+                }
+            }
+        }
+        
+        # Add payment method if available
+        if subscription.payment_method_id:
+            contract_input["contract"]["paymentMethodId"] = subscription.payment_method_id
+        
+        # Add notes if available
+        if subscription.notes:
+            contract_input["contract"]["note"] = subscription.notes
+        
+        variables = {"input": contract_input}
         
         try:
             # Step 1: Create draft
             result = self.client.execute_graphql_query(mutation, variables)
             
-            if "errors" in result or result.get("data", {}).get("subscriptionDraftCreate", {}).get("userErrors"):
-                errors = result.get("errors") or result["data"]["subscriptionDraftCreate"]["userErrors"]
-                logger.error(f"Subscription draft creation failed: {errors}")
+            if "errors" in result:
+                logger.error(f"GraphQL errors creating subscription: {result['errors']}")
                 return {
                     "success": False,
-                    "errors": errors,
-                    "message": "Failed to create subscription draft"
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
                 }
             
-            draft_id = result["data"]["subscriptionDraftCreate"]["draft"]["id"]
+            data = result.get("data", {}).get("subscriptionContractCreate", {})
+            user_errors = data.get("userErrors", [])
             
-            # Step 2: Commit draft to create active subscription
+            if user_errors:
+                logger.error(f"Subscription creation validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": f"Validation errors: {user_errors[0].get('message', 'Unknown error')}"
+                }
+            
+            draft_id = data.get("draft", {}).get("id")
+            if not draft_id:
+                return {
+                    "success": False,
+                    "message": "No draft ID returned from Shopify"
+                }
+            
+            # Step 2: Add line items to draft
+            if subscription.line_items:
+                for item in subscription.line_items:
+                    line_result = self._add_line_to_subscription_draft(draft_id, item)
+                    if not line_result.get("success"):
+                        logger.warning(f"Failed to add line item to draft: {line_result.get('message')}")
+                        # Continue with other items even if one fails
+            
+            # Step 3: Commit draft to create active subscription
             commit_result = self._commit_subscription_draft(draft_id)
             
             if commit_result.get("success"):
@@ -284,6 +352,7 @@ class SubscriptionBidirectionalSync:
                     subscription.needs_shopify_push = False
                     subscription.shopify_push_error = ""
                     subscription.last_pushed_to_shopify = timezone.now()
+                    subscription.contract_created_at = timezone.now()
                     subscription.save()
                 
                 logger.info(f"Successfully created subscription in Shopify: {contract_id}")
@@ -303,6 +372,59 @@ class SubscriptionBidirectionalSync:
                 "success": False,
                 "error": str(e),
                 "message": f"Failed to create subscription: {e}"
+            }
+    
+    def _add_line_to_subscription_draft(self, draft_id: str, line_item: dict) -> Dict:
+        """Add a line item to a subscription draft"""
+        mutation = """
+        mutation subscriptionDraftLineAdd($draftId: ID!, $input: SubscriptionLineInput!) {
+          subscriptionDraftLineAdd(draftId: $draftId, input: $input) {
+            lineAdded {
+              id
+              quantity
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        line_input = {
+            "productVariantId": line_item.get("variant_id"),
+            "quantity": line_item.get("quantity", 1)
+        }
+        
+        if "current_price" in line_item:
+            line_input["currentPrice"] = str(line_item["current_price"])
+        
+        if "selling_plan_id" in line_item:
+            line_input["sellingPlanId"] = line_item["selling_plan_id"]
+        
+        variables = {
+            "draftId": draft_id,
+            "input": line_input
+        }
+        
+        try:
+            result = self.client.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result or result.get("data", {}).get("subscriptionDraftLineAdd", {}).get("userErrors"):
+                errors = result.get("errors") or result["data"]["subscriptionDraftLineAdd"]["userErrors"]
+                return {
+                    "success": False,
+                    "errors": errors,
+                    "message": f"Failed to add line item: {errors[0].get('message') if errors else 'Unknown error'}"
+                }
+            
+            return {"success": True}
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Exception adding line item: {e}"
             }
     
     def _commit_subscription_draft(self, draft_id: str) -> Dict:
@@ -352,6 +474,7 @@ class SubscriptionBidirectionalSync:
     def update_subscription_in_shopify(self, subscription) -> Dict:
         """
         Update an existing subscription in Shopify
+        Creates a draft, applies changes, and commits
         
         Args:
             subscription: CustomerSubscription instance
@@ -365,13 +488,12 @@ class SubscriptionBidirectionalSync:
                 "message": "Subscription has no Shopify ID, cannot update"
             }
         
+        # Step 1: Create draft from existing contract
         mutation = """
-        mutation subscriptionContractUpdate($contractId: ID!, $input: SubscriptionContractUpdateInput!) {
-          subscriptionContractUpdate(contractId: $contractId, input: $input) {
-            contract {
+        mutation subscriptionContractUpdate($contractId: ID!) {
+          subscriptionContractUpdate(contractId: $contractId) {
+            draft {
               id
-              status
-              nextBillingDate
             }
             userErrors {
               field
@@ -381,39 +503,62 @@ class SubscriptionBidirectionalSync:
         }
         """
         
-        update_input = {}
-        
-        if subscription.next_billing_date:
-            update_input["nextBillingDate"] = subscription.next_billing_date.isoformat()
-        
-        variables = {
-            "contractId": subscription.shopify_id,
-            "input": update_input
-        }
+        variables = {"contractId": subscription.shopify_id}
         
         try:
             result = self.client.execute_graphql_query(mutation, variables)
             
-            if "errors" in result or result.get("data", {}).get("subscriptionContractUpdate", {}).get("userErrors"):
-                errors = result.get("errors") or result["data"]["subscriptionContractUpdate"]["userErrors"]
-                logger.error(f"Subscription update failed: {errors}")
+            if "errors" in result:
+                logger.error(f"GraphQL errors creating draft: {result['errors']}")
                 return {
                     "success": False,
-                    "errors": errors,
-                    "message": "Failed to update subscription"
+                    "errors": result["errors"],
+                    "message": "Failed to create update draft"
                 }
             
-            with transaction.atomic():
-                subscription.needs_shopify_push = False
-                subscription.shopify_push_error = ""
-                subscription.last_pushed_to_shopify = timezone.now()
-                subscription.save()
+            data = result.get("data", {}).get("subscriptionContractUpdate", {})
+            user_errors = data.get("userErrors", [])
             
-            logger.info(f"Successfully updated subscription in Shopify: {subscription.shopify_id}")
-            return {
-                "success": True,
-                "message": "Subscription updated in Shopify"
-            }
+            if user_errors:
+                logger.error(f"Subscription update draft errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": f"Failed to create draft: {user_errors[0].get('message', 'Unknown error')}"
+                }
+            
+            draft_id = data.get("draft", {}).get("id")
+            if not draft_id:
+                return {
+                    "success": False,
+                    "message": "No draft ID returned for update"
+                }
+            
+            # Step 2: Apply changes to the draft (if needed)
+            # You can add more draft modifications here, such as:
+            # - Adding/removing line items
+            # - Updating delivery address
+            # - Applying discounts
+            # For now, we just commit with the current state
+            
+            # Step 3: Commit the draft
+            commit_result = self._commit_subscription_draft(draft_id)
+            
+            if commit_result.get("success"):
+                with transaction.atomic():
+                    subscription.needs_shopify_push = False
+                    subscription.shopify_push_error = ""
+                    subscription.last_pushed_to_shopify = timezone.now()
+                    subscription.contract_updated_at = timezone.now()
+                    subscription.save()
+                
+                logger.info(f"Successfully updated subscription in Shopify: {subscription.shopify_id}")
+                return {
+                    "success": True,
+                    "message": "Subscription updated in Shopify"
+                }
+            
+            return commit_result
             
         except Exception as e:
             logger.error(f"Exception updating subscription: {e}")
@@ -423,6 +568,129 @@ class SubscriptionBidirectionalSync:
                 "success": False,
                 "error": str(e),
                 "message": f"Failed to update subscription: {e}"
+            }
+    
+    def create_billing_attempt(self, subscription, origin_time: Optional[str] = None) -> Dict:
+        """
+        Create a billing attempt for a subscription contract
+        This bills the customer and creates an order
+        
+        Args:
+            subscription: CustomerSubscription instance
+            origin_time: Optional ISO datetime for billing cycle calculation
+            
+        Returns:
+            Dict with success status and billing attempt details
+        """
+        if not subscription.shopify_id:
+            return {
+                "success": False,
+                "message": "Subscription has no Shopify ID, cannot create billing attempt"
+            }
+        
+        import uuid
+        idempotency_key = str(uuid.uuid4())
+        
+        mutation = """
+        mutation subscriptionBillingAttemptCreate($contractId: ID!, $input: SubscriptionBillingAttemptInput!) {
+          subscriptionBillingAttemptCreate(
+            subscriptionContractId: $contractId
+            subscriptionBillingAttemptInput: $input
+          ) {
+            subscriptionBillingAttempt {
+              id
+              originTime
+              errorMessage
+              errorCode
+              nextActionUrl
+              order {
+                id
+                name
+              }
+              ready
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        billing_input = {
+            "idempotencyKey": idempotency_key
+        }
+        
+        if origin_time:
+            billing_input["originTime"] = origin_time
+        
+        variables = {
+            "contractId": subscription.shopify_id,
+            "input": billing_input
+        }
+        
+        try:
+            result = self.client.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                logger.error(f"GraphQL errors creating billing attempt: {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "Failed to create billing attempt"
+                }
+            
+            data = result.get("data", {}).get("subscriptionBillingAttemptCreate", {})
+            user_errors = data.get("userErrors", [])
+            
+            if user_errors:
+                logger.error(f"Billing attempt validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": f"Billing attempt failed: {user_errors[0].get('message', 'Unknown error')}"
+                }
+            
+            billing_attempt = data.get("subscriptionBillingAttempt", {})
+            
+            if billing_attempt:
+                # Save billing attempt to database
+                from customer_subscriptions.models import SubscriptionBillingAttempt
+                
+                ba_record = SubscriptionBillingAttempt.objects.create(
+                    subscription=subscription,
+                    shopify_id=billing_attempt.get("id"),
+                    status='PENDING',
+                    amount=subscription.total_price,
+                    currency=subscription.currency,
+                    shopify_order_id=billing_attempt.get("order", {}).get("id", "") if billing_attempt.get("order") else "",
+                    error_message=billing_attempt.get("errorMessage", ""),
+                    error_code=billing_attempt.get("errorCode", "")
+                )
+                
+                logger.info(f"Created billing attempt: {billing_attempt.get('id')}")
+                
+                return {
+                    "success": True,
+                    "billing_attempt_id": billing_attempt.get("id"),
+                    "order_id": billing_attempt.get("order", {}).get("id") if billing_attempt.get("order") else None,
+                    "order_name": billing_attempt.get("order", {}).get("name") if billing_attempt.get("order") else None,
+                    "ready": billing_attempt.get("ready", False),
+                    "next_action_url": billing_attempt.get("nextActionUrl"),
+                    "message": "Billing attempt created successfully"
+                }
+            
+            return {
+                "success": False,
+                "message": "No billing attempt data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception creating billing attempt: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to create billing attempt: {e}"
             }
     
     def cancel_subscription_in_shopify(self, subscription) -> Dict:

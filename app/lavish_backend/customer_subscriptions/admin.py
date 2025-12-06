@@ -105,6 +105,21 @@ class SellingPlanAdmin(ImportExportModelAdmin):
     
     actions = ['push_to_shopify', 'mark_for_push']
     
+    def save_model(self, request, obj, form, change):
+        """Auto-push to Shopify on create/update"""
+        super().save_model(request, obj, form, change)
+        
+        # Auto-push to Shopify if flagged
+        if obj.needs_shopify_push:
+            result = subscription_sync.create_selling_plan_in_shopify(obj)
+            
+            if result.get('success'):
+                # Refresh to get the real Shopify ID
+                obj.refresh_from_db()
+                self.message_user(request, f"✅ Selling Plan synced to Shopify: {obj.name} (ID: {obj.shopify_id})", level=messages.SUCCESS)
+            else:
+                self.message_user(request, f"⚠️ Selling Plan saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+    
     def interval_display(self, obj):
         return f"Every {obj.billing_interval_count} {obj.billing_interval}(s)"
     interval_display.short_description = 'Billing Interval'
@@ -199,7 +214,31 @@ class CustomerSubscriptionAdmin(ImportExportModelAdmin):
         }),
     )
     
-    actions = ['push_to_shopify', 'update_in_shopify', 'cancel_in_shopify', 'mark_for_push']
+    actions = ['push_to_shopify', 'update_in_shopify', 'cancel_in_shopify', 'create_billing_attempt', 'mark_for_push']
+    
+    def save_model(self, request, obj, form, change):
+        """Auto-push to Shopify on create/update"""
+        super().save_model(request, obj, form, change)
+        
+        # Auto-push to Shopify if flagged
+        if obj.needs_shopify_push:
+            # Determine if this is create or update
+            if obj.shopify_id and not obj.shopify_id.startswith('temp_'):
+                # Update existing subscription
+                result = subscription_sync.update_subscription_in_shopify(obj)
+                action = "updated"
+            else:
+                # Create new subscription
+                result = subscription_sync.create_subscription_in_shopify(obj)
+                action = "created"
+            
+            if result.get('success'):
+                # Refresh to get the real Shopify ID
+                obj.refresh_from_db()
+                customer_name = f"{obj.customer.first_name} {obj.customer.last_name}" if obj.customer else "Customer"
+                self.message_user(request, f"✅ Subscription {action} in Shopify for {customer_name} (ID: {obj.shopify_id})", level=messages.SUCCESS)
+            else:
+                self.message_user(request, f"⚠️ Subscription saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
     
     def customer_display(self, obj):
         if obj.customer:
@@ -305,6 +344,31 @@ class CustomerSubscriptionAdmin(ImportExportModelAdmin):
             self.message_user(request, error_msg, level=messages.ERROR)
     
     cancel_in_shopify.short_description = "🗑️ Cancel subscriptions IN Shopify"
+    
+    def create_billing_attempt(self, request, queryset):
+        """Create billing attempts for subscriptions (bills customer and creates order)"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+        
+        for subscription in queryset:
+            if not subscription.shopify_id:
+                results["failed"] += 1
+                results["errors"].append(f"Sub {subscription.id}: No Shopify ID")
+                continue
+            
+            result = subscription_sync.create_billing_attempt(subscription)
+            if result.get("success"):
+                results["successful"] += 1
+                order_name = result.get("order_name", "pending")
+                self.message_user(request, f"✅ Billing attempt created for subscription {subscription.id}. Order: {order_name}", level=messages.SUCCESS)
+            else:
+                results["failed"] += 1
+                results["errors"].append(f"Sub {subscription.id}: {result.get('message', 'Unknown error')}")
+        
+        if results["failed"] > 0:
+            error_msg = f"❌ Failed {results['failed']} billing attempts. Errors: " + "; ".join(results["errors"][:3])
+            self.message_user(request, error_msg, level=messages.ERROR)
+    
+    create_billing_attempt.short_description = "💳 Create Billing Attempts (Bill & Create Orders)"
     
     def mark_for_push(self, request, queryset):
         """Mark selected subscriptions for push"""
