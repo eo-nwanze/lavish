@@ -27,8 +27,8 @@ class ShopifyLocation(models.Model):
     fulfillment_service = models.CharField(max_length=100, blank=True)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -62,8 +62,8 @@ class ShopifyInventoryItem(models.Model):
     variant = models.OneToOneField('products.ShopifyProductVariant', on_delete=models.CASCADE, related_name='inventory_item', null=True, blank=True)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')

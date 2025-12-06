@@ -7,7 +7,7 @@ from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from .models import ShopifyProduct, ShopifyProductVariant, ShopifyProductImage, ShopifyProductMetafield, ProductSyncLog
 from .realtime_sync import sync_products_realtime, get_product_sync_stats
-from .bidirectional_sync import bidirectional_sync
+from .bidirectional_sync import ProductBidirectionalSync
 
 
 # Import-Export Resources
@@ -124,6 +124,83 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     )
     
     actions = ['sync_selected_products', 'push_to_shopify', 'update_in_shopify', 'delete_from_shopify', 'mark_for_push', 'create_shipping_configs']
+    
+    def save_model(self, request, obj, form, change):
+        """Auto-push to Shopify on create/update"""
+        from django.utils import timezone
+        
+        # For new products, ensure timestamps are set
+        if not change:
+            if not obj.created_at:
+                obj.created_at = timezone.now()
+            if not obj.updated_at:
+                obj.updated_at = timezone.now()
+            # Generate handle if not provided
+            if not obj.handle:
+                obj.handle = obj.title.lower().replace(' ', '-').replace('/', '-')
+            # Set shopify_id for new products (will be updated after Shopify push)
+            if not obj.shopify_id:
+                obj.shopify_id = f"temp_{int(timezone.now().timestamp())}"
+        
+        super().save_model(request, obj, form, change)
+        
+        # Auto-push to Shopify if flagged
+        if obj.needs_shopify_push:
+            # Skip test/temp products
+            if not (obj.shopify_id and (obj.shopify_id.startswith('test_') or obj.shopify_id.startswith('temp_'))):
+                sync_service = ProductBidirectionalSync()
+                result = sync_service.push_product_to_shopify(obj)
+                
+                if result.get('success'):
+                    self.message_user(request, f"✅ Product synced to Shopify: {obj.title}", level=messages.SUCCESS)
+                else:
+                    self.message_user(request, f"⚠️ Product saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+            else:
+                # For temp products, still save but don't push
+                self.message_user(request, f"ℹ️ Product saved with temporary ID. Will be pushed to Shopify on next update.", level=messages.INFO)
+    
+    def save_formset(self, request, form, formset, change):
+        """Save variants and auto-push to Shopify"""
+        instances = formset.save(commit=False)
+        
+        # Process deleted objects
+        for obj in formset.deleted_objects:
+            obj.delete()
+        
+        # Process new/updated instances
+        for instance in instances:
+            instance.save()
+        
+        # Save many-to-many relationships
+        formset.save_m2m()
+        
+        # If this is a variant formset and product exists, mark product for sync
+        if formset.model == ShopifyProductVariant:
+            product = form.instance
+            if product.pk and product.shopify_id:
+                # Mark product for push if it has variants
+                if not product.shopify_id.startswith('temp_'):
+                    product.needs_shopify_push = True
+                    product.save(update_fields=['needs_shopify_push'])
+    
+    def delete_model(self, request, obj):
+        """Auto-delete from Shopify on delete"""
+        product_title = obj.title
+        product_id = obj.shopify_id
+        
+        # Try to delete from Shopify if it has a Shopify ID
+        if product_id and not (product_id.startswith('test_') or product_id.startswith('temp_')):
+            sync_service = ProductBidirectionalSync()
+            result = sync_service.delete_product_from_shopify(obj)
+            
+            if result.get('success'):
+                self.message_user(request, f"✅ Product '{product_title}' deleted from both Django and Shopify", level=messages.SUCCESS)
+            else:
+                self.message_user(request, f"⚠️ Product '{product_title}' deleted from Django but Shopify delete failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+        else:
+            self.message_user(request, f"ℹ️ Product '{product_title}' deleted from Django only (no Shopify ID)", level=messages.INFO)
+        
+        super().delete_model(request, obj)
     
     def status_badge(self, obj):
         """Show product status with colored badge"""

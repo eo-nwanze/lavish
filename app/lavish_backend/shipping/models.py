@@ -245,8 +245,8 @@ class ShopifyFulfillmentOrder(models.Model):
     delivery_method = models.JSONField(null=True, blank=True)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')

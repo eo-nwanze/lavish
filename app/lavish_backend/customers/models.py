@@ -10,7 +10,7 @@ class ShopifyCustomer(models.Model):
     """Model representing a Shopify customer"""
     
     # Shopify fields
-    shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Global ID")
+    shopify_id = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Shopify Global ID")
     email = models.EmailField(max_length=254, db_index=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
@@ -34,8 +34,8 @@ class ShopifyCustomer(models.Model):
     marketing_opt_in_level = models.CharField(max_length=50, blank=True)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -71,6 +71,14 @@ class ShopifyCustomer(models.Model):
     
     def save(self, *args, **kwargs):
         """Override save to detect changes and flag for Shopify push"""
+        import time
+        
+        # If this is a new customer without shopify_id, generate temp ID
+        if not self.pk and not self.shopify_id:
+            timestamp = int(time.time())
+            self.shopify_id = f"temp_customer_{timestamp}"
+            self.needs_shopify_push = True
+        
         if self.pk:  # Only for existing records
             try:
                 old_instance = ShopifyCustomer.objects.get(pk=self.pk)
@@ -104,7 +112,7 @@ class ShopifyCustomerAddress(models.Model):
     """Model representing a Shopify customer address"""
     
     customer = models.ForeignKey(ShopifyCustomer, on_delete=models.CASCADE, related_name='addresses')
-    shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Address ID")
+    shopify_id = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Shopify Address ID")
     
     # Address fields
     first_name = models.CharField(max_length=100, blank=True)
