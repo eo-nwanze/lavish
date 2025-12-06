@@ -129,18 +129,10 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
         """Auto-push to Shopify on create/update"""
         from django.utils import timezone
         
-        # For new products, ensure timestamps are set
+        # For new products, mark as created in Django
         if not change:
-            if not obj.created_at:
-                obj.created_at = timezone.now()
-            if not obj.updated_at:
-                obj.updated_at = timezone.now()
-            # Generate handle if not provided
-            if not obj.handle:
-                obj.handle = obj.title.lower().replace(' ', '-').replace('/', '-')
-            # Set shopify_id for new products (will be updated after Shopify push)
-            if not obj.shopify_id:
-                obj.shopify_id = f"temp_{int(timezone.now().timestamp())}"
+            obj.created_in_django = True
+            obj.needs_shopify_push = True
         
         super().save_model(request, obj, form, change)
         
@@ -185,8 +177,8 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
         product_title = obj.title
         product_id = obj.shopify_id
         
-        # Try to delete from Shopify if it has a Shopify ID
-        if product_id and not (product_id.startswith('test_') or product_id.startswith('temp_')):
+        # Try to delete from Shopify if it has a valid Shopify ID
+        if product_id and product_id.startswith('gid://shopify/Product/'):
             sync_service = ProductBidirectionalSync()
             result = sync_service.delete_product_from_shopify(obj)
             
@@ -195,7 +187,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
             else:
                 self.message_user(request, f"⚠️ Product '{product_title}' deleted from Django but Shopify delete failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
         else:
-            self.message_user(request, f"ℹ️ Product '{product_title}' deleted from Django only (no Shopify ID)", level=messages.INFO)
+            self.message_user(request, f"ℹ️ Product '{product_title}' deleted from Django only (temp/no Shopify ID)", level=messages.INFO)
         
         super().delete_model(request, obj)
     
@@ -257,6 +249,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     
     def push_to_shopify(self, request, queryset):
         """Push selected products TO Shopify (create new or update existing)"""
+        sync_service = ProductBidirectionalSync()
         results = {
             "successful": 0,
             "failed": 0,
@@ -264,7 +257,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
         }
         
         for product in queryset:
-            result = bidirectional_sync.push_product_to_shopify(product)
+            result = sync_service.push_product_to_shopify(product)
             if result.get("success"):
                 results["successful"] += 1
             else:
@@ -282,6 +275,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     
     def update_in_shopify(self, request, queryset):
         """Update existing products in Shopify"""
+        sync_service = ProductBidirectionalSync()
         results = {
             "successful": 0,
             "failed": 0,
@@ -294,7 +288,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
                 results["errors"].append(f"{product.title}: No Shopify ID (use 'Push to Shopify' instead)")
                 continue
             
-            result = bidirectional_sync.push_product_to_shopify(product)
+            result = sync_service.push_product_to_shopify(product)
             if result.get("success"):
                 results["successful"] += 1
             else:
@@ -312,6 +306,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     
     def delete_from_shopify(self, request, queryset):
         """Delete selected products from Shopify"""
+        sync_service = ProductBidirectionalSync()
         results = {
             "successful": 0,
             "failed": 0,
@@ -324,7 +319,7 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
                 results["errors"].append(f"{product.title}: No Shopify ID, cannot delete")
                 continue
             
-            result = bidirectional_sync.delete_product_from_shopify(product)
+            result = sync_service.delete_product_from_shopify(product)
             if result.get("success"):
                 results["successful"] += 1
             else:
@@ -407,7 +402,8 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     def push_pending_products(self, request):
         """Push all products marked as needing push to Shopify"""
         try:
-            results = bidirectional_sync.sync_pending_products()
+            sync_service = ProductBidirectionalSync()
+            results = sync_service.sync_pending_products()
             if results['successful'] > 0:
                 message = f"✅ Push completed! Successful: {results['successful']}/{results['total']}"
                 messages.success(request, message)

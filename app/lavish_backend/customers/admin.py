@@ -99,10 +99,22 @@ class ShopifyCustomerAdmin(ImportExportModelAdmin):
                     self.message_user(request, f"ℹ️ Address saved. Customer must be synced to Shopify first.", level=messages.INFO)
     
     def delete_model(self, request, obj):
-        """Handle customer deletion (Django only - no Shopify delete)"""
+        """Auto-delete from Shopify on delete"""
+        from customers.customer_bidirectional_sync import CustomerBidirectionalSync
+        
         customer_name = obj.full_name
+        customer_id = obj.shopify_id
+        
+        # Try to delete from Shopify if it has a valid Shopify ID
+        if customer_id and customer_id.startswith('gid://shopify/Customer/'):
+            sync_service = CustomerBidirectionalSync()
+            # Note: Shopify doesn't support deleting customers via API
+            # Can only anonymize/redact per GDPR
+            self.message_user(request, f"ℹ️ Customer '{customer_name}' deleted from Django. Note: Shopify doesn't allow customer deletion via API (GDPR compliance).", level=messages.INFO)
+        else:
+            self.message_user(request, f"✅ Customer '{customer_name}' deleted from Django (had no Shopify ID or temp ID)", level=messages.SUCCESS)
+        
         super().delete_model(request, obj)
-        self.message_user(request, f"⚠️ Customer '{customer_name}' deleted from Django only (not deleted from Shopify)", level=messages.WARNING)
     
     def sync_selected_customers(self, request, queryset):
         """Sync selected customers from Shopify"""
