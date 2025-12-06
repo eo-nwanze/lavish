@@ -26,8 +26,13 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
     
     def has_change_permission(self, request, obj=None):
         return False
+    
     def has_delete_permission(self, request, obj=None):
         return False
+    
+    def get_queryset(self, request):
+        """Return empty queryset since this is a dashboard view"""
+        return self.model.objects.none()
     
     def get_urls(self):
         urls = super().get_urls()
@@ -58,10 +63,9 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
         # Get recent product images for gallery
         product_images = ShopifyProductImage.objects.select_related('product').order_by('-created_at')[:12]
         
-        context = {
+        extra_context = extra_context or {}
+        extra_context.update({
             'title': 'Shopify Integration Dashboard',
-            'has_permission': True,
-            'app_label': 'shopify_integration',
             'data_counts': {
                 'customers': ShopifyCustomer.objects.count(),
                 'customer_addresses': ShopifyCustomerAddress.objects.count(),
@@ -83,12 +87,9 @@ class ShopifyIntegrationAdminView(admin.ModelAdmin):
                 'sync_operations': SyncOperation.objects.count(),
             },
             'product_images': product_images,
-        }
+        })
         
-        if extra_context:
-            context.update(extra_context)
-            
-        return TemplateResponse(request, self.change_list_template, context)
+        return super().changelist_view(request, extra_context=extra_context)
     
     def sync_all_data(self, request):
         """Sync all data from Shopify"""

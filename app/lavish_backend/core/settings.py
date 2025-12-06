@@ -14,11 +14,12 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from the repository root
+env_path = BASE_DIR.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 # Quick-start development settings - unsuitable for production
@@ -34,8 +35,17 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'lavish-backend.endevops.net',
+    'https://lavish-backend.endevops.net',
     'viewing.endevops.net',
     '.myshopify.com',  # Allow all Shopify store domains
+]
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://lavish-backend.endevops.net',
+    'https://viewing.endevops.net',
+    'http://localhost:8003',
+    'http://127.0.0.1:8003',
 ]
 
 
@@ -214,7 +224,7 @@ JAZZMIN_SETTINGS = {
     
     # Side Menu
     "show_sidebar": True,
-    "navigation_expanded": True,
+    "navigation_expanded": False,
     "hide_apps": [],
     "hide_models": [],
     "order_with_respect_to": [
@@ -232,9 +242,24 @@ JAZZMIN_SETTINGS = {
         "shopify_integration",
     ],
     
-    # Icons for models - Font Awesome (use lowercase model names)
+    # Icons for models and apps - Font Awesome (use lowercase model names)el names)
     "icons": {
+        # App-level icons (these appear in sidebar for parent items)
         "auth": "fas fa-users-cog",
+        "customers": "fas fa-user",
+        "customer_subscriptions": "fas fa-sync-alt",
+        "orders": "fas fa-shopping-cart",
+        "skips": "fas fa-forward",
+        "products": "fas fa-box",
+        "inventory": "fas fa-boxes",
+        "shipping": "fas fa-truck",
+        "payments": "fas fa-credit-card",
+        "email_manager": "fas fa-envelope",
+        "locations": "fas fa-map-marker-alt",
+        "shopify_integration": "fab fa-shopify",
+        "accounts": "fas fa-user-circle",
+        
+        # Model-level icons
         "auth.group": "fas fa-users",
         
         # Accounts app
@@ -368,15 +393,15 @@ JAZZMIN_UI_TWEAKS = {
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-purple",
-    "accent": "accent-purple",
+    "brand_colour": "navbar-brown",
+    "accent": "accent-brown",
     "navbar": "navbar-white navbar-light",
     "no_navbar_border": False,
     "navbar_fixed": False,
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-purple",
+    "sidebar": "sidebar-dark-brown",
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
@@ -447,6 +472,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # CORS Configuration for Shopify Theme Integration
 CORS_ALLOWED_ORIGINS = [
+    "https://lavish-backend.endevops.net",
     "https://7fa66c-ac.myshopify.com",
     "https://viewing.endevops.net",  # Production frontend
     "https://lavish-backend.endevops.net",  # Production backend

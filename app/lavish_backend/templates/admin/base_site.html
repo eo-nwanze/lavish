@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* Ensure dark mode styles are loaded */
+</style>
+<script>
+// Dark Mode Toggle Script
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for saved theme preference or default to 'light'
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    
+    // Create toggle button if it doesn't exist
+    if (!document.querySelector('.dark-mode-toggle')) {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'dark-mode-toggle';
+        
+        // Create icon only (no text)
+        const icon = document.createElement('i');
+        
+        if (currentTheme === 'dark') {
+            icon.className = 'fas fa-sun';
+        } else {
+            icon.className = 'fas fa-moon';
+        }
+        
+        toggleBtn.appendChild(icon);
+        
+        toggleBtn.addEventListener('click', function() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update button icon
+            const btnIcon = this.querySelector('i');
+            
+            if (newTheme === 'dark') {
+                btnIcon.className = 'fas fa-sun';
+            } else {
+                btnIcon.className = 'fas fa-moon';
+            }
+        });
+        
+        document.body.appendChild(toggleBtn);
+    }
+});
+</script>
+{% endblock %}
+
+{% block branding %}
+<a href="{% url 'admin:index' %}" class="brand-link">
+    <span class="brand-text font-weight-light">{{ site_header|default:_('Lavish Library') }}</span>
+</a>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

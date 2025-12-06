@@ -3,22 +3,19 @@
 
 {% block title %}Shopify Integration Dashboard{% endblock %}
 
-{% block sidebar %}{{ block.super }}{% endblock %}
-
 {% block extrahead %}
 {{ block.super }}
 <style>
 .sync-dashboard {
     padding: 20px;
-    background: white;
-    margin: 20px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: transparent;
+    margin: 20px 0 20px 40px;
+    max-width: calc(100% - 80px);
 }
 
 .sync-card {
-    background: #f8f9fa;
-    border: 1px solid #ddd;
+    background: #FFF6EA;
+    border: 2px solid #4C5151;
     border-radius: 8px;
     padding: 20px;
     margin: 10px;
@@ -68,11 +65,11 @@
 }
 
 .stat-item {
-    background: #f8f9fa;
+    background: transparent;
     padding: 15px;
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
-    border: 1px solid #e9ecef;
+    border: 2px solid #4C5151;
 }
 
 .stat-number {
@@ -158,16 +155,21 @@
 .breadcrumbs a:hover {
     text-decoration: underline;
 }
+
+/* Adjust content wrapper for sync dashboard page */
+body.change-form .content-wrapper,
+body.change-list .content-wrapper {
+    margin-left: 400px !important;
+}
+
+body.sidebar-collapse.change-form .content-wrapper,
+body.sidebar-collapse.change-list .content-wrapper {
+    margin-left: 4.6rem !important;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="breadcrumbs">
-    <a href="{% url 'admin:index' %}">Home</a>
-    &rsaquo; <a href="{% url 'admin:app_list' app_label='shopify_integration' %}">Shopify Integration</a>
-    &rsaquo; Sync Dashboard
-</div>
-
 <div class="sync-dashboard">
     <h1>🔄 Shopify Integration Dashboard</h1>
     
