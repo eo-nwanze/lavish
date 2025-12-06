@@ -98,6 +98,25 @@ class ShopifyInventoryItemAdmin(ImportExportModelAdmin):
     
     actions = ['sync_selected_items']
     
+    def save_formset(self, request, form, formset, change):
+        """Auto-push inventory levels to Shopify on create/update"""
+        instances = formset.save(commit=True)
+        
+        # Push each inventory level that needs sync
+        for instance in instances:
+            if hasattr(instance, 'needs_shopify_push') and instance.needs_shopify_push:
+                # Skip test/temp inventory
+                if not (instance.inventory_item.shopify_id and (instance.inventory_item.shopify_id.startswith('test_') or instance.inventory_item.shopify_id.startswith('temp_'))):
+                    from inventory.bidirectional_sync import push_inventory_to_shopify
+                    result = push_inventory_to_shopify(instance)
+                    
+                    if result.get('success'):
+                        location_name = instance.location.name if instance.location else 'Unknown'
+                        sku = instance.inventory_item.sku if instance.inventory_item else 'Unknown'
+                        self.message_user(request, f"✅ Inventory synced to Shopify: {sku} at {location_name}", level=messages.SUCCESS)
+                    else:
+                        self.message_user(request, f"⚠️ Inventory saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+    
     def sync_selected_items(self, request, queryset):
         """Sync selected inventory items from Shopify"""
         count = 0

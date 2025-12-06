@@ -34,8 +34,8 @@ class ShopifyProduct(models.Model):
     tags = models.JSONField(default=list, blank=True, help_text="Product tags as JSON array")
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -69,10 +69,21 @@ class ShopifyProduct(models.Model):
     
     def save(self, *args, **kwargs):
         """Override save to handle bidirectional sync tracking"""
+        import time
+        from django.utils.text import slugify
+        
         # If this is a new product without shopify_id, it was created in Django
         if not self.pk and not self.shopify_id:
             self.created_in_django = True
             self.needs_shopify_push = True
+            
+            # Generate temp shopify_id
+            timestamp = int(time.time())
+            self.shopify_id = f"temp_{timestamp}"
+            
+            # Auto-generate handle if not provided
+            if not self.handle:
+                self.handle = slugify(self.title)
         
         # If product has been modified and has a shopify_id, mark for update
         if self.pk and self.shopify_id:
@@ -105,7 +116,7 @@ class ShopifyProductVariant(models.Model):
     """Model representing a Shopify product variant"""
     
     product = models.ForeignKey(ShopifyProduct, on_delete=models.CASCADE, related_name='variants')
-    shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Variant ID")
+    shopify_id = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Shopify Variant ID")
     
     # Variant details
     title = models.CharField(max_length=255)
@@ -143,8 +154,8 @@ class ShopifyProductVariant(models.Model):
     position = models.IntegerField(default=1)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -157,6 +168,17 @@ class ShopifyProductVariant(models.Model):
             models.Index(fields=['product', 'position']),
         ]
     
+    def save(self, *args, **kwargs):
+        """Override save to auto-generate temp shopify_id if needed"""
+        import time
+        
+        # Generate temp ID if not set
+        if not self.shopify_id:
+            timestamp = int(time.time() * 1000)  # milliseconds
+            self.shopify_id = f"temp_variant_{timestamp}_{self.product_id or 'new'}_{self.position}"
+        
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.product.title} - {self.title}"
 
@@ -165,7 +187,7 @@ class ShopifyProductImage(models.Model):
     """Model representing a Shopify product image"""
     
     product = models.ForeignKey(ShopifyProduct, on_delete=models.CASCADE, related_name='images')
-    shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Image ID")
+    shopify_id = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Shopify Image ID")
     
     # Image details
     src = models.URLField(max_length=500)
@@ -180,8 +202,8 @@ class ShopifyProductImage(models.Model):
     variant_ids = models.JSONField(default=list, blank=True, help_text="Associated variant IDs as JSON array")
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -192,6 +214,17 @@ class ShopifyProductImage(models.Model):
             models.Index(fields=['shopify_id']),
             models.Index(fields=['product', 'position']),
         ]
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-generate temp shopify_id if needed"""
+        import time
+        
+        # Generate temp ID if not set
+        if not self.shopify_id:
+            timestamp = int(time.time() * 1000)
+            self.shopify_id = f"temp_image_{timestamp}_{self.product_id or 'new'}_{self.position}"
+        
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.product.title} - Image {self.position}"
@@ -207,10 +240,10 @@ class ShopifyProductImage(models.Model):
 
 
 class ShopifyProductMetafield(models.Model):
-    """Model representing Shopify product metafields"""
+    """Model representing a Shopify product metafield"""
     
     product = models.ForeignKey(ShopifyProduct, on_delete=models.CASCADE, related_name='metafields')
-    shopify_id = models.CharField(max_length=100, unique=True, help_text="Shopify Metafield ID")
+    shopify_id = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Shopify Metafield ID")
     
     # Metafield details
     namespace = models.CharField(max_length=100)
@@ -220,8 +253,8 @@ class ShopifyProductMetafield(models.Model):
     description = models.TextField(blank=True)
     
     # Timestamps
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
@@ -234,6 +267,17 @@ class ShopifyProductMetafield(models.Model):
             models.Index(fields=['namespace', 'key']),
         ]
         unique_together = ['product', 'namespace', 'key']
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-generate temp shopify_id if needed"""
+        import time
+        
+        # Generate temp ID if not set
+        if not self.shopify_id:
+            timestamp = int(time.time() * 1000)
+            self.shopify_id = f"temp_metafield_{timestamp}_{self.product_id or 'new'}_{self.namespace}_{self.key}"
+        
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.product.title} - {self.namespace}.{self.key}"
