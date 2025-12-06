@@ -146,18 +146,15 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
         
         # Auto-push to Shopify if flagged
         if obj.needs_shopify_push:
-            # Skip test/temp products
-            if not (obj.shopify_id and (obj.shopify_id.startswith('test_') or obj.shopify_id.startswith('temp_'))):
-                sync_service = ProductBidirectionalSync()
-                result = sync_service.push_product_to_shopify(obj)
-                
-                if result.get('success'):
-                    self.message_user(request, f"✅ Product synced to Shopify: {obj.title}", level=messages.SUCCESS)
-                else:
-                    self.message_user(request, f"⚠️ Product saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+            sync_service = ProductBidirectionalSync()
+            result = sync_service.push_product_to_shopify(obj)
+            
+            if result.get('success'):
+                # Refresh to get the real Shopify ID
+                obj.refresh_from_db()
+                self.message_user(request, f"✅ Product synced to Shopify: {obj.title} (ID: {obj.shopify_id})", level=messages.SUCCESS)
             else:
-                # For temp products, still save but don't push
-                self.message_user(request, f"ℹ️ Product saved with temporary ID. Will be pushed to Shopify on next update.", level=messages.INFO)
+                self.message_user(request, f"⚠️ Product saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
     
     def save_formset(self, request, form, formset, change):
         """Save variants and auto-push to Shopify"""

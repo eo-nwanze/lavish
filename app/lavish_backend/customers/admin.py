@@ -70,14 +70,14 @@ class ShopifyCustomerAdmin(ImportExportModelAdmin):
         
         # Auto-push to Shopify if flagged
         if obj.needs_shopify_push:
-            # Skip test/temp customers
-            if not (obj.shopify_id and (obj.shopify_id.startswith('test_') or obj.shopify_id.startswith('temp_'))):
-                result = push_customer_to_shopify(obj)
-                
-                if result.get('success'):
-                    self.message_user(request, f"✅ Customer synced to Shopify: {obj.full_name}", level=messages.SUCCESS)
-                else:
-                    self.message_user(request, f"⚠️ Customer saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+            result = push_customer_to_shopify(obj)
+            
+            if result.get('success'):
+                # Refresh to get the real Shopify ID
+                obj.refresh_from_db()
+                self.message_user(request, f"✅ Customer synced to Shopify: {obj.full_name} (ID: {obj.shopify_id})", level=messages.SUCCESS)
+            else:
+                self.message_user(request, f"⚠️ Customer saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
     
     def save_formset(self, request, form, formset, change):
         """Auto-push addresses to Shopify on create/update"""
@@ -86,14 +86,17 @@ class ShopifyCustomerAdmin(ImportExportModelAdmin):
         # Push each address that needs sync
         for instance in instances:
             if isinstance(instance, ShopifyCustomerAddress) and instance.needs_shopify_push:
-                # Skip test/temp customers
-                if not (instance.customer.shopify_id and (instance.customer.shopify_id.startswith('test_') or instance.customer.shopify_id.startswith('temp_'))):
+                # Only push if customer has real Shopify ID (not temp)
+                if instance.customer.shopify_id and not instance.customer.shopify_id.startswith('temp_'):
                     result = push_address_to_shopify(instance)
                     
                     if result.get('success'):
+                        instance.refresh_from_db()
                         self.message_user(request, f"✅ Address synced to Shopify: {instance.city}", level=messages.SUCCESS)
                     else:
                         self.message_user(request, f"⚠️ Address saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+                else:
+                    self.message_user(request, f"ℹ️ Address saved. Customer must be synced to Shopify first.", level=messages.INFO)
     
     def delete_model(self, request, obj):
         """Handle customer deletion (Django only - no Shopify delete)"""

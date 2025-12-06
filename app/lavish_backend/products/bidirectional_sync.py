@@ -29,8 +29,21 @@ class ProductBidirectionalSync:
             Dict with success status and details
         """
         try:
+            # Check if product has a valid Shopify ID (not temp/test)
+            has_valid_id = (product.shopify_id and 
+                          product.shopify_id.startswith('gid://shopify/Product/') and
+                          not product.shopify_id.startswith('gid://shopify/Product/test'))
+            
+            # If has temp/test ID, treat as new product
+            if (product.shopify_id and 
+                (product.shopify_id.startswith('test_') or 
+                 product.shopify_id.startswith('temp_') or
+                 product.shopify_id.startswith('gid://shopify/Product/test'))):
+                logger.info(f"Product {product.id} has test/temp ID, will create in Shopify")
+                return self._create_new_product(product)
+            
             # Check if this is a new product or update
-            if product.shopify_id and not product.created_in_django:
+            if has_valid_id and not product.created_in_django:
                 # Product already exists in Shopify, update it
                 return self._update_existing_product(product)
             else:
