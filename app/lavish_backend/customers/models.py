@@ -14,7 +14,7 @@ class ShopifyCustomer(models.Model):
     email = models.EmailField(max_length=254, db_index=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=20, blank=True, help_text="Phone in E.164 format (e.g., +61400000000)")
     
     # Status and verification
     state = models.CharField(max_length=20, default='ENABLED', choices=[
