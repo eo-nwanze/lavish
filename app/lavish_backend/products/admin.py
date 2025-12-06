@@ -125,6 +125,20 @@ class ShopifyProductAdmin(ImportExportModelAdmin):
     
     actions = ['sync_selected_products', 'push_to_shopify', 'update_in_shopify', 'delete_from_shopify', 'mark_for_push', 'create_shipping_configs']
     
+    def save_formset(self, request, form, formset, change):
+        """Save inline formsets and sync variants if product is in Shopify"""
+        instances = formset.save(commit=True)
+        
+        # If this is a variant formset and product has real Shopify ID, resync
+        if formset.model.__name__ == 'ShopifyProductVariant':
+            product = form.instance
+            # Only trigger resync if product already exists in Shopify
+            if product.shopify_id and product.shopify_id.startswith('gid://shopify/Product/'):
+                product.needs_shopify_push = True
+                product.save()
+        
+        return instances
+    
     def save_model(self, request, obj, form, change):
         """Auto-push to Shopify on create/update"""
         from django.utils import timezone

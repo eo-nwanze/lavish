@@ -112,6 +112,24 @@ class ShopifyProduct(models.Model):
         return self.tags or []
 
 
+# Signal to auto-create default variant
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=ShopifyProduct)
+def create_default_variant(sender, instance, created, **kwargs):
+    """Auto-create a default variant for new products if none exist"""
+    if created and not instance.variants.exists():
+        ShopifyProductVariant.objects.create(
+            product=instance,
+            title="Default Title",
+            sku="",
+            price=0.00,
+            inventory_quantity=0,
+            position=1
+        )
+
+
 class ShopifyProductVariant(models.Model):
     """Model representing a Shopify product variant"""
     
@@ -172,10 +190,11 @@ class ShopifyProductVariant(models.Model):
         """Override save to auto-generate temp shopify_id if needed"""
         import time
         
-        # Generate temp ID if not set
-        if not self.shopify_id:
-            timestamp = int(time.time() * 1000)  # milliseconds
-            self.shopify_id = f"temp_variant_{timestamp}_{self.product_id or 'new'}_{self.position}"
+        # Generate temp ID if not set and not already a real Shopify ID
+        if not self.shopify_id or not self.shopify_id.startswith('gid://shopify/ProductVariant/'):
+            if not self.shopify_id:
+                timestamp = int(time.time() * 1000)  # milliseconds
+                self.shopify_id = f"temp_variant_{timestamp}_{self.product_id or 'new'}_{self.position}"
         
         super().save(*args, **kwargs)
     

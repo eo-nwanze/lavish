@@ -818,35 +818,8 @@ class EnhancedShopifyAPIClient:
                 product_id = product['id']
                 logger.info(f"Successfully created product in Shopify: {product_id}")
                 
-                # Now update variants if provided (Shopify creates a default variant)
-                if variants and len(variants) > 0:
-                    # Get the default variant ID created by Shopify
-                    default_variant = product.get("variants", {}).get("edges", [])
-                    if default_variant:
-                        default_variant_id = default_variant[0]["node"]["id"]
-                        
-                        # Update the default variant with our data
-                        first_variant = variants[0]
-                        variant_update_result = self._update_product_variant(
-                            default_variant_id,
-                            price=first_variant.get("price", "0.00"),
-                            sku=first_variant.get("sku", ""),
-                            inventory_quantity=first_variant.get("inventory_quantity", 0)
-                        )
-                        
-                        if not variant_update_result.get("success"):
-                            logger.warning(f"Failed to update default variant: {variant_update_result.get('message')}")
-                        
-                        # Create additional variants if more than one
-                        if len(variants) > 1:
-                            for variant_data in variants[1:]:
-                                self._create_product_variant(
-                                    product_id,
-                                    price=variant_data.get("price", "0.00"),
-                                    sku=variant_data.get("sku", ""),
-                                    inventory_quantity=variant_data.get("inventory_quantity", 0),
-                                    title=variant_data.get("title", "Default")
-                                )
+                # Shopify automatically creates a default variant - we just need to sync it back to Django
+                # The variant will have a proper Shopify ID that we can use
                 
                 return {
                     "success": True,
