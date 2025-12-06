@@ -55,7 +55,7 @@ def skip_next_payment(request):
         # Get subscription
         subscription = get_object_or_404(
             CustomerSubscription,
-            shopify_subscription_contract_id=subscription_id
+            shopify_id=subscription_id
         )
         
         # Check if skip is allowed
@@ -206,7 +206,7 @@ def subscription_details(request, subscription_id):
     try:
         subscription = get_object_or_404(
             CustomerSubscription,
-            shopify_subscription_contract_id=subscription_id
+            shopify_id=subscription_id
         )
         
         # Get recent skips
@@ -234,7 +234,7 @@ def subscription_details(request, subscription_id):
         return json_response({
             'success': True,
             'subscription': {
-                'id': subscription.shopify_subscription_contract_id,
+                'id': subscription.shopify_id,
                 'name': subscription.subscription_name,
                 'status': subscription.status,
                 'billing_cycle': subscription.billing_cycle,
@@ -296,7 +296,7 @@ def subscription_skips_list(request, subscription_id):
     try:
         subscription = get_object_or_404(
             CustomerSubscription,
-            shopify_subscription_contract_id=subscription_id
+            shopify_id=subscription_id
         )
         
         skips = subscription.skips.all().order_by('-created_at')
@@ -338,7 +338,7 @@ def skip_quota(request, subscription_id):
     try:
         subscription = get_object_or_404(
             CustomerSubscription,
-            shopify_subscription_contract_id=subscription_id
+            shopify_id=subscription_id
         )
         
         if not subscription.skip_policy:
@@ -474,7 +474,7 @@ def customer_subscriptions(request):
             'count': subscriptions.count(),
             'subscriptions': [
                 {
-                    'id': sub.shopify_subscription_contract_id,
+                    'id': sub.shopify_id,
                     'name': sub.subscription_name,
                     'status': sub.status,
                     'billing_cycle': sub.billing_cycle,
