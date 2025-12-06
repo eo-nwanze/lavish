@@ -1,0 +1,546 @@
+{%- comment -%}
+  Subscription Options Display for Product Pages
+  This snippet loads subscription options via JavaScript API calls
+  instead of relying on Shopify's Liquid data
+{%- endcomment -%}
+
+<!-- Always show subscription options container - will be populated via JavaScript -->
+<div class="product-subscription-options" data-product-id="{{ product.id }}" data-product-handle="{{ product.handle }}">
+  <div class="subscription-loading">
+    <div class="loading-spinner"></div>
+    <p>Loading subscription options...</p>
+  </div>
+</div>
+
+<style>
+/* Product Subscription Options - Matching Orders Page Style */
+.product-subscription-options {
+  margin: 0 auto;
+}
+
+.subscription-loading {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(var(--color-foreground), 0.1);
+  border-top: 2px solid rgba(var(--color-button), var(--alpha-button-background));
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.subscription-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.subscription-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: rgb(var(--color-foreground));
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.subscription-header p {
+  margin: 0;
+  color: rgba(var(--color-foreground), 0.7);
+  font-size: 1.1rem;
+}
+
+.subscription-options-list {
+  display: grid;
+  gap: 1.5rem;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  margin-bottom: 2rem;
+}
+
+.subscription-option {
+  background-color: rgba(var(--color-foreground), 0.04);
+  border-radius: var(--media-radius);
+  padding: 1.5rem;
+  border-left: 0.4rem solid transparent;
+  transition: all 0.3s ease;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subscription-option:hover {
+  border-left-color: rgba(var(--color-button), var(--alpha-button-background));
+  background-color: rgba(var(--color-foreground), 0.06);
+}
+
+.subscription-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.subscription-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: rgb(var(--color-foreground));
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.subscription-description {
+  margin: 0 0 1rem 0;
+  color: rgba(var(--color-foreground), 0.7);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.subscription-details {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.billing-interval,
+.discount {
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--buttons-radius);
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.billing-interval {
+  background-color: rgba(var(--color-button), 0.1);
+  color: rgb(var(--color-button));
+}
+
+.discount {
+  background-color: rgba(var(--color-success), 0.1);
+  color: rgb(var(--color-success));
+}
+
+.subscription-action {
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.subscribe-btn {
+  background: rgba(var(--color-button), var(--alpha-button-background));
+  color: rgb(var(--color-button-text));
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--buttons-radius);
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.4rem;
+  white-space: nowrap;
+}
+
+.subscribe-btn:hover {
+  background: rgba(var(--color-button), var(--alpha-button-background));
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.subscribe-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.subscription-benefits {
+  background-color: rgba(var(--color-success), 0.05);
+  border: 0.1rem solid rgba(var(--color-success), 0.2);
+  border-radius: var(--media-radius);
+  padding: 1.5rem;
+}
+
+.subscription-benefits h4 {
+  margin: 0 0 1rem 0;
+  color: rgb(var(--color-success));
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.subscription-benefits ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.subscription-benefits li {
+  color: rgba(var(--color-foreground), 0.8);
+  font-size: 1rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.subscription-benefits li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: rgb(var(--color-success));
+  font-weight: bold;
+}
+
+/* Error and success states */
+.subscription-error,
+.subscription-checkout-error {
+  background-color: rgba(var(--color-error), 0.05);
+  border: 0.1rem solid rgba(var(--color-error), 0.2);
+  border-radius: var(--media-radius);
+  padding: 1.5rem;
+  text-align: center;
+  color: rgb(var(--color-error));
+}
+
+.subscription-success {
+  background-color: rgba(var(--color-success), 0.05);
+  border: 0.1rem solid rgba(var(--color-success), 0.2);
+  border-radius: var(--media-radius);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.subscription-success h4 {
+  color: rgb(var(--color-success));
+  margin: 0 0 1rem 0;
+}
+
+.subscription-details {
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.subscription-details p {
+  margin: 0.5rem 0;
+  color: rgba(var(--color-foreground), 0.8);
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.manage-subscription-btn,
+.continue-shopping-btn,
+.retry-btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--buttons-radius);
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.4rem;
+  white-space: nowrap;
+  border: none;
+}
+
+.manage-subscription-btn {
+  background: rgba(var(--color-button), var(--alpha-button-background));
+  color: rgb(var(--color-button-text));
+}
+
+.continue-shopping-btn,
+.retry-btn {
+  background: transparent;
+  color: rgb(var(--color-foreground));
+  border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+}
+
+.retry-btn {
+  background: rgba(var(--color-error), 0.1);
+  color: rgb(var(--color-error));
+  border-color: rgba(var(--color-error), 0.2);
+}
+
+/* Mobile responsive - matching orders page */
+@media screen and (max-width: 768px) {
+  .subscription-option {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .subscription-action {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .subscribe-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .subscription-details {
+    justify-content: center;
+  }
+
+  .subscription-benefits ul {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script>
+// Load subscription options when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Load subscription options via API
+  const container = document.querySelector('.product-subscription-options');
+  const productId = container.dataset.productId;
+  const productHandle = container.dataset.productHandle;
+  
+  if (container && productId) {
+    // Try multiple API endpoints for reliability
+    const apiEndpoints = [
+      'http://127.0.0.1:8003/api/subscriptions/selling-plans/?product_id=' + productId,
+      'http://localhost:8003/api/subscriptions/selling-plans/?product_id=' + productId,
+      '/api/subscriptions/selling-plans/?product_id=' + productId
+    ];
+    
+    // Try each endpoint until one works
+    let endpointIndex = 0;
+    
+    function tryNextEndpoint() {
+      if (endpointIndex >= apiEndpoints.length) {
+        // All endpoints failed, show error
+        showSubscriptionError(container, 'Unable to load subscription options. Please refresh the page.');
+        return;
+      }
+      
+      const endpoint = apiEndpoints[endpointIndex];
+      
+      fetch(endpoint)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success && data.selling_plans && data.selling_plans.length > 0) {
+            // Render subscription options
+            renderSubscriptionOptions(container, data.selling_plans, productId, productHandle);
+          } else {
+            // No plans available, hide container
+            container.style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.warn('Failed to load from ' + endpoint + ':', error);
+          endpointIndex++;
+          tryNextEndpoint();
+        });
+    }
+    
+    // Start trying endpoints
+    tryNextEndpoint();
+    
+    // Set a timeout to prevent infinite loading
+    setTimeout(function() {
+      if (container.querySelector('.subscription-loading')) {
+        showSubscriptionError(container, 'Loading subscription options is taking longer than expected. Please refresh the page.');
+      }
+    }, 10000);
+  }
+});
+
+function showSubscriptionError(container, message) {
+  container.innerHTML = '<div class="subscription-error"><p>' + message + '</p><button class="retry-btn" onclick="location.reload()">Retry</button></div>';
+}
+
+function renderSubscriptionOptions(container, plans, productId, productHandle) {
+  var optionsHTML = plans.map(function(plan) {
+    return '<div class="subscription-option">' +
+      '<div class="subscription-info">' +
+        '<h4>' + plan.name + '</h4>' +
+        '<p class="subscription-description">' + plan.description + '</p>' +
+        '<div class="subscription-details">' +
+          '<span class="billing-interval">' +
+            'Every ' + plan.billing_interval_count + ' ' + plan.billing_interval.toLowerCase() +
+          '</span>' +
+          '<span class="discount">Save ' + plan.price_adjustment_value + '%</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="subscription-action">' +
+        '<button class="subscribe-btn btn-primary" ' +
+                'data-plan-id="' + plan.id + '" ' +
+                'data-plan-name="' + plan.name + '" ' +
+                'data-product-id="' + productId + '" ' +
+                'data-product-handle="' + productHandle + '">' +
+          'Subscribe' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  
+  container.innerHTML = 
+    '<div class="subscription-header">' +
+      '<h3>Subscribe & Save</h3>' +
+      '<p>Choose a subscription plan and save on every order!</p>' +
+    '</div>' +
+    '<div class="subscription-options-list">' +
+      optionsHTML +
+    '</div>' +
+    '<div class="subscription-benefits">' +
+      '<h4>Subscription Benefits:</h4>' +
+      '<ul>' +
+        '<li>✓ Save on every order</li>' +
+        '<li>✓ Never run out of your favorite items</li>' +
+        '<li>✓ Exclusive subscriber perks</li>' +
+        '<li>✓ Easy to skip or cancel anytime</li>' +
+      '</ul>' +
+    '</div>';
+  
+  // Initialize subscription checkout functionality
+  initializeSubscriptionButtons(container);
+}
+
+function initializeSubscriptionButtons(container) {
+  // Add click handlers for subscribe buttons
+  container.querySelectorAll('.subscribe-btn').forEach(function(button) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      var planId = this.dataset.planId;
+      var planName = this.dataset.planName;
+      var productId = this.dataset.productId;
+      var productHandle = this.dataset.productHandle;
+      
+      // Show loading state
+      var originalText = this.textContent;
+      this.textContent = 'Subscribing...';
+      this.disabled = true;
+      
+      // Create subscription checkout
+      createSubscriptionCheckout(planId, planName, productId, productHandle, this);
+    });
+  });
+}
+
+function createSubscriptionCheckout(planId, planName, productId, productHandle, button) {
+  // Try multiple checkout endpoints
+  var checkoutEndpoints = [
+    'http://127.0.0.1:8003/api/subscriptions/checkout/create/',
+    'http://localhost:8003/api/subscriptions/checkout/create/',
+    '/api/subscriptions/checkout/create/'
+  ];
+  
+  var endpointIndex = 0;
+  
+  function tryNextCheckoutEndpoint() {
+    if (endpointIndex >= checkoutEndpoints.length) {
+      // All endpoints failed
+      showCheckoutError(button, 'Unable to process subscription. Please try again.');
+      return;
+    }
+    
+    var endpoint = checkoutEndpoints[endpointIndex];
+    
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        selling_plan_id: planId,
+        product_id: productId,
+        quantity: 1
+      })
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data.success) {
+        // Show success message
+        showCheckoutSuccess(button, planName, data);
+      } else {
+        throw new Error(data.error || 'Checkout failed');
+      }
+    })
+    .catch(function(error) {
+      console.warn('Checkout failed on ' + endpoint + ':', error);
+      endpointIndex++;
+      tryNextCheckoutEndpoint();
+    });
+  }
+  
+  tryNextCheckoutEndpoint();
+}
+
+function showCheckoutSuccess(button, planName, data) {
+  var container = button.closest('.product-subscription-options');
+  var successHTML = 
+    '<div class="subscription-success">' +
+      '<h4>Subscription Created!</h4>' +
+      '<p>You have successfully subscribed to <strong>' + planName + '</strong>.</p>' +
+      '<div class="subscription-details">' +
+        '<p><strong>Subscription ID:</strong> ' + (data.subscription_id || 'Processing...') + '</p>' +
+        '<p><strong>Next Billing:</strong> ' + (data.next_billing_date || 'Processing...') + '</p>' +
+      '</div>' +
+      '<div class="subscription-actions">' +
+        '<button class="manage-subscription-btn" onclick="window.open('/account/subscriptions', '_blank')">' +
+          'Manage Subscription' +
+        '</button>' +
+        '<button class="continue-shopping-btn" onclick="location.reload()">' +
+          'Continue Shopping' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  
+  container.innerHTML = successHTML;
+}
+
+function showCheckoutError(button, message) {
+  // Restore button state
+  button.disabled = false;
+  button.textContent = 'Subscribe';
+  
+  // Show error message
+  var errorDiv = document.createElement('div');
+  errorDiv.className = 'subscription-checkout-error';
+  errorDiv.innerHTML = '<p>' + message + '</p><button class="retry-btn" onclick="location.reload()">Try Again</button>';
+  
+  button.parentNode.appendChild(errorDiv);
+  
+  // Remove error after 5 seconds
+  setTimeout(function() {
+    if (errorDiv.parentNode) {
+      errorDiv.parentNode.removeChild(errorDiv);
+    }
+  }, 5000);
+}
+</script>
