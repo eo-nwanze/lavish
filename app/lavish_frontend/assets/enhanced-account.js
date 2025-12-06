@@ -1278,11 +1278,19 @@ class RenewalCalendarManager {
 
   async loadSubscriptionRenewalData(subscriptionId) {
     try {
+      // First check if subscription exists in database
+      const checkResponse = await fetch(`http://127.0.0.1:8003/api/skips/subscriptions/${subscriptionId}/`);
+      
+      if (!checkResponse.ok) {
+        console.warn(`Subscription ${subscriptionId} not found in database, skipping renewal data`);
+        return;
+      }
+      
       const response = await fetch(`http://127.0.0.1:8003/api/skips/subscriptions/${subscriptionId}/renewal-info/`);
       
       if (!response.ok) {
         if (response.status === 404) {
-          console.warn(`Subscription ${subscriptionId} not found, skipping renewal data`);
+          console.warn(`Subscription ${subscriptionId} renewal info not found, skipping renewal data`);
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -2042,6 +2050,7 @@ window.showRenewalCalendar = function() {
   const modal = document.getElementById('renewal-calendar-modal');
   if (modal) {
     modal.style.display = 'flex';
+    modal.classList.add('active');
     window.renewalCalendarManager.renderCalendar();
   }
 };
@@ -2049,7 +2058,10 @@ window.showRenewalCalendar = function() {
 window.closeRenewalCalendar = function() {
   const modal = document.getElementById('renewal-calendar-modal');
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
   }
 };
 
@@ -2057,6 +2069,7 @@ window.showRenewalTimeline = function() {
   const modal = document.getElementById('renewal-timeline-modal');
   if (modal) {
     modal.style.display = 'flex';
+    modal.classList.add('active');
     window.renewalCalendarManager.renderTimeline();
   }
 };
@@ -2064,7 +2077,10 @@ window.showRenewalTimeline = function() {
 window.closeRenewalTimeline = function() {
   const modal = document.getElementById('renewal-timeline-modal');
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
   }
 };
 
@@ -2434,6 +2450,14 @@ class SubscriptionManager {
 
   async getSubscriptionOptions(subscriptionId) {
     try {
+      // First check if subscription exists in database
+      const checkResponse = await fetch(`http://127.0.0.1:8003/api/skips/subscriptions/${subscriptionId}/`);
+      
+      if (!checkResponse.ok) {
+        console.warn(`Subscription ${subscriptionId} not found in database, returning default options`);
+        return { success: false, error: 'Subscription not found' };
+      }
+      
       const response = await fetch(`${this.baseApiUrl}/${subscriptionId}/options/`, {
         method: 'GET',
         headers: {
@@ -2443,8 +2467,8 @@ class SubscriptionManager {
 
       if (!response.ok) {
         if (response.status === 404) {
-          console.warn(`Subscription ${subscriptionId} not found, returning default options`);
-          return { success: false, error: 'Subscription not found' };
+          console.warn(`Subscription ${subscriptionId} options not found, returning default options`);
+          return { success: false, error: 'Subscription options not found' };
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }

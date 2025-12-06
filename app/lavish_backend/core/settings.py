@@ -608,3 +608,12 @@ COUNTRY_CURRENCY_MAP = {
     'GR': 'EUR', 'LU': 'EUR', 'SI': 'EUR', 'SK': 'EUR', 'EE': 'EUR',
     'LV': 'EUR', 'LT': 'EUR', 'CY': 'EUR', 'MT': 'EUR',
 }
+
+
+# ============================================================================
+# CONTENT SECURITY POLICY
+# ============================================================================
+
+# Content Security Policy settings
+SECURE_CONTENT_SEC_POLICY_NONE = False
+SECURE_CONTENT_SEC_POLICY_HEADER = "frame-ancestors https://7fa66c-ac.myshopify.com https://7fa66c-ac.account.myshopify.com https://lavishlibrary.com.au https://www.lavishlibrary.com.au https://shopify.com https://shop.app/"
