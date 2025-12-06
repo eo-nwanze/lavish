@@ -60,7 +60,8 @@
 /* Expand sidebar width to contain long text properly */
 .main-sidebar {
     width: 380px !important;
-    overflow: visible !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     transition: width 0.3s ease, margin-left 0.3s ease !important;
 }
 
@@ -87,6 +88,20 @@
 
 .sidebar-mini.sidebar-collapse .brand-link .brand-text {
     display: none !important;
+}
+
+/* Reduce logo size when sidebar is collapsed */
+.sidebar-mini.sidebar-collapse .brand-link .lavish-logo {
+    max-height: 40px !important;
+    max-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+/* Adjust brand-link height when collapsed */
+.sidebar-mini.sidebar-collapse .brand-link {
+    min-height: 57px !important;
+    padding: 0.5rem !important;
 }
 
 /* Hide arrows in collapsed mode */
@@ -146,18 +161,46 @@
 .brand-link {
     background-color: transparent !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-    padding: 0.8rem 1rem !important;
+    padding: 1rem !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 0.5rem !important;
     min-height: 57px !important;
 }
 
 .brand-link .brand-image {
-    max-height: 35px !important;
+    max-height: 40px !important;
     width: auto !important;
     opacity: 1 !important;
     margin-right: 0 !important;
+}
+
+/* Lavish Library Logo Styling - No borders, no overflow */
+.lavish-logo,
+.brand-link .lavish-logo,
+img.lavish-logo,
+.brand-link img[src*="lavish-logo"] {
+    max-height: 180px !important;
+    max-width: 180px !important;
+    width: 180px !important;
+    height: 180px !important;
+    object-fit: contain !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+/* Remove any circle effects on logo */
+.brand-link .lavish-logo.img-circle,
+.lavish-logo.elevation-3 {
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 .brand-link .brand-text {
@@ -168,6 +211,7 @@
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    display: none !important;
 }
 
 /* Hide brand text when collapsed */
