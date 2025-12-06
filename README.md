@@ -177,3 +177,6 @@ Proprietary - All rights reserved
 ## Support
 
 For support, contact the development team or create an issue in the repository.
+=======
+# lavish
+>>>>>>> 223491a2746e2e7b5c7c2f5136f8c736e40a8192
