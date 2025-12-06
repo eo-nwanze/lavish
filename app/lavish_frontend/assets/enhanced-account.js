@@ -2631,37 +2631,75 @@ window.confirmCancellation = function() {
     return;
   }
   
-  subscriptionManager.cancelSubscription(subscriptionId, reason, feedback);
+  // Show loading state
+  const confirmBtn = document.querySelector('#cancel-subscription-modal button[onclick="confirmCancellation()"]');
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Cancelling...';
+  }
+  
+  subscriptionManager.cancelSubscription(subscriptionId, reason, feedback)
+    .then(() => {
+      // Close modal on success
+      window.closeCancelSubscriptionModal();
+    })
+    .catch(error => {
+      console.error('Cancellation error:', error);
+    })
+    .finally(() => {
+      // Reset button state
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '❌ Cancel Subscription';
+      }
+    });
 };
 
 window.cancelSubscription = function(subscriptionId) {
-  // Set the subscription ID in the modal
-  const subscriptionIdInput = document.querySelector('#cancel-subscription-modal input[name="subscription_id"]');
-  if (subscriptionIdInput) {
-    subscriptionIdInput.value = subscriptionId;
-  }
-  
-  // Update the subscription name in the modal
-  const subscriptionNameElement = document.querySelector('#cancel-subscription-name');
-  if (subscriptionNameElement) {
-    const subscriptionCard = document.querySelector(`[data-subscription-id="${subscriptionId}"]`);
-    if (subscriptionCard) {
-      const subscriptionName = subscriptionCard.querySelector('h3')?.textContent || 'Subscription';
-      subscriptionNameElement.textContent = subscriptionName;
-    }
-  }
-  
-  // Show the modal
-  const modal = document.getElementById('cancel-subscription-modal');
-  if (modal) {
-    modal.style.display = 'flex';
-  }
+  // First check if subscription exists
+  fetch(`http://127.0.0.1:8003/api/skips/subscriptions/${subscriptionId}/`)
+    .then(response => {
+      if (!response.ok) {
+        subscriptionManager.showNotification('Subscription not found', 'error');
+        return;
+      }
+      
+      // Set the subscription ID in the modal
+      const subscriptionIdInput = document.querySelector('#cancel-subscription-modal input[name="subscription_id"]');
+      if (subscriptionIdInput) {
+        subscriptionIdInput.value = subscriptionId;
+      }
+      
+      // Update the subscription name in the modal
+      const subscriptionNameElement = document.querySelector('#cancel-subscription-name');
+      if (subscriptionNameElement) {
+        const subscriptionCard = document.querySelector(`[data-subscription-id="${subscriptionId}"]`);
+        if (subscriptionCard) {
+          const subscriptionName = subscriptionCard.querySelector('h3')?.textContent || 'Subscription';
+          subscriptionNameElement.textContent = subscriptionName;
+        }
+      }
+      
+      // Show the modal
+      const modal = document.getElementById('cancel-subscription-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+      }
+    })
+    .catch(error => {
+      console.error('Error checking subscription:', error);
+      subscriptionManager.showNotification('Error checking subscription', 'error');
+    });
 };
 
 window.closeCancelSubscriptionModal = function() {
   const modal = document.getElementById('cancel-subscription-modal');
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
   }
 };
 
