@@ -18,6 +18,34 @@ class CustomerBidirectionalSync:
     def __init__(self):
         self.client = EnhancedShopifyAPIClient()
     
+    @staticmethod
+    def validate_phone_number(phone):
+        """Validate and format phone number for Shopify (E.164 format)"""
+        if not phone:
+            return ""
+        
+        # Remove common separators
+        cleaned = phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+        
+        # Check if contains only digits and + sign
+        if not all(c.isdigit() or c == '+' for c in cleaned):
+            logger.warning(f"Phone number '{phone}' contains invalid characters, skipping")
+            return ""
+        
+        # If doesn't start with +, it's likely invalid for Shopify
+        if not cleaned.startswith('+'):
+            # Try to add +61 for Australian numbers
+            if cleaned.startswith('0') and len(cleaned) == 10:
+                cleaned = '+61' + cleaned[1:]
+            elif len(cleaned) == 9:  # Missing leading 0
+                cleaned = '+61' + cleaned
+            else:
+                # Return empty if can't determine format
+                logger.warning(f"Phone number '{phone}' not in E.164 format, skipping")
+                return ""
+        
+        return cleaned
+    
     def push_customer_to_shopify(self, customer) -> Dict:
         """
         Push a Django customer to Shopify
@@ -96,7 +124,7 @@ class CustomerBidirectionalSync:
             "email": customer.email,
             "firstName": customer.first_name or "",
             "lastName": customer.last_name or "",
-            "phone": customer.phone or "",
+            "phone": self.validate_phone_number(customer.phone),
             "tags": customer.tags if isinstance(customer.tags, list) else [],
         }
         
@@ -186,7 +214,6 @@ class CustomerBidirectionalSync:
               phone
               state
               tags
-              acceptsMarketing
               updatedAt
             }
             userErrors {
@@ -203,7 +230,7 @@ class CustomerBidirectionalSync:
             "email": customer.email,
             "firstName": customer.first_name or "",
             "lastName": customer.last_name or "",
-            "phone": customer.phone or "",
+            "phone": self.validate_phone_number(customer.phone),
             "tags": customer.tags if isinstance(customer.tags, list) else [],
         }
         
