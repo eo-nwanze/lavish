@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 import json
 
 User = get_user_model()
@@ -50,6 +51,11 @@ class ShopifyCustomer(models.Model):
         ('error', 'Sync Error'),
     ])
     
+    # Bidirectional sync fields
+    needs_shopify_push = models.BooleanField(default=False, help_text="True if customer needs to be pushed to Shopify")
+    shopify_push_error = models.TextField(blank=True, help_text="Last error message from Shopify push")
+    last_pushed_to_shopify = models.DateTimeField(null=True, blank=True, help_text="Last successful push to Shopify")
+    
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -57,10 +63,28 @@ class ShopifyCustomer(models.Model):
             models.Index(fields=['shopify_id']),
             models.Index(fields=['state']),
             models.Index(fields=['store_domain']),
+            models.Index(fields=['needs_shopify_push']),
         ]
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
+    
+    def save(self, *args, **kwargs):
+        """Override save to detect changes and flag for Shopify push"""
+        if self.pk:  # Only for existing records
+            try:
+                old_instance = ShopifyCustomer.objects.get(pk=self.pk)
+                # Check if any synced fields changed
+                if (old_instance.email != self.email or
+                    old_instance.first_name != self.first_name or
+                    old_instance.last_name != self.last_name or
+                    old_instance.phone != self.phone or
+                    old_instance.tags != self.tags or
+                    old_instance.accepts_marketing != self.accepts_marketing):
+                    self.needs_shopify_push = True
+            except ShopifyCustomer.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
     
     @property
     def full_name(self):
@@ -105,12 +129,18 @@ class ShopifyCustomerAddress(models.Model):
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
     
+    # Bidirectional Sync Tracking
+    needs_shopify_push = models.BooleanField(default=False, help_text="True if needs push to Shopify")
+    shopify_push_error = models.TextField(blank=True, help_text="Last push error message")
+    last_pushed_to_shopify = models.DateTimeField(null=True, blank=True, help_text="When last pushed to Shopify")
+    
     class Meta:
         ordering = ['-is_default', 'id']
         indexes = [
             models.Index(fields=['customer', 'is_default']),
             models.Index(fields=['country_code']),
             models.Index(fields=['province_code']),
+            models.Index(fields=['needs_shopify_push']),
         ]
     
     def __str__(self):
@@ -128,6 +158,34 @@ class ShopifyCustomerAddress(models.Model):
             self.zip_code
         ]
         return ', '.join([part for part in parts if part])
+    
+    def save(self, *args, **kwargs):
+        """Auto-track changes for bidirectional sync"""
+        # Skip auto-push during sync operations
+        skip_push_flag = kwargs.pop('skip_push_flag', False)
+        
+        if self.pk and not skip_push_flag:
+            # Check if address changed
+            try:
+                old = ShopifyCustomerAddress.objects.get(pk=self.pk)
+                # Check if any address field changed
+                if (old.address1 != self.address1 or old.address2 != self.address2 or
+                    old.city != self.city or old.province != self.province or
+                    old.country != self.country or old.zip_code != self.zip_code or
+                    old.phone != self.phone or old.is_default != self.is_default or
+                    old.first_name != self.first_name or old.last_name != self.last_name or
+                    old.company != self.company):
+                    self.needs_shopify_push = True
+            except ShopifyCustomerAddress.DoesNotExist:
+                pass
+        elif not self.pk:
+            # New record - if created in Django, mark for push
+            self.needs_shopify_push = True
+            # Generate temporary ID if not set
+            if not self.shopify_id:
+                self.shopify_id = f"temp_address_{timezone.now().timestamp()}"
+                
+        super().save(*args, **kwargs)
 
 
 class CustomerSyncLog(models.Model):

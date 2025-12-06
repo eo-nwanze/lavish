@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Subscription Workflow - Lavish Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #FFF6EA;
+            color: #4C5151;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4C5151;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .endpoint-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .endpoint-card h2 {
+            color: #4C5151;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .endpoint-url {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .endpoint-url .method {
+            color: #2563eb;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .test-section {
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4C5151;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4C5151;
+        }
+
+        button {
+            background: #4C5151;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background: #3a3d3d;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .response-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-box.error {
+            color: #ef4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .subscription-plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .plan-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .plan-card:hover {
+            border-color: #4C5151;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .plan-card.selected {
+            border-color: #4C5151;
+            background: #FFF6EA;
+        }
+
+        .plan-card h3 {
+            color: #4C5151;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-card p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .discount-badge {
+            background: #10b981;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Test Subscription Workflow</h1>
+
+        <div class="success-box">
+            <strong>✅ Django Server Running</strong><br>
+            Local development server is running at: <strong>http://127.0.0.1:8003/</strong>
+        </div>
+
+        <!-- Test Selling Plans API -->
+        <div class="endpoint-card">
+            <h2>1. Get Selling Plans</h2>
+            <div class="endpoint-url">
+                <span class="method">GET</span>
+                http://127.0.0.1:8003/api/subscriptions/selling-plans/?product_id=<strong>{product_id}</strong>
+            </div>
+
+            <div class="info-box">
+                This endpoint returns all active subscription plans available for a product.
+            </div>
+
+            <div class="test-section">
+                <div class="form-group">
+                    <label for="product-id">Product ID (from Shopify)</label>
+                    <input type="text" id="product-id" placeholder="e.g., 7453947904176" value="7453947904176">
+                </div>
+
+                <button onclick="fetchSellingPlans()">
+                    Fetch Selling Plans
+                    <span id="plans-loading" class="loading" style="display: none;"></span>
+                </button>
+
+                <div id="plans-response" style="display: none;"></div>
+                <div id="plans-display" class="subscription-plans" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Test Subscription Checkout API -->
+        <div class="endpoint-card">
+            <h2>2. Create Subscription Checkout</h2>
+            <div class="endpoint-url">
+                <span class="method">POST</span>
+                http://127.0.0.1:8003/api/subscriptions/checkout/create/
+            </div>
+
+            <div class="info-box">
+                This endpoint creates a subscription checkout session. Currently returns a 501 (Not Implemented) status as the Shopify checkout integration is pending.
+            </div>
+
+            <div class="test-section">
+                <div class="form-group">
+                    <label for="customer-id">Customer ID</label>
+                    <input type="text" id="customer-id" placeholder="e.g., 7049234825392" value="7049234825392">
+                </div>
+
+                <div class="form-group">
+                    <label for="selling-plan-id">Selling Plan ID</label>
+                    <select id="selling-plan-id">
+                        <option value="">-- Select a plan (fetch plans first) --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="variant-id">Product Variant ID (GID)</label>
+                    <input type="text" id="variant-id" placeholder="e.g., gid://shopify/ProductVariant/42595623878832" value="gid://shopify/ProductVariant/42595623878832">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" value="1" min="1">
+                </div>
+
+                <button onclick="createCheckout()">
+                    Create Checkout
+                    <span id="checkout-loading" class="loading" style="display: none;"></span>
+                </button>
+
+                <div id="checkout-response" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="endpoint-card">
+            <h2>📋 Quick Links & Info</h2>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 1rem;">
+                    <strong>Django Admin:</strong><br>
+                    <a href="http://127.0.0.1:8003/admin/" target="_blank" style="color: #2563eb;">
+                        http://127.0.0.1:8003/admin/
+                    </a>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>API Root:</strong><br>
+                    <a href="http://127.0.0.1:8003/api/" target="_blank" style="color: #2563eb;">
+                        http://127.0.0.1:8003/api/
+                    </a>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong>Subscription APIs:</strong><br>
+                    <code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                        /api/subscriptions/selling-plans/
+                    </code><br>
+                    <code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                        /api/subscriptions/checkout/create/
+                    </code>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlanId = null;
+
+        async function fetchSellingPlans() {
+            const productId = document.getElementById('product-id').value;
+            const loading = document.getElementById('plans-loading');
+            const responseDiv = document.getElementById('plans-response');
+            const plansDiv = document.getElementById('plans-display');
+            const selectDropdown = document.getElementById('selling-plan-id');
+
+            if (!productId) {
+                alert('Please enter a product ID');
+                return;
+            }
+
+            loading.style.display = 'inline-block';
+            responseDiv.style.display = 'none';
+            plansDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(
+                    `http://127.0.0.1:8003/api/subscriptions/selling-plans/?product_id=${productId}`
+                );
+
+                const data = await response.json();
+
+                // Show raw response
+                responseDiv.style.display = 'block';
+                responseDiv.className = response.ok ? 'response-box' : 'response-box error';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+
+                // If successful, display plans visually
+                if (response.ok && data.selling_plans && data.selling_plans.length > 0) {
+                    plansDiv.style.display = 'grid';
+                    plansDiv.innerHTML = data.selling_plans.map(plan => {
+                        const discount = plan.price_adjustment_value > 0 
+                            ? `${plan.price_adjustment_value}% off` 
+                            : '';
+
+                        return `
+                            <div class="plan-card" onclick="selectPlan(${plan.id}, '${plan.name}')">
+                                <h3>${plan.name}</h3>
+                                <p>${plan.description || 'No description'}</p>
+                                <p><strong>${plan.interval_count} ${plan.interval.toLowerCase()}</strong></p>
+                                ${discount ? `<span class="discount-badge">${discount}</span>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+
+                    // Populate dropdown
+                    selectDropdown.innerHTML = '<option value="">-- Select a plan --</option>' +
+                        data.selling_plans.map(plan => 
+                            `<option value="${plan.id}">${plan.name} - ${plan.interval_count} ${plan.interval}</option>`
+                        ).join('');
+                }
+
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response-box error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function selectPlan(planId, planName) {
+            selectedPlanId = planId;
+            document.getElementById('selling-plan-id').value = planId;
+
+            // Update visual selection
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        async function createCheckout() {
+            const customerId = document.getElementById('customer-id').value;
+            const sellingPlanId = document.getElementById('selling-plan-id').value;
+            const variantId = document.getElementById('variant-id').value;
+            const quantity = document.getElementById('quantity').value;
+            const loading = document.getElementById('checkout-loading');
+            const responseDiv = document.getElementById('checkout-response');
+
+            if (!customerId || !sellingPlanId || !variantId) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            loading.style.display = 'inline-block';
+            responseDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(
+                    'http://127.0.0.1:8003/api/subscriptions/checkout/create/',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            customer_id: customerId,
+                            selling_plan_id: parseInt(sellingPlanId),
+                            variant_id: variantId,
+                            quantity: parseInt(quantity)
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                responseDiv.style.display = 'block';
+                responseDiv.className = response.ok ? 'response-box' : 'response-box error';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response-box error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

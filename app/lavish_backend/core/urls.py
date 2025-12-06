@@ -25,6 +25,9 @@ urlpatterns = [
     # Main API for Shopify theme integration
     path('api/', include('api.urls')),
     
+    # Subscription API (for Shopify theme)
+    path('api/subscriptions/', include('customer_subscriptions.urls')),
+    
     # Legacy API endpoints
     path('api/customers/', include('customers.urls')),
     path('api/products/', include('products.urls')),

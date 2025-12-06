@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class ShopifyLocation(models.Model):
@@ -108,7 +109,10 @@ class ShopifyInventoryLevel(models.Model):
     # Store reference
     store_domain = models.CharField(max_length=100, default='7fa66c-ac.myshopify.com')
     
-    # Sync tracking
+    # Bidirectional Sync Tracking
+    needs_shopify_push = models.BooleanField(default=False, help_text="True if needs push to Shopify")
+    shopify_push_error = models.TextField(blank=True, help_text="Last push error message")
+    last_pushed_to_shopify = models.DateTimeField(null=True, blank=True, help_text="When last pushed to Shopify")
     last_synced = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -117,6 +121,7 @@ class ShopifyInventoryLevel(models.Model):
         indexes = [
             models.Index(fields=['inventory_item', 'location']),
             models.Index(fields=['available']),
+            models.Index(fields=['needs_shopify_push']),
         ]
     
     def __str__(self):
@@ -129,6 +134,28 @@ class ShopifyInventoryLevel(models.Model):
     def total_quantity(self):
         """Calculate total quantity (available + committed)"""
         return self.available + self.committed
+    
+    def save(self, *args, **kwargs):
+        """Auto-track changes for bidirectional sync"""
+        # Skip auto-push during sync operations
+        skip_push_flag = kwargs.pop('skip_push_flag', False)
+        
+        if self.pk and not skip_push_flag:
+            # Check if quantity changed
+            try:
+                old = ShopifyInventoryLevel.objects.get(pk=self.pk)
+                if old.available != self.available:
+                    self.needs_shopify_push = True
+                    self.updated_at = timezone.now()
+            except ShopifyInventoryLevel.DoesNotExist:
+                pass
+        elif not self.pk:
+            # New record - if created in Django, mark for push
+            self.needs_shopify_push = True
+            if not self.updated_at:
+                self.updated_at = timezone.now()
+                
+        super().save(*args, **kwargs)
 
 
 class InventoryAdjustment(models.Model):
