@@ -1,0 +1,62 @@
+[
+  {
+    "id": 6,
+    "name": "Fantasy Lover's Monthly",
+    "shopify_id": "gid://shopify/SellingPlan/6323699806",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935057502",
+    "billing_interval": "MONTH",
+    "billing_interval_count": 1,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "12.00"
+  },
+  {
+    "id": 5,
+    "name": "Quarterly Collector's Box",
+    "shopify_id": "gid://shopify/SellingPlan/6323732574",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935090270",
+    "billing_interval": "MONTH",
+    "billing_interval_count": 3,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "25.00"
+  },
+  {
+    "id": 4,
+    "name": "Weekly Romance Bundle",
+    "shopify_id": "gid://shopify/SellingPlan/6323765342",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935123038",
+    "billing_interval": "WEEK",
+    "billing_interval_count": 1,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "10.00"
+  },
+  {
+    "id": 3,
+    "name": "Bi-Monthly Sticker Club",
+    "shopify_id": "gid://shopify/SellingPlan/6323798110",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935155806",
+    "billing_interval": "MONTH",
+    "billing_interval_count": 2,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "20.00"
+  },
+  {
+    "id": 2,
+    "name": "Monthly Book Box",
+    "shopify_id": "gid://shopify/SellingPlan/6323830878",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935188574",
+    "billing_interval": "MONTH",
+    "billing_interval_count": 1,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "15.00"
+  },
+  {
+    "id": 1,
+    "name": "Monthly Lavish Box",
+    "shopify_id": "gid://shopify/SellingPlan/6323863646",
+    "shopify_selling_plan_group_id": "gid://shopify/SellingPlanGroup/4935221342",
+    "billing_interval": "MONTH",
+    "billing_interval_count": 1,
+    "price_adjustment_type": "PERCENTAGE",
+    "price_adjustment_value": "10.00"
+  }
+]

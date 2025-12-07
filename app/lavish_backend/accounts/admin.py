@@ -153,25 +153,28 @@ admin.site.register(Company, CompanyAdmin)
 admin.site.register(IndustryType)
 
 
-@admin.register(BankDetail)
-class BankDetailAdmin(ImportExportModelAdmin):
-    resource_class = BankDetailResource
-    list_display = ("user", "bank_name", "account_number", "account_holder_name", "created_at")
-    search_fields = ("bank_name", "account_number", "account_holder_name")
+# Hidden from admin - Bank details, Card details, and PayID
+# Uncomment below to show in admin if needed
+
+# @admin.register(BankDetail)
+# class BankDetailAdmin(ImportExportModelAdmin):
+#     resource_class = BankDetailResource
+#     list_display = ("user", "bank_name", "account_number", "account_holder_name", "created_at")
+#     search_fields = ("bank_name", "account_number", "account_holder_name")
 
 
-@admin.register(CardDetail)
-class CardDetailAdmin(ImportExportModelAdmin):
-    resource_class = CardDetailResource
-    list_display = ("user", "card_number", "cardholder_name", "expiry_date", "created_at")
-    search_fields = ("card_number", "cardholder_name")
+# @admin.register(CardDetail)
+# class CardDetailAdmin(ImportExportModelAdmin):
+#     resource_class = CardDetailResource
+#     list_display = ("user", "card_number", "cardholder_name", "expiry_date", "created_at")
+#     search_fields = ("card_number", "cardholder_name")
 
 
-@admin.register(PayID)
-class PayIDAdmin(ImportExportModelAdmin):
-    resource_class = PayIDResource
-    list_display = ("user", "name", "email", "phone_number", "created_at")
-    search_fields = ("name", "email", "phone_number")
+# @admin.register(PayID)
+# class PayIDAdmin(ImportExportModelAdmin):
+#     resource_class = PayIDResource
+#     list_display = ("user", "name", "email", "phone_number", "created_at")
+#     search_fields = ("name", "email", "phone_number")
 
 @admin.register(UserSession)
 class UserSessionAdmin(ImportExportModelAdmin):

@@ -452,6 +452,10 @@
 
               {%- when 'variant_picker' -%}
                 {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
+                
+                {%- comment -%} Subscription Purchase Options {%- endcomment -%}
+                {% render 'subscription-purchase-options', product: product, product_form_id: product_form_id %}
+                
               {%- when 'buy_buttons' -%}
                 {%- render 'buy-buttons',
                   block: block,

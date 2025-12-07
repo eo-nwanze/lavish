@@ -1,0 +1,169 @@
+{% comment %}
+  Renders subscription purchase options for products with selling plans.
+  
+  Accepts:
+  - product: {Object} product object.
+  - product_form_id: {String} product form id.
+
+  Usage:
+  {% render 'subscription-purchase-options', product: product, product_form_id: product_form_id %}
+{% endcomment %}
+
+{%- if product.selling_plan_groups.size > 0 -%}
+  {%- comment -%} Main heading OUTSIDE the box {%- endcomment -%}
+  <div class="subscription-header" style="margin: 20px 0 12px 0;">
+    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 600;">Buy</h3>
+    <p style="margin: 0; font-size: 14px; color: #666;">Choose how you'd like to receive this product</p>
+  </div>
+  
+  <div class="subscription-purchase-options" style="margin: 0 0 20px 0;">
+    {%- comment -%} One-time purchase option {%- endcomment -%}
+    <div class="purchase-option" style="margin: 0 0 12px 0; padding: 12px; border: 2px solid rgba(224, 224, 224, 0.3); border-radius: 6px; transition: all 0.2s; background: transparent;">
+      <label class="purchase-option-label" style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
+        <input 
+          type="radio" 
+          name="purchase_option_{{ product_form_id }}" 
+          value="onetime" 
+          checked
+          data-purchase-type="onetime"
+          style="margin-right: 12px; margin-top: 4px;">
+        <div style="flex: 1;">
+          <span style="font-weight: 500; display: block;">One-time purchase</span>
+          <span style="font-size: 14px; color: #666;">{{ product.selected_or_first_available_variant.price | money }}</span>
+        </div>
+      </label>
+    </div>
+    
+    {%- comment -%} Subscription options - De-duplicate and show proper descriptions {%- endcomment -%}
+    {%- assign seen_plan_names = "" -%}
+    
+    {%- for selling_plan_group in product.selling_plan_groups -%}
+      {%- for selling_plan in selling_plan_group.selling_plans -%}
+        {%- comment -%} Check if we've already shown this plan name {%- endcomment -%}
+        {%- assign plan_key = selling_plan.name | append: "|" | append: selling_plan_group.name -%}
+        {%- unless seen_plan_names contains plan_key -%}
+          {%- assign seen_plan_names = seen_plan_names | append: plan_key | append: "," -%}
+          
+          <div class="selling-plan-group" style="margin-top: 20px;">
+            {%- comment -%} Subscription Options heading ABOVE the box {%- endcomment -%}
+            <h4>Subscription Options</h4>
+            
+            <div class="purchase-option subscription-option" style="margin: 0; padding: 16px; border: 2px solid rgba(224, 224, 224, 0.3); border-radius: 6px; transition: all 0.2s; background: transparent;" data-selling-plan-id="{{ selling_plan.id }}">
+              <label class="purchase-option-label" style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
+                <input 
+                  type="radio" 
+                  name="purchase_option_{{ product_form_id }}" 
+                  value="{{ selling_plan.id }}"
+                  data-purchase-type="subscription"
+                  data-selling-plan-id="{{ selling_plan.id }}"
+                  data-selling-plan-name="{{ selling_plan.name }}"
+                  style="margin-right: 12px; margin-top: 4px; flex-shrink: 0;">
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                    <strong style="font-weight: 600;">{{ selling_plan.name }}</strong>
+                    {%- if selling_plan.price_adjustments.size > 0 -%}
+                      {%- assign price_adjustment = selling_plan.price_adjustments | first -%}
+                      {%- if price_adjustment.value_type == 'percentage' -%}
+                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value }}% off</span>
+                      {%- elsif price_adjustment.value_type == 'fixed_amount' -%}
+                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value | money }} off</span>
+                      {%- elsif price_adjustment.value_type == 'price' -%}
+                        <span class="subscription-price" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value | money }}</span>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
+                  
+                  {%- comment -%} Show description with product list - PLAN description now has the content {%- endcomment -%}
+                  {%- if selling_plan.description != blank -%}
+                    <div style="font-size: 13px; color: #666; margin: 8px 0 0 0; line-height: 1.6; white-space: pre-line;">{{ selling_plan.description }}</div>
+                  {%- elsif selling_plan_group.description != blank -%}
+                    <div style="font-size: 13px; color: #666; margin: 8px 0 0 0; line-height: 1.6; white-space: pre-line;">{{ selling_plan_group.description }}</div>
+                  {%- endif -%}
+                </div>
+              </label>
+            </div>
+          </div>
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endfor -%}
+    
+    {%- comment -%} Hidden input for selling plan ID {%- endcomment -%}
+    <input type="hidden" name="selling_plan" id="selling_plan_input_{{ product_form_id }}" value="" form="{{ product_form_id }}">
+  </div>
+  
+  <style>
+    .purchase-option:has(input:checked) {
+      border-color: #000 !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    .purchase-option-label:hover {
+      opacity: 0.8;
+    }
+    
+    .subscription-purchase-options input[type="radio"] {
+      flex-shrink: 0;
+    }
+    
+    @media (max-width: 749px) {
+      .subscription-purchase-options {
+        padding: 16px;
+      }
+      
+      .subscription-header h3 {
+        font-size: 16px;
+      }
+    }
+  </style>
+  
+  <script>
+    (function() {
+      // Get form ID from parameter
+      const formId = '{{ product_form_id }}';
+      const hiddenInput = document.getElementById('selling_plan_input_' + formId);
+      
+      if (!hiddenInput) {
+        console.warn('Selling plan input not found for form:', formId);
+        return;
+      }
+      
+      // Get all purchase option radio buttons for this form
+      const radios = document.querySelectorAll('input[name="purchase_option_' + formId + '"]');
+      
+      // Add event listeners to radio buttons
+      radios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          const sellingPlanId = this.dataset.sellingPlanId || '';
+          const purchaseType = this.dataset.purchaseType;
+          
+          // Update hidden selling plan input
+          hiddenInput.value = sellingPlanId;
+          
+          console.log('Purchase option changed:', {
+            type: purchaseType,
+            sellingPlanId: sellingPlanId,
+            sellingPlanName: this.dataset.sellingPlanName
+          });
+          
+          // Dispatch custom event for analytics or other tracking
+          const event = new CustomEvent('subscriptionOptionChanged', {
+            detail: {
+              purchaseType: purchaseType,
+              sellingPlanId: sellingPlanId,
+              sellingPlanName: this.dataset.sellingPlanName
+            }
+          });
+          document.dispatchEvent(event);
+        });
+      });
+      
+      // Initialize with default (one-time purchase)
+      const defaultRadio = document.querySelector('input[name="purchase_option_' + formId + '"][value="onetime"]');
+      if (defaultRadio && defaultRadio.checked) {
+        hiddenInput.value = '';
+      }
+    })();
+  </script>
+{%- endif -%}
+

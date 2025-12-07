@@ -941,6 +941,190 @@ class EnhancedShopifyAPIClient:
                 "message": f"Failed to update product: {e}"
             }
     
+    def create_product_variants(self, product_id: str, variants: List[Dict]) -> Dict:
+        """
+        Create multiple variants for a product using productVariantsBulkCreate
+        
+        Args:
+            product_id: Shopify product GID
+            variants: List of variant dicts with title, price, sku, etc.
+            
+        Returns:
+            Dict with success status and created variants
+        """
+        if not variants or len(variants) == 0:
+            return {
+                "success": True,
+                "message": "No variants to create"
+            }
+        
+        mutation = """
+        mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkCreate(productId: $productId, variants: $variants) {
+            product {
+              id
+            }
+            productVariants {
+              id
+              title
+              price
+              sku
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        # Build variants input
+        # Note: ProductVariantsBulkInput doesn't support SKU
+        # We need to update SKU separately after creation
+        variants_input = []
+        for variant in variants:
+            variant_data = {}
+            
+            if 'title' in variant:
+                variant_data['optionValues'] = [{"optionName": "Title", "name": variant['title']}]
+            
+            if 'price' in variant:
+                variant_data['price'] = str(variant['price'])
+            
+            # Note: SKU and inventory quantity are set separately after variant creation
+            
+            variants_input.append(variant_data)
+        
+        variables = {
+            "productId": product_id,
+            "variants": variants_input
+        }
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                logger.error(f"Variants creation failed: {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            variant_data = result.get("data", {}).get("productVariantsBulkCreate", {})
+            user_errors = variant_data.get("userErrors", [])
+            
+            if user_errors:
+                logger.error(f"Variants creation validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            created_variants = variant_data.get("productVariants", [])
+            logger.info(f"Successfully created {len(created_variants)} variants for product {product_id}")
+            
+            return {
+                "success": True,
+                "variants": created_variants,
+                "message": f"Created {len(created_variants)} variants"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception creating variants: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to create variants: {e}"
+            }
+    
+    def update_product_variant(self, variant_id: str, sku: str = None, price: float = None) -> Dict:
+        """
+        Update a product variant's SKU or price
+        
+        Args:
+            variant_id: Shopify variant GID
+            sku: New SKU (optional)
+            price: New price (optional)
+            
+        Returns:
+            Dict with success status
+        """
+        mutation = """
+        mutation UpdateVariant($input: ProductVariantInput!) {
+          productVariantUpdate(productVariant: $input) {
+            productVariant {
+              id
+              sku
+              price
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variant_input = {"id": variant_id}
+        
+        if sku is not None:
+            variant_input["sku"] = str(sku)
+        
+        if price is not None:
+            variant_input["price"] = str(price)
+        
+        variables = {"input": variant_input}
+        
+        try:
+            result = self.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                # SKU updates might not be critical, so just log and continue
+                logger.warning(f"Variant update had errors (non-critical): {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred (non-critical)"
+                }
+            
+            variant_data = result.get("data", {}).get("productVariantUpdate", {})
+            if not variant_data:
+                # Mutation might not exist in this API version, continue anyway
+                logger.warning(f"productVariantUpdate mutation not available, SKU update skipped")
+                return {
+                    "success": False,
+                    "message": "Variant update mutation not available"
+                }
+            
+            user_errors = variant_data.get("userErrors", [])
+            
+            if user_errors:
+                logger.warning(f"Variant update validation errors (non-critical): {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred (non-critical)"
+                }
+            
+            updated_variant = variant_data.get("productVariant", {})
+            logger.info(f"Successfully updated variant {variant_id}")
+            
+            return {
+                "success": True,
+                "variant": updated_variant,
+                "message": "Variant updated successfully"
+            }
+            
+        except Exception as e:
+            logger.warning(f"Exception updating variant (non-critical): {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to update variant: {e}"
+            }
+    
     def delete_product_in_shopify(self, shopify_product_id: str) -> Dict:
         """
         Delete a product from Shopify
