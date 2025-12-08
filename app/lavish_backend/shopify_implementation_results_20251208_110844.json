@@ -1,0 +1,967 @@
+{
+  "timestamp": "2025-12-08T11:08:01.001480",
+  "store_domain": "7fa66c-ac.myshopify.com",
+  "steps": {
+    "connection_test": {
+      "success": true
+    },
+    "store_setup": {
+      "success": true
+    },
+    "webhook_setup": {
+      "success": false
+    },
+    "data_sync": {
+      "customers": {
+        "success": false,
+        "error": "'EnhancedShopifyAPIClient' object has no attribute 'get_customers'"
+      },
+      "products": {
+        "success": true,
+        "processed": 1,
+        "created": 0,
+        "updated": 1,
+        "errors": 107
+      },
+      "orders": {
+        "success": true,
+        "processed": 100,
+        "created": 0,
+        "updated": 0,
+        "errors": 0
+      },
+      "inventory": {
+        "success": true,
+        "processed": 721,
+        "created": 0,
+        "updated": 0,
+        "errors": 0
+      }
+    },
+    "statistics": {
+      "success": true,
+      "data": {
+        "customers": {
+          "total": 100,
+          "sample": [
+            {
+              "id": "gid://shopify/Customer/7099756642398",
+              "firstName": null,
+              "lastName": null,
+              "email": "anotherbookchick@gmail.com",
+              "phone": null,
+              "createdAt": "2024-05-27T10:06:23Z",
+              "updatedAt": "2024-05-27T10:06:23Z",
+              "numberOfOrders": "0",
+              "state": "DISABLED",
+              "verifiedEmail": true,
+              "taxExempt": false,
+              "tags": [
+                "newsletter"
+              ],
+              "addresses": [
+                {
+                  "id": "gid://shopify/MailingAddress/8069794725982?model_name=CustomerAddress",
+                  "firstName": null,
+                  "lastName": null,
+                  "address1": null,
+                  "address2": null,
+                  "city": null,
+                  "province": null,
+                  "country": "New Zealand",
+                  "zip": null,
+                  "phone": null,
+                  "name": "",
+                  "provinceCode": null,
+                  "countryCodeV2": "NZ"
+                }
+              ],
+              "defaultAddress": {
+                "id": "gid://shopify/MailingAddress/8069794725982?model_name=CustomerAddress",
+                "address1": null,
+                "address2": null,
+                "city": null,
+                "province": null,
+                "country": "New Zealand",
+                "zip": null,
+                "phone": null,
+                "provinceCode": null,
+                "countryCodeV2": "NZ"
+              }
+            },
+            {
+              "id": "gid://shopify/Customer/7104269779038",
+              "firstName": null,
+              "lastName": null,
+              "email": "kateivywalsh@yahoo.com",
+              "phone": null,
+              "createdAt": "2024-05-29T20:45:03Z",
+              "updatedAt": "2024-09-10T09:56:48Z",
+              "numberOfOrders": "0",
+              "state": "DISABLED",
+              "verifiedEmail": true,
+              "taxExempt": false,
+              "tags": [
+                "EcomSend Popups",
+                "ES Popup Name: Mailing list pop-up",
+                "newsletter"
+              ],
+              "addresses": [
+                {
+                  "id": "gid://shopify/MailingAddress/8074436804702?model_name=CustomerAddress",
+                  "firstName": null,
+                  "lastName": null,
+                  "address1": null,
+                  "address2": null,
+                  "city": null,
+                  "province": null,
+                  "country": "Australia",
+                  "zip": null,
+                  "phone": null,
+                  "name": "",
+                  "provinceCode": null,
+                  "countryCodeV2": "AU"
+                }
+              ],
+              "defaultAddress": {
+                "id": "gid://shopify/MailingAddress/8074436804702?model_name=CustomerAddress",
+                "address1": null,
+                "address2": null,
+                "city": null,
+                "province": null,
+                "country": "Australia",
+                "zip": null,
+                "phone": null,
+                "provinceCode": null,
+                "countryCodeV2": "AU"
+              }
+            },
+            {
+              "id": "gid://shopify/Customer/7105205043294",
+              "firstName": null,
+              "lastName": null,
+              "email": "dedicatedtobooks80@gmail.com",
+              "phone": null,
+              "createdAt": "2024-05-30T16:46:09Z",
+              "updatedAt": "2025-05-26T14:20:22Z",
+              "numberOfOrders": "0",
+              "state": "DISABLED",
+              "verifiedEmail": true,
+              "taxExempt": false,
+              "tags": [
+                "newsletter"
+              ],
+              "addresses": [
+                {
+                  "id": "gid://shopify/MailingAddress/8075651612766?model_name=CustomerAddress",
+                  "firstName": null,
+                  "lastName": null,
+                  "address1": null,
+                  "address2": null,
+                  "city": null,
+                  "province": null,
+                  "country": "Australia",
+                  "zip": null,
+                  "phone": null,
+                  "name": "",
+                  "provinceCode": null,
+                  "countryCodeV2": "AU"
+                }
+              ],
+              "defaultAddress": {
+                "id": "gid://shopify/MailingAddress/8075651612766?model_name=CustomerAddress",
+                "address1": null,
+                "address2": null,
+                "city": null,
+                "province": null,
+                "country": "Australia",
+                "zip": null,
+                "phone": null,
+                "provinceCode": null,
+                "countryCodeV2": "AU"
+              }
+            }
+          ]
+        },
+        "products": {
+          "total": 100,
+          "sample": [
+            {
+              "id": "gid://shopify/Product/7085193756766",
+              "title": "Wingspan Tee",
+              "handle": "as-colour-womens-maple-tee-6",
+              "description": "How big is your wingspan? Show them it's not always how you use it in our super comfy, regular fit Wingspan women's tee.Size Chart: Size Body Width (cm) Body Length (cm) XSM 45.5 63.5 SML 48 64.5 MED 50.5 65.5 LGE 53 66.5 XL 55.5 67.5 2XL 58 68.5 How to Measure: Lay an existing t-shirt flat. Body Width: Measure 3cm below armpit, from one side to the other. Body Length: Measure from the top of the shoulder to the bottom of the t-shirt. Materials: Regular fit Crew neck 100% combed cotton (marles 15% polyester) Neck ribbing, side seamed, shoulder to shoulder tape, double needle hems, preshrunk to minimise shrinkage. Please note: Some of the product images in this listing are digital mock-ups. This means that due to monitor/phone/tablet settings & the nature of digital mock-up themselves, colours may appear slightly different on screen compared to the finished product & design sizes/placements may differ slightly. We have done our best to ensure these images are as close to the final product as possible. Feel free to get in contact with us before placing your order if you have any questions.",
+              "vendor": "Ogo Merch",
+              "productType": "",
+              "status": "ARCHIVED",
+              "createdAt": "2024-05-21T05:00:46Z",
+              "updatedAt": "2025-11-30T02:30:07Z",
+              "publishedAt": null,
+              "tags": [],
+              "totalInventory": 6000,
+              "tracksInventory": true,
+              "variants": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825214046",
+                      "title": "White / Extra Small",
+                      "sku": "62.37.1",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105462878",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825246814",
+                      "title": "White / Small",
+                      "sku": "62.37.2",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105495646",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825279582",
+                      "title": "White / Medium",
+                      "sku": "62.37.3",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105528414",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825312350",
+                      "title": "White / Large",
+                      "sku": "62.37.4",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105561182",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825345118",
+                      "title": "White / X-Large",
+                      "sku": "62.37.5",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105593950",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40838825377886",
+                      "title": "White / 2XL",
+                      "sku": "62.37.6",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42938105626718",
+                        "tracked": true
+                      }
+                    }
+                  }
+                ]
+              },
+              "images": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductImage/31243736678494",
+                      "src": "https://cdn.shopify.com/s/files/1/0572/2275/8494/files/Untitled_design_98.png?v=1725840827",
+                      "altText": ""
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductImage/30858599301214",
+                      "src": "https://cdn.shopify.com/s/files/1/0572/2275/8494/files/wingspan_flatlay.png?v=1719110396",
+                      "altText": "Wingspan Tee - Lavish Library"
+                    }
+                  }
+                ]
+              },
+              "seo": {
+                "title": null,
+                "description": null
+              }
+            },
+            {
+              "id": "gid://shopify/Product/7108520247390",
+              "title": "Rather be Reading Raglan (Boyfriend Fit)",
+              "handle": "rather-be-reading-raglan",
+              "description": "Whether you're running errands, working or being forced to socialize, everyone will know where you'd rather be in this adorable 3/4 sleeve, regular fit raglan tee.Size Chart: Size Body Width (cm) Body Length (cm) XS 44.5 72 Small 48.5 75 Medium 52.5 78 Large 56.5 81 XL 60.5 84 2XL 64.5 85 How to Measure: Lay an existing t-shirt flat. Body Width: Measure 3cm below armpit, from one side to the other. Body Length: Measure from the top of the shoulder to the bottom of the t-shirt. Materials: Regular fit Crew neck \u00be length raglan sleeves Curved tails 100% combed cotton (marles 15% polyester) Self-fabric binding on neck, side seamed, double needle hems, preshrunk to minimise shrinkage. Please note: All of the product images in this listing are digital mock-ups. This means that due to monitor/phone/tablet settings & the nature of digital mock-up themselves, colours may appear slightly different on screen compared to the finished product & design sizes/placements may differ slightly. We have done our best to ensure these images are as close to the final product as possible. Feel free to get in contact with us before placing your order if you have any questions.",
+              "vendor": "Ogo Merch",
+              "productType": "",
+              "status": "ARCHIVED",
+              "createdAt": "2024-06-01T22:29:45Z",
+              "updatedAt": "2025-11-30T02:30:05Z",
+              "publishedAt": null,
+              "tags": [],
+              "totalInventory": 9000,
+              "tracksInventory": true,
+              "variants": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618727006",
+                      "title": "White/Black / Extra Small",
+                      "sku": "58.57.1",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988909985886",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618759774",
+                      "title": "White/Black / Small",
+                      "sku": "58.57.2",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 0,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910018654",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618792542",
+                      "title": "White/Black / Medium",
+                      "sku": "58.57.3",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910051422",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618825310",
+                      "title": "White/Black / Large",
+                      "sku": "58.57.4",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910084190",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618858078",
+                      "title": "White/Black / X-Large",
+                      "sku": "58.57.5",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 0,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910116958",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618890846",
+                      "title": "White/Black / 2XL",
+                      "sku": "58.57.6",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 0,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910149726",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618923614",
+                      "title": "White/Navy / Extra Small",
+                      "sku": "58.58.1",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910182494",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618956382",
+                      "title": "White/Navy / Small",
+                      "sku": "58.58.2",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910215262",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889618989150",
+                      "title": "White/Navy / Medium",
+                      "sku": "58.58.3",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910248030",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889619021918",
+                      "title": "White/Navy / Large",
+                      "sku": "58.58.4",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988910280798",
+                        "tracked": true
+                      }
+                    }
+                  }
+                ]
+              },
+              "images": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductImage/30858995269726",
+                      "src": "https://cdn.shopify.com/s/files/1/0572/2275/8494/files/Untitled_design_57.png?v=1719745489",
+                      "altText": "Rather be Reading Raglan (Boyfriend Fit) - Lavish Library"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductImage/30760764473438",
+                      "src": "https://cdn.shopify.com/s/files/1/0572/2275/8494/files/ba48ba5278bc4751a38721127e59b2e8.jpg?v=1719745512",
+                      "altText": "Rather be Reading Raglan (Boyfriend Fit) - Lavish Library"
+                    }
+                  }
+                ]
+              },
+              "seo": {
+                "title": null,
+                "description": null
+              }
+            },
+            {
+              "id": "gid://shopify/Product/7108522147934",
+              "title": "Rather be Reading Long Sleeve Crop",
+              "handle": "rather-be-reading-long-sleeve-crop-tee",
+              "description": "Whether you're running errands, working or being forced to socialize, everyone will know where you'd rather be in this adorable tee.Size Chart: Size Body Width (cm) Body Length (cm) Extra Small 47.5 44 Small 50 45 Medium 52.5 46.5 Large 55 47.5 XL 57.5 48.5 How to Measure: Lay an existing t-shirt flat. Body Width: Measure 3cm below armpit, from one side to the other. Body Length: Measure from the top of the shoulder to the bottom of the t-shirt. Materials: Relaxed fit Crew neck 100% combed cotton (marles 15% viscose) Short body, dropped shoulders, neck ribbing, side seamed, shoulder to shoulder tape, double needle hems, preshrunk to minimise shrinkage. Please note: All of the product images in this listing are digital mock-ups. This means that due to monitor/phone/tablet settings & the nature of digital mock-up themselves, colours may appear slightly different on screen compared to the finished product & design sizes/placements may differ slightly. We have done our best to ensure these images are as close to the final product as possible. Feel free to get in contact with us before placing your order if you have any questions.",
+              "vendor": "Ogo Merch",
+              "productType": "",
+              "status": "ARCHIVED",
+              "createdAt": "2024-06-01T22:36:15Z",
+              "updatedAt": "2025-11-30T02:30:02Z",
+              "publishedAt": null,
+              "tags": [],
+              "totalInventory": 5000,
+              "tracksInventory": true,
+              "variants": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889620496478",
+                      "title": "White / Extra Small",
+                      "sku": "69.37.1",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988911755358",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889620529246",
+                      "title": "White / Small",
+                      "sku": "69.37.2",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988911788126",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889620562014",
+                      "title": "White / Medium",
+                      "sku": "69.37.3",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988911820894",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889620594782",
+                      "title": "White / Large",
+                      "sku": "69.37.4",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988911853662",
+                        "tracked": true
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductVariant/40889620627550",
+                      "title": "White / X-Large",
+                      "sku": "69.37.5",
+                      "price": "50.00",
+                      "compareAtPrice": null,
+                      "inventoryQuantity": 1000,
+                      "inventoryItem": {
+                        "id": "gid://shopify/InventoryItem/42988911886430",
+                        "tracked": true
+                      }
+                    }
+                  }
+                ]
+              },
+              "images": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/ProductImage/30858989699166",
+                      "src": "https://cdn.shopify.com/s/files/1/0572/2275/8494/files/Untitled_design_56.png?v=1719745402",
+                      "altText": "Rather be Reading Long Sleeve Crop - Lavish Library"
+                    }
+                  }
+                ]
+              },
+              "seo": {
+                "title": null,
+                "description": null
+              }
+            }
+          ]
+        },
+        "orders": {
+          "total": 100,
+          "sample": [
+            {
+              "id": "gid://shopify/Order/5224767160414",
+              "name": "#1001",
+              "email": "lavishlibrarian@gmail.com",
+              "createdAt": "2024-05-21T10:50:20Z",
+              "updatedAt": "2024-05-30T06:40:58Z",
+              "totalPriceSet": {
+                "shopMoney": {
+                  "amount": "176.0",
+                  "currencyCode": "AUD"
+                }
+              },
+              "displayFulfillmentStatus": "FULFILLED",
+              "displayFinancialStatus": "PAID",
+              "processedAt": "2024-05-21T10:50:19Z",
+              "tags": [],
+              "note": null,
+              "customer": null,
+              "shippingAddress": {
+                "firstName": "Sarah",
+                "lastName": "Badman",
+                "address1": "8 Mellifont Street",
+                "city": "Banyo",
+                "province": "Queensland",
+                "country": "Australia",
+                "zip": "4014"
+              },
+              "lineItems": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12805256314974",
+                      "title": "AS Colour - Women's Maple Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40838825312350",
+                        "title": "White / Large",
+                        "sku": "62.37.4",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7085193756766",
+                        "title": "Wingspan Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12805256347742",
+                      "title": "AS Colour United - Crew Sweatshirt",
+                      "quantity": 1,
+                      "variant": null,
+                      "product": null
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12805256380510",
+                      "title": "Rather be Reading long sleeve crop tee",
+                      "quantity": 1,
+                      "variant": null,
+                      "product": null
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gid://shopify/Order/5240357584990",
+              "name": "#1002",
+              "email": "sarah.badman@gmail.com",
+              "createdAt": "2024-06-01T00:40:41Z",
+              "updatedAt": "2024-06-11T01:49:26Z",
+              "totalPriceSet": {
+                "shopMoney": {
+                  "amount": "46.95",
+                  "currencyCode": "AUD"
+                }
+              },
+              "displayFulfillmentStatus": "FULFILLED",
+              "displayFinancialStatus": "PAID",
+              "processedAt": "2024-06-01T00:40:40Z",
+              "tags": [],
+              "note": null,
+              "customer": {
+                "id": "gid://shopify/Customer/7107680108638",
+                "firstName": "Sarah",
+                "lastName": "Badman",
+                "email": "sarah.badman@gmail.com"
+              },
+              "shippingAddress": {
+                "firstName": "Sarah",
+                "lastName": "Badman",
+                "address1": "8 Mellifont Street",
+                "city": "Banyo",
+                "province": "Queensland",
+                "country": "Australia",
+                "zip": "4014"
+              },
+              "lineItems": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12836225908830",
+                      "title": "AS Colour - Women's Maple Tee",
+                      "quantity": 1,
+                      "variant": null,
+                      "product": null
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "gid://shopify/Order/5248210600030",
+              "name": "#1003",
+              "email": "sarah.badman@gmail.com",
+              "createdAt": "2024-06-07T06:24:19Z",
+              "updatedAt": "2024-06-18T06:54:12Z",
+              "totalPriceSet": {
+                "shopMoney": {
+                  "amount": "380.0",
+                  "currencyCode": "AUD"
+                }
+              },
+              "displayFulfillmentStatus": "FULFILLED",
+              "displayFinancialStatus": "PAID",
+              "processedAt": "2024-06-07T06:24:18Z",
+              "tags": [],
+              "note": null,
+              "customer": {
+                "id": "gid://shopify/Customer/7107680108638",
+                "firstName": "Sarah",
+                "lastName": "Badman",
+                "email": "sarah.badman@gmail.com"
+              },
+              "shippingAddress": {
+                "firstName": "Sarah",
+                "lastName": "Badman",
+                "address1": "8 Mellifont Street",
+                "city": "Banyo",
+                "province": "Queensland",
+                "country": "Australia",
+                "zip": "4014"
+              },
+              "lineItems": {
+                "edges": [
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851089965150",
+                      "title": "Enemies to Lovers Tote",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40915397541982",
+                        "title": "Default Title",
+                        "sku": "68.12.31",
+                        "price": "35.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7118951088222",
+                        "title": "Enemies to Lovers Tote"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851089997918",
+                      "title": "How We Like 'Em  Tote",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40895928762462",
+                        "title": "Default Title",
+                        "sku": "68.12.31",
+                        "price": "35.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7112221229150",
+                        "title": "How We Like 'Em  Tote"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090030686",
+                      "title": "Morally Grey Tote",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40896114425950",
+                        "title": "Default Title",
+                        "sku": "68.12.31",
+                        "price": "35.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7112258650206",
+                        "title": "Morally Grey Tote"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090063454",
+                      "title": "Tropes Tote",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40915730202718",
+                        "title": "Default Title",
+                        "sku": "68.12.31",
+                        "price": "35.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7119029862494",
+                        "title": "Tropes Tote"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090096222",
+                      "title": "Bibliophile Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40905470017630",
+                        "title": "White / 2XL",
+                        "sku": "62.37.6",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7114914824286",
+                        "title": "Bibliophile Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090128990",
+                      "title": "Hockey Book Boyfriend Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40905088008286",
+                        "title": "Pale Blue / 2XL",
+                        "sku": "62.67.6",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7114797154398",
+                        "title": "Hockey Book Boyfriend Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090161758",
+                      "title": "Romantasy Era Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40915801669726",
+                        "title": "Sage / Small",
+                        "sku": "62.68.2",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7119067185246",
+                        "title": "Romantasy Era Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090194526",
+                      "title": "Small Town Romance Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40916664385630",
+                        "title": "Pink / Small",
+                        "sku": "62.29.2",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7119551889502",
+                        "title": "Small Town Romance (MF) Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090227294",
+                      "title": "Wingspan Matters Tee",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40916755087454",
+                        "title": "White / Small",
+                        "sku": "62.37.2",
+                        "price": "50.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7119611363422",
+                        "title": "Wingspan Matters Tee"
+                      }
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "gid://shopify/LineItem/12851090260062",
+                      "title": "AS Colour - Shoulder Canvas Tote Bag",
+                      "quantity": 1,
+                      "variant": {
+                        "id": "gid://shopify/ProductVariant/40916859125854",
+                        "title": "Default Title",
+                        "sku": "68.12.31",
+                        "price": "35.00"
+                      },
+                      "product": {
+                        "id": "gid://shopify/Product/7119672836190",
+                        "title": "Save a Horse, Ride a Cowboy Tote"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "locations": {
+          "total": 2,
+          "details": [
+            {
+              "id": "gid://shopify/Location/64008126558",
+              "name": "8 Mellifont Street",
+              "isActive": true,
+              "address": {
+                "address1": "8 Mellifont Street",
+                "address2": "",
+                "city": "Banyo",
+                "province": "Queensland",
+                "country": "Australia",
+                "zip": "4014",
+                "phone": "+61434975688"
+              }
+            },
+            {
+              "id": "gid://shopify/Location/71649493086",
+              "name": "Laguna",
+              "isActive": true,
+              "address": {
+                "address1": "2307 Bandera Road",
+                "address2": "Suite 103 and 104",
+                "city": "San Antonio",
+                "province": "Texas",
+                "country": "United States",
+                "zip": "78228",
+                "phone": "+14063041282"
+              }
+            }
+          ]
+        },
+        "timestamp": "2025-12-08T11:08:44.647186"
+      }
+    },
+    "sample_plan": {
+      "success": true
+    }
+  },
+  "overall_success": false
+}

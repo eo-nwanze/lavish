@@ -1482,4 +1482,97 @@ class EnhancedShopifyAPIClient:
                 "error": str(e),
                 "message": f"Failed to update inventory: {e}"
             }
+    
+    # ==================== REST API METHODS ====================
+    
+    def rest_request(self, method: str, endpoint: str, data: Dict = None, params: Dict = None) -> Dict:
+        """
+        Execute a REST API request to Shopify
+        
+        Args:
+            method: HTTP method (GET, POST, PUT, DELETE)
+            endpoint: API endpoint (e.g., 'webhooks.json')
+            data: Request body data
+            params: Query parameters
+            
+        Returns:
+            Dict with response data or error
+        """
+        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        
+        try:
+            response = requests.request(
+                method,
+                url,
+                headers=self.get_headers(),
+                json=data,
+                params=params,
+                timeout=30
+            )
+            
+            if response.status_code in [200, 201, 204]:
+                if response.content:
+                    return response.json()
+                return {'success': True}
+            
+            elif response.status_code == 429:  # Rate limited
+                retry_after = int(response.headers.get('Retry-After', 2))
+                logger.warning(f"Rate limited, waiting {retry_after} seconds")
+                time.sleep(retry_after)
+                return self.rest_request(method, endpoint, data, params)
+            
+            else:
+                logger.error(f"HTTP {response.status_code}: {response.text}")
+                return {'error': f"HTTP {response.status_code}: {response.text}"}
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"REST request failed: {e}")
+            return {'error': str(e)}
+    
+    def get_customers(self, limit: int = 50, cursor: str = None) -> Dict:
+        """
+        Get customers using REST API with pagination
+        
+        Args:
+            limit: Number of customers to retrieve
+            cursor: Pagination cursor
+            
+        Returns:
+            Dict with customer data
+        """
+        params = {'limit': limit}
+        if cursor:
+            params['page_info'] = cursor
+        
+        return self.rest_request('GET', 'customers.json', params=params)
+    
+    def create_webhook(self, topic: str, address: str, format: str = 'json') -> Dict:
+        """
+        Create a webhook
+        
+        Args:
+            topic: Webhook topic (e.g., 'orders/create')
+            address: Webhook URL
+            format: Response format ('json' or 'xml')
+            
+        Returns:
+            Dict with webhook data or error
+        """
+        webhook_data = {
+            "webhook": {
+                "topic": topic,
+                "address": address,
+                "format": format
+            }
+        }
+        
+        return self.rest_request('POST', 'webhooks.json', webhook_data)
+    
+    def get_webhooks(self) -> Dict:
+        """Get all webhooks"""
+        return self.rest_request('GET', 'webhooks.json')
+    
+    def delete_webhook(self, webhook_id: str) -> Dict:
+        """Delete a webhook"""
+        return self.rest_request('DELETE', f'webhooks/{webhook_id}.json')
 
