@@ -296,3 +296,6 @@ You can now:
 
 **Your Django Admin is now a complete product management system!** 🎉
 
+
+
+

@@ -146,3 +146,6 @@ class EmailTemplateAdmin(ImportExportModelAdmin):
         self.message_user(request, f"Successfully deactivated {queryset.count()} template(s).")
     deactivate_templates.short_description = "Deactivate selected templates"
 
+
+
+

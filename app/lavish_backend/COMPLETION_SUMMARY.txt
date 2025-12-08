@@ -36,3 +36,6 @@ From now on, all products you create in Django Admin will automatically have:
 
 NO MORE MANUAL STEPS NEEDED! 🎉
 
+
+
+

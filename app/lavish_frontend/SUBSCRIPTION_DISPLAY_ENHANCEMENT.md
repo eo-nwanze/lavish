@@ -302,3 +302,6 @@ Customers need this information to understand what they're subscribing to!
 
 Refresh your product and cart pages to see the enhanced subscription information!
 
+
+
+

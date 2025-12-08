@@ -325,3 +325,6 @@ for sub in subs:
 - Just need to add frontend UI to theme (1 hour) 🎨
 - Then customers can purchase subscriptions! 🚀
 
+
+
+

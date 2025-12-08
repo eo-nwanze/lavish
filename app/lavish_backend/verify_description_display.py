@@ -248,3 +248,6 @@ If descriptions still don't show:
   - May need to use Shopify CLI to sync theme
     """)
 
+
+
+

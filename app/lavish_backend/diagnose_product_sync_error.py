@@ -255,3 +255,6 @@ if __name__ == '__main__':
             print("Looking for most recent product needing push...")
             diagnose_product()
 
+
+
+

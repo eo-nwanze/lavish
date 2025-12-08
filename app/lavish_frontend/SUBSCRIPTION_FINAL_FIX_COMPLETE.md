@@ -213,3 +213,6 @@ Put data where Liquid CAN access it - on the selling_plan object itself, not the
 
 **Deploy the theme and refresh your browser to see the product lists!** 🎊
 
+
+
+

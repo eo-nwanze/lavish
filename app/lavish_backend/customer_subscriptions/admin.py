@@ -11,6 +11,9 @@ from .models import (
     ProductShippingConfig, ShippingCutoffLog
 )
 from .bidirectional_sync import subscription_sync
+import logging
+
+logger = logging.getLogger('customer_subscriptions')
 
 
 # Import-Export Resources
@@ -103,7 +106,7 @@ class SellingPlanAdmin(ImportExportModelAdmin):
         }),
     )
     
-    actions = ['push_to_shopify', 'mark_for_push']
+    actions = ['push_to_shopify', 'mark_for_push', 'publish_products_to_store']
     
     def save_model(self, request, obj, form, change):
         """Auto-push to Shopify on create/update"""
@@ -117,8 +120,110 @@ class SellingPlanAdmin(ImportExportModelAdmin):
                 # Refresh to get the real Shopify ID
                 obj.refresh_from_db()
                 self.message_user(request, f"✅ Selling Plan synced to Shopify: {obj.name} (ID: {obj.shopify_id})", level=messages.SUCCESS)
+                
+                # Auto-publish associated products to Online Store
+                published_count = self._publish_products_to_online_store(obj)
+                if published_count > 0:
+                    self.message_user(request, f"✅ Published {published_count} associated product(s) to Online Store", level=messages.SUCCESS)
             else:
                 self.message_user(request, f"⚠️ Selling Plan saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+    
+    def _publish_products_to_online_store(self, selling_plan):
+        """Publish all associated products to the Online Store channel"""
+        from shopify_integration.enhanced_client import EnhancedShopifyAPIClient
+        
+        client = EnhancedShopifyAPIClient()
+        published_count = 0
+        
+        # Get Online Store publication ID
+        pub_query = """
+        {
+          publications(first: 10) {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
+        }
+        """
+        
+        pub_result = client.execute_graphql_query(pub_query)
+        
+        if "errors" in pub_result:
+            logger.error(f"Failed to get publications: {pub_result['errors']}")
+            return 0
+        
+        publications = pub_result.get("data", {}).get("publications", {}).get("edges", [])
+        online_store_id = None
+        
+        for pub_edge in publications:
+            pub = pub_edge.get("node", {})
+            if pub.get("name") == "Online Store":
+                online_store_id = pub.get("id")
+                break
+        
+        if not online_store_id:
+            logger.error("Could not find Online Store publication")
+            return 0
+        
+        # Publish each associated product
+        for product in selling_plan.products.all():
+            if not product.shopify_id or product.shopify_id.startswith('temp_'):
+                continue
+            
+            # Check if already published
+            check_query = """
+            query($id: ID!) {
+              product(id: $id) {
+                id
+                publishedAt
+              }
+            }
+            """
+            
+            check_result = client.execute_graphql_query(check_query, {"id": product.shopify_id})
+            
+            if "errors" not in check_result:
+                prod_data = check_result.get("data", {}).get("product", {})
+                if prod_data and prod_data.get("publishedAt"):
+                    # Already published
+                    continue
+            
+            # Publish the product
+            publish_mutation = """
+            mutation publishProduct($id: ID!, $input: [PublicationInput!]!) {
+              publishablePublish(id: $id, input: $input) {
+                publishable {
+                  ... on Product {
+                    id
+                    title
+                    onlineStoreUrl
+                  }
+                }
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }
+            """
+            
+            publish_result = client.execute_graphql_query(publish_mutation, {
+                "id": product.shopify_id,
+                "input": [{"publicationId": online_store_id}]
+            })
+            
+            if "errors" not in publish_result:
+                publish_data = publish_result.get("data", {}).get("publishablePublish", {})
+                user_errors = publish_data.get("userErrors", [])
+                
+                if not user_errors:
+                    published_count += 1
+                    logger.info(f"Published product to Online Store: {product.title}")
+        
+        return published_count
     
     def interval_display(self, obj):
         return f"Every {obj.billing_interval_count} {obj.billing_interval}(s)"
@@ -170,6 +275,23 @@ class SellingPlanAdmin(ImportExportModelAdmin):
         self.message_user(request, f"✅ Marked {count} plans for push to Shopify", level=messages.SUCCESS)
     
     mark_for_push.short_description = "⚡ Mark for push to Shopify"
+    
+    def publish_products_to_store(self, request, queryset):
+        """Publish associated products to Online Store"""
+        total_published = 0
+        total_plans = 0
+        
+        for plan in queryset:
+            total_plans += 1
+            published_count = self._publish_products_to_online_store(plan)
+            total_published += published_count
+        
+        if total_published > 0:
+            self.message_user(request, f"✅ Published {total_published} product(s) from {total_plans} selling plan(s) to Online Store", level=messages.SUCCESS)
+        else:
+            self.message_user(request, f"ℹ️ No products needed publishing (already published or no products associated)", level=messages.INFO)
+    
+    publish_products_to_store.short_description = "🌐 Publish associated products to Online Store"
 
 
 @admin.register(CustomerSubscription)
