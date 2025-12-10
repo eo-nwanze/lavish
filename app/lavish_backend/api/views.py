@@ -3,15 +3,19 @@ API Views for Shopify Data
 Exposes Django backend data to Shopify theme frontend
 """
 
-from rest_framework import viewsets, generics, filters
-from rest_framework.decorators import action
+from rest_framework import viewsets, generics, filters, status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Sum
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 from products.models import ShopifyProduct
 from inventory.models import ShopifyInventoryLevel
-from customers.models import ShopifyCustomer
-from orders.models import ShopifyOrder
+from customers.models import ShopifyCustomer, ShopifyCustomerAddress
+from orders.models import ShopifyOrder, ShopifyOrderAddress
 from shipping.models import ShopifyCarrierService, ShopifyDeliveryMethod
 from locations.models import Country, State, City
 from .serializers import (
@@ -176,19 +180,188 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(data)
 
 
-class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+class OrderViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for orders
+    API endpoint for orders with full CRUD operations
     
     Endpoints:
     - GET /api/orders/ - List all orders
     - GET /api/orders/{id}/ - Get order by ID
-    - GET /api/orders/recent/ - Get recent orders
+    - POST /api/orders/ - Create new order
+    - PUT /api/orders/{id}/ - Update order
+    - PATCH /api/orders/{id}/ - Partial update order
+    - DELETE /api/orders/{id}/ - Delete order
+    - GET /api/orders/customer-orders/ - Get orders for current customer
+    - POST /api/orders/{id}/update-address/ - Update order shipping address
+    - POST /api/orders/{id}/cancel/ - Cancel order
+    - GET /api/orders/{id}/invoice/ - Download order invoice
     """
     queryset = ShopifyOrder.objects.prefetch_related('line_items', 'customer')
     serializer_class = OrderSerializer
     permission_classes = [AllowAny]
     ordering = ['-created_at']
+    
+    @action(detail=False, methods=['get'])
+    def customer_orders(self, request):
+        """Get orders for the current customer"""
+        try:
+            customer_email = request.GET.get('customer_email')
+            if not customer_email:
+                return Response(
+                    {'error': 'Customer email required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            orders = ShopifyOrder.objects.filter(
+                customer_email=customer_email
+            ).order_by('-created_at')
+            
+            # Calculate statistics
+            total_orders = orders.count()
+            pending_orders = orders.filter(financial_status='pending').count()
+            fulfilled_orders = orders.filter(fulfillment_status='fulfilled').count()
+            total_spent = sum(order.total_price or 0 for order in orders)
+            
+            serializer = self.get_serializer(orders, many=True)
+            
+            return Response({
+                'success': True,
+                'orders': serializer.data,
+                'statistics': {
+                    'total_orders': total_orders,
+                    'pending_orders': pending_orders,
+                    'fulfilled_orders': fulfilled_orders,
+                    'total_spent': float(total_spent)
+                }
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'])
+    def update_address(self, request, pk=None):
+        """Update order shipping address"""
+        try:
+            order = self.get_object()
+            
+            # Get or create shipping address
+            from orders.models import ShopifyOrderAddress
+            shipping_address, created = ShopifyOrderAddress.objects.get_or_create(
+                order=order,
+                address_type='shipping',
+                defaults={
+                    'first_name': '',
+                    'last_name': '',
+                    'company': '',
+                    'address1': '',
+                    'address2': '',
+                    'city': '',
+                    'province': '',
+                    'country': '',
+                    'zip_code': '',
+                    'phone': '',
+                }
+            )
+            
+            # Update shipping address fields
+            address_data = request.data.get('address', {})
+            
+            if 'first_name' in address_data:
+                shipping_address.first_name = address_data['first_name']
+            if 'last_name' in address_data:
+                shipping_address.last_name = address_data['last_name']
+            if 'company' in address_data:
+                shipping_address.company = address_data['company']
+            if 'address1' in address_data:
+                shipping_address.address1 = address_data['address1']
+            if 'address2' in address_data:
+                shipping_address.address2 = address_data['address2']
+            if 'city' in address_data:
+                shipping_address.city = address_data['city']
+            if 'province' in address_data:
+                shipping_address.province = address_data['province']
+            if 'country' in address_data:
+                shipping_address.country = address_data['country']
+            if 'zip' in address_data:
+                shipping_address.zip_code = address_data['zip']
+            if 'phone' in address_data:
+                shipping_address.phone = address_data['phone']
+            
+            shipping_address.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Order shipping address updated successfully'
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """Cancel an order"""
+        try:
+            order = self.get_object()
+            
+            # Check if order can be cancelled
+            if order.financial_status in ['paid', 'fulfilled']:
+                return Response(
+                    {'error': 'Order cannot be cancelled in current status'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Update order status
+            order.financial_status = 'cancelled'
+            order.cancelled_at = timezone.now()
+            order.cancel_reason = request.data.get('reason', 'Customer requested cancellation')
+            order.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Order cancelled successfully'
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['get'])
+    def invoice(self, request, pk=None):
+        """Generate and download order invoice"""
+        try:
+            order = self.get_object()
+            
+            # Generate invoice PDF (simplified version)
+            # In a real implementation, you would use a PDF library like ReportLab
+            invoice_data = {
+                'order_name': order.name,
+                'customer_email': order.customer_email,
+                'created_at': order.created_at,
+                'total_price': float(order.total_price or 0),
+                'financial_status': order.financial_status,
+                'fulfillment_status': order.fulfillment_status
+            }
+            
+            # For now, return JSON data instead of PDF
+            return Response({
+                'success': True,
+                'invoice_data': invoice_data,
+                'message': 'Invoice data retrieved successfully'
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=False, methods=['get'])
     def recent(self, request):
@@ -199,18 +372,195 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class CustomerViewSet(viewsets.ReadOnlyModelViewSet):
+class CustomerViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for customers
+    API endpoint for customers with full CRUD operations
     
     Endpoints:
     - GET /api/customers/ - List all customers
     - GET /api/customers/{id}/ - Get customer by ID
+    - POST /api/customers/ - Create new customer
+    - PUT /api/customers/{id}/ - Update customer
+    - PATCH /api/customers/{id}/ - Partial update customer
+    - DELETE /api/customers/{id}/ - Delete customer
+    - POST /api/customers/profile/update/ - Update customer profile
+    - POST /api/customers/addresses/create/ - Create address
+    - PUT /api/customers/addresses/{id}/update/ - Update address
+    - DELETE /api/customers/addresses/{id}/delete/ - Delete address
     """
     queryset = ShopifyCustomer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [AllowAny]
     ordering = ['-created_at']
+    
+    @action(detail=False, methods=['post'])
+    def update_profile(self, request):
+        """Update customer profile information"""
+        try:
+            customer_id = request.data.get('customer_id')
+            if not customer_id:
+                return Response(
+                    {'error': 'Customer ID required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            customer = ShopifyCustomer.objects.get(shopify_id=customer_id)
+            
+            # Update customer fields
+            if 'first_name' in request.data:
+                customer.first_name = request.data['first_name']
+            if 'last_name' in request.data:
+                customer.last_name = request.data['last_name']
+            if 'phone' in request.data:
+                customer.phone = request.data['phone']
+            if 'email' in request.data:
+                customer.email = request.data['email']
+            if 'accepts_marketing' in request.data:
+                customer.accepts_marketing = request.data['accepts_marketing']
+            
+            customer.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'customer': {
+                    'shopify_id': customer.shopify_id,
+                    'email': customer.email,
+                    'first_name': customer.first_name,
+                    'last_name': customer.last_name,
+                    'phone': customer.phone,
+                    'accepts_marketing': customer.accepts_marketing
+                }
+            })
+            
+        except ShopifyCustomer.DoesNotExist:
+            return Response(
+                {'error': 'Customer not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['post'])
+    def create_address(self, request):
+        """Create new customer address"""
+        try:
+            customer_id = request.data.get('customer_id')
+            if not customer_id:
+                return Response(
+                    {'error': 'Customer ID required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            customer = ShopifyCustomer.objects.get(shopify_id=customer_id)
+            
+            # Create address
+            address = ShopifyCustomerAddress.objects.create(
+                customer=customer,
+                first_name=request.data.get('first_name', ''),
+                last_name=request.data.get('last_name', ''),
+                company=request.data.get('company', ''),
+                address1=request.data.get('address1', ''),
+                address2=request.data.get('address2', ''),
+                city=request.data.get('city', ''),
+                province=request.data.get('province', ''),
+                country=request.data.get('country', ''),
+                zip_code=request.data.get('zip_code', ''),
+                phone=request.data.get('phone', ''),
+                is_default=request.data.get('is_default', False)
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Address created successfully',
+                'address_id': address.id,
+                'shopify_id': address.shopify_id
+            })
+            
+        except ShopifyCustomer.DoesNotExist:
+            return Response(
+                {'error': 'Customer not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['put', 'patch'])
+    def update_address(self, request, pk=None):
+        """Update customer address"""
+        try:
+            address = ShopifyCustomerAddress.objects.get(pk=pk)
+            
+            # Update address fields
+            if 'first_name' in request.data:
+                address.first_name = request.data['first_name']
+            if 'last_name' in request.data:
+                address.last_name = request.data['last_name']
+            if 'company' in request.data:
+                address.company = request.data['company']
+            if 'address1' in request.data:
+                address.address1 = request.data['address1']
+            if 'address2' in request.data:
+                address.address2 = request.data['address2']
+            if 'city' in request.data:
+                address.city = request.data['city']
+            if 'province' in request.data:
+                address.province = request.data['province']
+            if 'country' in request.data:
+                address.country = request.data['country']
+            if 'zip_code' in request.data:
+                address.zip_code = request.data['zip_code']
+            if 'phone' in request.data:
+                address.phone = request.data['phone']
+            if 'is_default' in request.data:
+                address.is_default = request.data['is_default']
+            
+            address.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Address updated successfully'
+            })
+            
+        except ShopifyCustomerAddress.DoesNotExist:
+            return Response(
+                {'error': 'Address not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['delete'])
+    def delete_address(self, request, pk=None):
+        """Delete customer address"""
+        try:
+            address = ShopifyCustomerAddress.objects.get(pk=pk)
+            address.delete()
+            
+            return Response({
+                'success': True,
+                'message': 'Address deleted successfully'
+            })
+            
+        except ShopifyCustomerAddress.DoesNotExist:
+            return Response(
+                {'error': 'Address not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ShippingViewSet(viewsets.ReadOnlyModelViewSet):
