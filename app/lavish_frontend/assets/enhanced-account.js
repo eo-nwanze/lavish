@@ -478,13 +478,178 @@ function closeSkipPaymentModal() {
 }
 
 function changeAddress(subscriptionId) {
+  console.log('changeAddress called with subscriptionId:', subscriptionId);
+  
+  // Wait for the modal to be fully loaded before trying to open it
+  const checkModal = () => {
+    const modal = document.getElementById('change-address-modal');
+    console.log('Modal element:', modal);
+    if (modal) {
+      modal.classList.add('active');
+      console.log('Modal opened with active class');
+      
+      // Wait for the modal transition to complete and for elements to be fully visible
+      setTimeout(() => {
+        console.log('Modal transition should be complete, attempting to populate dropdowns...');
+        
+        // Check if modal is actually visible
+        const modalStyle = window.getComputedStyle(modal);
+        console.log('Modal visibility:', modalStyle.visibility);
+        console.log('Modal opacity:', modalStyle.opacity);
+        
+        const countrySelect = document.getElementById('change_addr_country');
+        const countryCodeSelect = document.getElementById('change_addr_country_code');
+        
+        console.log('Elements found:', {
+          countrySelect: !!countrySelect,
+          countryCodeSelect: !!countryCodeSelect,
+          countrySelectVisible: countrySelect ? window.getComputedStyle(countrySelect).display !== 'none' : false,
+          countryCodeSelectVisible: countryCodeSelect ? window.getComputedStyle(countryCodeSelect).display !== 'none' : false
+        });
+        
+        if (countrySelect && countryCodeSelect) {
+          // Try using Django Integration first
+          if (window.djangoIntegration && window.djangoIntegration.countries.length > 0) {
+            console.log('Using Django Integration data');
+            const countries = window.djangoIntegration.countries;
+            
+            // Clear existing options
+            countrySelect.innerHTML = '<option value="">Select a country...</option>';
+            countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+            
+            // Add countries
+            countries.forEach((country, index) => {
+              const option = document.createElement('option');
+              option.value = country.id;
+              option.textContent = country.name;
+              countrySelect.appendChild(option);
+
+              const codeOption = document.createElement('option');
+              codeOption.value = `+${country.phone_code}`;
+              codeOption.textContent = `(+${country.phone_code})`;
+              countryCodeSelect.appendChild(codeOption);
+              
+              if (index === 0) console.log('Added first country:', country.name);
+            });
+            
+            // Add change event listener
+            countrySelect.addEventListener('change', () => {
+              const selectedCountry = countries.find(c => c.id == countrySelect.value);
+              if (selectedCountry) {
+                countryCodeSelect.value = `+${selectedCountry.phone_code}`;
+                loadStatesForChangeAddress(countrySelect.value);
+              }
+            });
+            
+            console.log('Dropdowns populated successfully. Country options:', countrySelect.options.length);
+          } else {
+            console.log('Using API fallback');
+            loadCountriesForChangeAddress();
+          }
+        } else {
+          console.error('Dropdown elements not found even after delay');
+          // Try one more time with a longer delay
+          setTimeout(() => {
+            console.log('Second attempt at populating dropdowns...');
+            const countrySelect2 = document.getElementById('change_addr_country');
+            const countryCodeSelect2 = document.getElementById('change_addr_country_code');
+            console.log('Second attempt - Elements found:', {
+              countrySelect: !!countrySelect2,
+              countryCodeSelect: !!countryCodeSelect2
+            });
+            if (countrySelect2 && countryCodeSelect2) {
+              debugDropdownPopulation();
+            }
+          }, 1000);
+        }
+      }, 500); // Increased delay to account for modal transition
+    } else {
+      console.error('Change address modal not found, retrying...');
+      // Retry after a short delay
+      setTimeout(checkModal, 100);
+    }
+  };
+  
+  checkModal();
+}
+
+// Debug function to test dropdown population
+function debugDropdownPopulation() {
+  console.log('=== DEBUG: Dropdown Population Test ===');
+  
+  const countrySelect = document.getElementById('change_addr_country');
+  const countryCodeSelect = document.getElementById('change_addr_country_code');
+  const stateSelect = document.getElementById('change_addr_province');
+  const citySelect = document.getElementById('change_addr_city');
+  
+  console.log('Elements found:', {
+    countrySelect: !!countrySelect,
+    countryCodeSelect: !!countryCodeSelect,
+    stateSelect: !!stateSelect,
+    citySelect: !!citySelect
+  });
+  
+  if (countrySelect) {
+    console.log('Country select current options:', countrySelect.options.length);
+    console.log('Country select innerHTML:', countrySelect.innerHTML.substring(0, 200));
+  }
+  
+  if (countryCodeSelect) {
+    console.log('Country code select current options:', countryCodeSelect.options.length);
+    console.log('Country code select innerHTML:', countryCodeSelect.innerHTML.substring(0, 200));
+  }
+  
+  console.log('Django Integration available:', !!window.djangoIntegration);
+  if (window.djangoIntegration) {
+    console.log('Django Integration countries:', window.djangoIntegration.countries.length);
+  }
+  
+  // Try to populate directly
+  if (countrySelect && countryCodeSelect && window.djangoIntegration && window.djangoIntegration.countries.length > 0) {
+    console.log('Attempting direct population...');
+    const countries = window.djangoIntegration.countries;
+    
+    countrySelect.innerHTML = '<option value="">Select a country...</option>';
+    countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+    
+    countries.forEach(country => {
+      const option = document.createElement('option');
+      option.value = country.id;
+      option.textContent = country.name;
+      countrySelect.appendChild(option);
+
+      const codeOption = document.createElement('option');
+      codeOption.value = `+${country.phone_code}`;
+      codeOption.textContent = `(+${country.phone_code})`;
+      countryCodeSelect.appendChild(codeOption);
+    });
+    
+    console.log('Direct population completed');
+    console.log('Country select new options:', countrySelect.options.length);
+    console.log('Country code select new options:', countryCodeSelect.options.length);
+  }
+  
+  console.log('=== END DEBUG ===');
+}
+
+// Make debug function available globally
+window.debugDropdownPopulation = debugDropdownPopulation;
+
+// Also create a function to manually open and populate the modal for testing
+window.testChangeAddressModal = function() {
+  console.log('=== MANUAL TEST: Opening Change Address Modal ===');
   const modal = document.getElementById('change-address-modal');
   if (modal) {
     modal.classList.add('active');
-    // Load countries, states, and country codes for the change address modal
-    loadCountriesForChangeAddress();
+    setTimeout(() => {
+      debugDropdownPopulation();
+    }, 500);
+  } else {
+    console.error('Modal not found');
   }
-}
+};
+
+console.log('Debug functions available: debugDropdownPopulation() and testChangeAddressModal()');
 
 function changePayment(subscriptionId) {
   const modal = document.getElementById('change-payment-modal');
@@ -772,6 +937,14 @@ function closeChangeAddressModal() {
   }
 }
 
+function closeAddAddressModal() {
+  const modal = document.getElementById('add-address-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.getElementById('add-address-form').reset();
+  }
+}
+
 function getApiBaseUrl() {
   if (window.location.hostname === 'localhost') {
     return 'http://127.0.0.1:8003/api'; // Development
@@ -988,11 +1161,40 @@ function loadCountriesForChangeAddress() {
   const countrySelect = document.getElementById('change_addr_country');
   const countryCodeSelect = document.getElementById('change_addr_country_code');
 
+  console.log('loadCountriesForChangeAddress called');
+  console.log('countrySelect element:', countrySelect);
+  console.log('countryCodeSelect element:', countryCodeSelect);
+
+  if (!countrySelect || !countryCodeSelect) {
+    console.error('Required elements not found in the DOM');
+    // Retry after a short delay in case the DOM is still loading
+    setTimeout(() => {
+      console.log('Retrying loadCountriesForChangeAddress...');
+      loadCountriesForChangeAddress();
+    }, 500);
+    return;
+  }
+
+  // Show loading state
+  countrySelect.innerHTML = '<option value="">Loading countries...</option>';
+  countryCodeSelect.innerHTML = '<option value="">Loading...</option>';
+
   fetch(`${getApiBaseUrl()}/locations/countries/`)
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response received:', response);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('Countries data received:', data.length, 'countries');
+      
+      // Clear existing options
       countrySelect.innerHTML = '<option value="">Select a country...</option>';
       countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+      
+      // Add countries
       data.forEach(country => {
         const option = document.createElement('option');
         option.value = country.id;
@@ -1004,18 +1206,28 @@ function loadCountriesForChangeAddress() {
         codeOption.textContent = `(+${country.phone_code})`;
         countryCodeSelect.appendChild(codeOption);
       });
-      countrySelect.addEventListener('change', () => {
-        loadStatesForChangeAddress(countrySelect.value);
-        const selectedCountry = data.find(c => c.id == countrySelect.value);
+      
+      // Remove existing event listener to prevent duplicates
+      const newCountrySelect = countrySelect.cloneNode(true);
+      countrySelect.parentNode.replaceChild(newCountrySelect, countrySelect);
+      
+      // Add change event listener
+      newCountrySelect.addEventListener('change', () => {
+        loadStatesForChangeAddress(newCountrySelect.value);
+        const selectedCountry = data.find(c => c.id == newCountrySelect.value);
         if (selectedCountry) {
-          countryCodeSelect.value = `+${selectedCountry.phone_code}`;
-          document.getElementById('change_addr_phone').value = '';
+          document.getElementById('change_addr_country_code').value = `+${selectedCountry.phone_code}`;
+          const phoneInput = document.getElementById('change_addr_phone');
+          if (phoneInput) {
+            phoneInput.value = '';
+          }
         }
       });
     })
     .catch(error => {
       console.error('Error fetching countries:', error);
       countrySelect.innerHTML = '<option value="">Error loading countries</option>';
+      countryCodeSelect.innerHTML = '<option value="">Error loading</option>';
     });
 }
 
@@ -1023,11 +1235,33 @@ function loadStatesForChangeAddress(countryId) {
   const stateSelect = document.getElementById('change_addr_province');
   const citySelect = document.getElementById('change_addr_city');
 
+  if (!stateSelect || !citySelect) {
+    console.error('State or city select elements not found');
+    return;
+  }
+
+  if (!countryId) {
+    stateSelect.innerHTML = '<option value="">Select country first</option>';
+    citySelect.innerHTML = '<option value="">Select state first</option>';
+    return;
+  }
+
+  // Show loading state
+  stateSelect.innerHTML = '<option value="">Loading states...</option>';
+  citySelect.innerHTML = '<option value="">Select state first...</option>';
+
   fetch(`${getApiBaseUrl()}/locations/countries/${countryId}/states/`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('States data received:', data.length, 'states');
       stateSelect.innerHTML = '<option value="">Select state/province...</option>';
       citySelect.innerHTML = '<option value="">Select state first...</option>';
+      
       if (data.length > 0) {
         data.forEach(state => {
           const option = document.createElement('option');
@@ -1035,7 +1269,13 @@ function loadStatesForChangeAddress(countryId) {
           option.textContent = state.name;
           stateSelect.appendChild(option);
         });
-        stateSelect.addEventListener('change', () => loadCitiesForChangeAddress(stateSelect.value));
+        
+        // Remove existing event listener to prevent duplicates
+        const newStateSelect = stateSelect.cloneNode(true);
+        stateSelect.parentNode.replaceChild(newStateSelect, stateSelect);
+        
+        // Add change event listener
+        newStateSelect.addEventListener('change', () => loadCitiesForChangeAddress(newStateSelect.value));
       } else {
         stateSelect.innerHTML = '<option value="N/A">N/A</option>';
         citySelect.innerHTML = '<option value="">Enter city manually...</option>';
@@ -1044,16 +1284,37 @@ function loadStatesForChangeAddress(countryId) {
     .catch(error => {
       console.error('Error fetching states:', error);
       stateSelect.innerHTML = '<option value="">Error loading states</option>';
+      citySelect.innerHTML = '<option value="">Select state first</option>';
     });
 }
 
 function loadCitiesForChangeAddress(stateId) {
   const citySelect = document.getElementById('change_addr_city');
 
+  if (!citySelect) {
+    console.error('City select element not found');
+    return;
+  }
+
+  if (!stateId || stateId === 'N/A') {
+    citySelect.innerHTML = '<option value="">Enter city manually...</option>';
+    return;
+  }
+
+  // Show loading state
+  citySelect.innerHTML = '<option value="">Loading cities...</option>';
+
   fetch(`${getApiBaseUrl()}/locations/states/${stateId}/cities/`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('Cities data received:', data.length, 'cities');
       citySelect.innerHTML = '<option value="">Select a city...</option>';
+      
       if (data.length > 0) {
         data.forEach(city => {
           const option = document.createElement('option');
@@ -1095,17 +1356,133 @@ function saveChangedAddress() {
     return;
   }
   
-  // Show success message
-  showNotification('✅ Address updated successfully for subscription!', 'success');
-  closeChangeAddressModal();
+  // Show loading state
+  const saveBtn = document.querySelector('button[onclick="saveChangedAddress()"]');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+  }
   
-  // In a real implementation, you would send the data to the backend
+  // Send data to backend
   if (window.djangoIntegration) {
-    window.djangoIntegration.makeRequest('/customers/subscriptions/change-address/', 'POST', {
-      customer_id: customerId,
-      subscription_id: currentSubscriptionId,
-      address_data: formData
+    window.djangoIntegration.makeRequest('/customers/addresses/create/', 'POST', {
+      customer_id: window.customerId || 'demo_customer',
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      company: formData.company || '',
+      address1: formData.address1,
+      address2: formData.address2,
+      city: formData.city,
+      province: formData.province,
+      country: formData.country,
+      zip_code: formData.zip,
+      phone: formData.phone,
+      is_default: formData.set_default
+    })
+    .then(response => {
+      if (response && response.success) {
+        showNotification('✅ Address updated successfully!', 'success');
+        closeChangeAddressModal();
+        
+        // Refresh the address list if it exists
+        if (window.locationManager) {
+          window.locationManager.loadCustomerAddresses();
+        }
+      } else {
+        showNotification('❌ Failed to update address: ' + (response?.error || 'Unknown error'), 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error saving address:', error);
+      showNotification('❌ Failed to update address. Please try again.', 'error');
+    })
+    .finally(() => {
+      // Reset button state
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Update Address';
+      }
     });
+  } else {
+    // Fallback for demo without backend
+    showNotification('✅ Address updated successfully for subscription!', 'success');
+    closeChangeAddressModal();
+  }
+}
+
+function saveNewAddress() {
+  // Get form data from the new address modal
+  const formData = {
+    first_name: document.getElementById('addr_first_name').value,
+    last_name: document.getElementById('addr_last_name').value,
+    company: document.getElementById('addr_company').value,
+    address1: document.getElementById('addr_address1').value,
+    address2: document.getElementById('addr_address2').value,
+    city: document.getElementById('addr_city').value,
+    province: document.getElementById('addr_province').value,
+    country: document.getElementById('addr_country').value,
+    zip_code: document.getElementById('addr_zip').value,
+    phone: document.getElementById('addr_phone').value,
+    is_default: document.getElementById('addr_set_default').checked
+  };
+  
+  // Validate required fields
+  if (!formData.first_name || !formData.last_name || !formData.address1 || !formData.city || !formData.country || !formData.zip_code) {
+    showNotification('⚠️ Please fill in all required fields', 'warning');
+    return;
+  }
+  
+  // Show loading state
+  const saveBtn = document.querySelector('button[onclick="saveNewAddress()"]');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+  }
+  
+  // Send data to backend
+  if (window.djangoIntegration) {
+    window.djangoIntegration.makeRequest('/customers/addresses/create/', 'POST', {
+      customer_id: window.customerId || 'demo_customer',
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      company: formData.company,
+      address1: formData.address1,
+      address2: formData.address2,
+      city: formData.city,
+      province: formData.province,
+      country: formData.country,
+      zip_code: formData.zip_code,
+      phone: formData.phone,
+      is_default: formData.is_default
+    })
+    .then(response => {
+      if (response && response.success) {
+        showNotification('✅ New address created successfully!', 'success');
+        closeAddAddressModal();
+        
+        // Refresh the address list if it exists
+        if (window.locationManager) {
+          window.locationManager.loadCustomerAddresses();
+        }
+      } else {
+        showNotification('❌ Failed to create address: ' + (response?.error || 'Unknown error'), 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating address:', error);
+      showNotification('❌ Failed to create address. Please try again.', 'error');
+    })
+    .finally(() => {
+      // Reset button state
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Add Address';
+      }
+    });
+  } else {
+    // Fallback for demo without backend
+    showNotification('✅ New address created successfully!', 'success');
+    closeAddAddressModal();
   }
 }
 

@@ -100,8 +100,9 @@ class DjangoIntegration {
     }
     
     populateCountryDropdowns() {
-        const countryDropdowns = document.querySelectorAll('select[name="country"], select[name="address[country]"]');
-        const phoneCodeDropdowns = document.querySelectorAll('select[name="phone_country_code"], select[name="country_code"]');
+        // Find all country dropdowns including the change address modal
+        const countryDropdowns = document.querySelectorAll('select[name="country"], select[name="address[country]"], select[id="change_addr_country"]');
+        const phoneCodeDropdowns = document.querySelectorAll('select[name="phone_country_code"], select[name="country_code"], select[id="change_addr_country_code"]');
         
         countryDropdowns.forEach(dropdown => {
             // Clear existing options except the default
@@ -411,6 +412,113 @@ class DjangoIntegration {
         if (!customerId || !preferences) return null;
         
         return await this.makeRequest(`/customers/${customerId}/preferences/`, 'PUT', preferences);
+    }
+    
+    // Method to populate change address modal dropdowns
+    populateChangeAddressModal() {
+        console.log('Django Integration: Populating change address modal...');
+        console.log('Available countries:', this.countries.length);
+        
+        const countrySelect = document.getElementById('change_addr_country');
+        const countryCodeSelect = document.getElementById('change_addr_country_code');
+        const stateSelect = document.getElementById('change_addr_province');
+        const citySelect = document.getElementById('change_addr_city');
+        
+        console.log('Elements found:', {
+            countrySelect: !!countrySelect,
+            countryCodeSelect: !!countryCodeSelect,
+            stateSelect: !!stateSelect,
+            citySelect: !!citySelect
+        });
+        
+        if (!countrySelect || !countryCodeSelect) {
+            console.error('Change address modal elements not found');
+            return;
+        }
+        
+        // Clear existing options
+        countrySelect.innerHTML = '<option value="">Select a country...</option>';
+        countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+        
+        // Add countries
+        this.countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.id;
+            option.textContent = country.name;
+            option.dataset.phoneCode = country.phone_code;
+            countrySelect.appendChild(option);
+            
+            const codeOption = document.createElement('option');
+            codeOption.value = `+${country.phone_code}`;
+            codeOption.textContent = `(+${country.phone_code})`;
+            countryCodeSelect.appendChild(codeOption);
+        });
+        
+        // Add change event listener for country
+        countrySelect.addEventListener('change', async (e) => {
+            const countryId = e.target.value;
+            if (!countryId) {
+                stateSelect.innerHTML = '<option value="">Select country first</option>';
+                citySelect.innerHTML = '<option value="">Select state first</option>';
+                return;
+            }
+            
+            // Update phone code
+            const selectedCountry = this.countries.find(c => c.id == countryId);
+            if (selectedCountry) {
+                countryCodeSelect.value = `+${selectedCountry.phone_code}`;
+            }
+            
+            // Load states
+            try {
+                stateSelect.innerHTML = '<option value="">Loading states...</option>';
+                citySelect.innerHTML = '<option value="">Select state first...</option>';
+                
+                const states = await this.makeRequest(`/locations/countries/${countryId}/states/`);
+                stateSelect.innerHTML = '<option value="">Select state/province...</option>';
+                
+                if (states.length > 0) {
+                    states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state.id;
+                        option.textContent = state.name;
+                        stateSelect.appendChild(option);
+                    });
+                    
+                    // Add change event listener for state
+                    stateSelect.addEventListener('change', async (e) => {
+                        const stateId = e.target.value;
+                        if (!stateId || stateId === 'N/A') {
+                            citySelect.innerHTML = '<option value="">Enter city manually...</option>';
+                            return;
+                        }
+                        
+                        // Load cities
+                        try {
+                            citySelect.innerHTML = '<option value="">Loading cities...</option>';
+                            const cities = await this.makeRequest(`/locations/states/${stateId}/cities/`);
+                            citySelect.innerHTML = '<option value="">Select city...</option>';
+                            
+                            cities.forEach(city => {
+                                const option = document.createElement('option');
+                                option.value = city.id;
+                                option.textContent = city.name;
+                                citySelect.appendChild(option);
+                            });
+                        } catch (error) {
+                            console.error('Error loading cities:', error);
+                            citySelect.innerHTML = '<option value="">Error loading cities</option>';
+                        }
+                    });
+                } else {
+                    stateSelect.innerHTML = '<option value="N/A">N/A</option>';
+                    citySelect.innerHTML = '<option value="">Enter city manually...</option>';
+                }
+            } catch (error) {
+                console.error('Error loading states:', error);
+                stateSelect.innerHTML = '<option value="">Error loading states</option>';
+            }
+        });
     }
 }
 
