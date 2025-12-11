@@ -1,4 +1,123 @@
 {{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'enhanced-account.css' | asset_url | stylesheet_tag }}
+
+<script>
+  // Detect if we're running locally and provide alternative login
+  document.addEventListener('DOMContentLoaded', function() {
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.port === '9292';
+    
+    if (isLocalhost) {
+      console.log('Running locally - providing alternative login method');
+      
+      // Check if we have the Customer Account API error
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasError = window.location.search.includes('authentication/') || 
+                      window.location.search.includes('verify') ||
+                      window.location.pathname.includes('authentication/');
+      
+      if (hasError) {
+        console.log('Customer Account API error detected, redirecting to dev mode');
+        // Redirect to the same page with dev_mode parameter
+        window.location.href = '/account/login?dev_mode=1';
+        return;
+      }
+      
+      // Show local development notice if not in dev mode
+      if (!urlParams.has('dev_mode')) {
+        const loginForm = document.querySelector('form[action*="login"]');
+        if (loginForm) {
+          const notice = document.createElement('div');
+          notice.className = 'local-dev-notice';
+          notice.innerHTML = `
+            <div class="notice-content">
+              <h3>🔧 Local Development Mode</h3>
+              <p>Shopify Customer Account API is not available in local development.</p>
+              <p>Please use one of these options:</p>
+              <ul>
+                <li><strong>Option 1:</strong> <a href="/account/login?dev_mode=1" target="_self">Use Development Login</a></li>
+                <li><strong>Option 2:</strong> Disable Customer Account API in Shopify Admin</li>
+                <li><strong>Option 3:</strong> Test on the live theme preview</li>
+              </ul>
+              <button onclick="this.parentElement.parentElement.style.display='none'" class="close-notice">Continue Anyway</button>
+            </div>
+          `;
+          loginForm.parentElement.insertBefore(notice, loginForm);
+        }
+      }
+    }
+  });
+</script>
+
+<style>
+  .local-dev-notice {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  }
+  
+  .notice-content h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+  }
+  
+  .notice-content p {
+    margin: 0.5rem 0;
+    opacity: 0.9;
+  }
+  
+  .notice-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .notice-content li {
+    margin: 0.5rem 0;
+  }
+  
+  .notice-content a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .notice-content a:hover {
+    text-decoration: underline;
+  }
+  
+  .close-notice {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .close-notice:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  
+  .local-dev-bypass {
+    background: #f8f9fa;
+    border: 2px dashed #007bff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .local-dev-bypass h3 {
+    color: #007bff;
+    margin-bottom: 1rem;
+  }
+</style>
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -69,6 +188,54 @@
         {{ 'customer.login_page.cancel' | t }}
       </a>
     {%- endform -%}
+    
+    <!-- Local Development Bypass for Recover Password -->
+    {% assign url_params = request.url_params %}
+    {% if url_params contains 'dev_mode=1' %}
+      <div class="local-dev-bypass" style="margin-top: 2rem;">
+        <h3>🔧 Local Development Password Recovery</h3>
+        <p>This is a bypass for local development when Customer Account API is enabled.</p>
+        <div class="bypass-form">
+          <input type="email" id="devRecoverEmail" placeholder="Enter your email for testing" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px;">
+          <button onclick="devRecoverPassword()" class="button" style="width: 100%; padding: 0.75rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Simulate Password Reset (Local Dev)
+          </button>
+        </div>
+        <p><small>This will simulate a password reset email for local development purposes.</small></p>
+      </div>
+      
+      <script>
+        function devRecoverPassword() {
+          const email = document.getElementById('devRecoverEmail').value;
+          if (!email) {
+            alert('Please enter an email address');
+            return;
+          }
+          
+          // Simulate password reset email
+          console.log('Simulating password reset for:', email);
+          
+          // Show success message
+          const bypassDiv = document.querySelector('.local-dev-bypass');
+          bypassDiv.innerHTML = `
+            <div style="text-align: center; padding: 2rem; background: #d1ecf1; border-radius: 8px; color: #0c5460;">
+              <h3>📧 Password Reset Email Simulated</h3>
+              <p>A password reset email would be sent to:</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Reset Token:</strong> DEV_TOKEN_${Date.now()}</p>
+              <p><strong>Expiry:</strong> 1 hour from now</p>
+              <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; text-align: left;">
+                <p><strong>In a real environment:</strong></p>
+                <p>1. User would receive an email with reset link</p>
+                <p>2. Click link would go to: /account/reset/<token></p>
+                <p>3. User would set new password</p>
+              </div>
+              <button onclick="window.location.href='/account/login?dev_mode=1'" class="button" style="margin-top: 1rem;">Back to Login</button>
+            </div>
+          `;
+        }
+      </script>
+    {% endif %}
   </div>
 
   <h1 id="login" tabindex="-1">
@@ -85,6 +252,48 @@
         {{ 'customer.recover_password.success' | t }}
       </h3>
     {%- endif -%}
+    
+    <!-- Local Development Bypass -->
+    {% assign url_params = request.url_params %}
+    {% if url_params contains 'dev_mode=1' %}
+      <div class="local-dev-bypass">
+        <h3>🔧 Local Development Login</h3>
+        <p>This is a bypass for local development when Customer Account API is enabled.</p>
+        <div class="bypass-form">
+          <input type="email" id="devEmail" placeholder="Enter your email for testing" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px;">
+          <button onclick="devLogin()" class="button" style="width: 100%; padding: 0.75rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Simulate Login (Local Dev)
+          </button>
+        </div>
+        <p><small>This will simulate a login for local development purposes.</small></p>
+      </div>
+      
+      <script>
+        function devLogin() {
+          const email = document.getElementById('devEmail').value;
+          if (!email) {
+            alert('Please enter an email address');
+            return;
+          }
+          
+          // Simulate successful login by redirecting to account page
+          console.log('Simulating login for:', email);
+          
+          // Show success message
+          const bypassDiv = document.querySelector('.local-dev-bypass');
+          bypassDiv.innerHTML = `
+            <div style="text-align: center; padding: 2rem; background: #d4edda; border-radius: 8px; color: #155724;">
+              <h3>✅ Login Simulated Successfully</h3>
+              <p>Welcome back! (Local Development Mode)</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Customer ID:</strong> DEV_${Date.now()}</p>
+              <button onclick="window.location.href='/account'" class="button" style="margin-top: 1rem;">Go to Account</button>
+            </div>
+          `;
+        }
+      </script>
+    {% endif %}
+    
     {%- form 'customer_login', novalidate: 'novalidate' -%}
       {%- if form.errors -%}
         <h2 class="form__message" tabindex="-1" autofocus>
