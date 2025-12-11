@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Location Dropdowns</title>
+</head>
+<body>
+    <h1>Test Location Dropdowns</h1>
+    
+    <label>Country:</label>
+    <select id="change_addr_country">
+        <option value="">Loading countries...</option>
+    </select>
+    
+    <label>State:</label>
+    <select id="change_addr_province">
+        <option value="">Select country first</option>
+    </select>
+    
+    <label>City:</label>
+    <select id="change_addr_city">
+        <option value="">Select state first</option>
+    </select>
+    
+    <label>Country Code:</label>
+    <select id="change_addr_country_code">
+        <option value="">Loading...</option>
+    </select>
+    
+    <div id="status"></div>
+    
+    <script>
+        function getApiBaseUrl() {
+            if (window.location.hostname === 'localhost') {
+                return 'http://127.0.0.1:8003/api';
+            } else {
+                return 'https://lavish-backend.endevops.net/api';
+            }
+        }
+
+        function loadCountriesForChangeAddress() {
+            const countrySelect = document.getElementById('change_addr_country');
+            const countryCodeSelect = document.getElementById('change_addr_country_code');
+            const statusDiv = document.getElementById('status');
+
+            statusDiv.innerHTML = 'Loading countries...';
+            
+            fetch(`${getApiBaseUrl()}/locations/countries/`)
+                .then(response => {
+                    statusDiv.innerHTML = 'Response received, parsing JSON...';
+                    return response.json();
+                })
+                .then(data => {
+                    statusDiv.innerHTML = `Loaded ${data.length} countries`;
+                    countrySelect.innerHTML = '<option value="">Select a country...</option>';
+                    countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+                    
+                    data.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country.id;
+                        option.textContent = country.name;
+                        countrySelect.appendChild(option);
+
+                        const codeOption = document.createElement('option');
+                        codeOption.value = `+${country.phone_code}`;
+                        codeOption.textContent = `(+${country.phone_code})`;
+                        countryCodeSelect.appendChild(codeOption);
+                    });
+                    
+                    countrySelect.addEventListener('change', () => {
+                        loadStatesForChangeAddress(countrySelect.value);
+                        const selectedCountry = data.find(c => c.id == countrySelect.value);
+                        if (selectedCountry) {
+                            countryCodeSelect.value = `+${selectedCountry.phone_code}`;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching countries:', error);
+                    statusDiv.innerHTML = `Error: ${error.message}`;
+                    countrySelect.innerHTML = '<option value="">Error loading countries</option>';
+                });
+        }
+
+        function loadStatesForChangeAddress(countryId) {
+            const stateSelect = document.getElementById('change_addr_province');
+            const citySelect = document.getElementById('change_addr_city');
+            const statusDiv = document.getElementById('status');
+
+            if (!countryId) {
+                stateSelect.innerHTML = '<option value="">Select country first</option>';
+                citySelect.innerHTML = '<option value="">Select state first</option>';
+                return;
+            }
+
+            statusDiv.innerHTML = `Loading states for country ${countryId}...`;
+            
+            fetch(`${getApiBaseUrl()}/locations/countries/${countryId}/states/`)
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = `Loaded ${data.length} states`;
+                    stateSelect.innerHTML = '<option value="">Select state/province...</option>';
+                    citySelect.innerHTML = '<option value="">Select state first...</option>';
+                    
+                    if (data.length > 0) {
+                        data.forEach(state => {
+                            const option = document.createElement('option');
+                            option.value = state.id;
+                            option.textContent = state.name;
+                            stateSelect.appendChild(option);
+                        });
+                        stateSelect.addEventListener('change', () => loadCitiesForChangeAddress(stateSelect.value));
+                    } else {
+                        stateSelect.innerHTML = '<option value="N/A">N/A</option>';
+                        citySelect.innerHTML = '<option value="">Enter city manually...</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching states:', error);
+                    statusDiv.innerHTML = `Error loading states: ${error.message}`;
+                    stateSelect.innerHTML = '<option value="">Error loading states</option>';
+                });
+        }
+
+        function loadCitiesForChangeAddress(stateId) {
+            const citySelect = document.getElementById('change_addr_city');
+            const statusDiv = document.getElementById('status');
+
+            if (!stateId || stateId === 'N/A') {
+                citySelect.innerHTML = '<option value="">Enter city manually...</option>';
+                return;
+            }
+
+            statusDiv.innerHTML = `Loading cities for state ${stateId}...`;
+            
+            fetch(`${getApiBaseUrl()}/locations/states/${stateId}/cities/`)
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = `Loaded ${data.length} cities`;
+                    citySelect.innerHTML = '<option value="">Select city...</option>';
+                    
+                    data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.id;
+                        option.textContent = city.name;
+                        citySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching cities:', error);
+                    statusDiv.innerHTML = `Error loading cities: ${error.message}`;
+                    citySelect.innerHTML = '<option value="">Error loading cities</option>';
+                });
+        }
+
+        // Test the function when page loads
+        window.onload = function() {
+            loadCountriesForChangeAddress();
+        };
+    </script>
+</body>
+</html>
