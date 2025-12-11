@@ -1,0 +1,217 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'enhanced-account.css' | asset_url | stylesheet_tag }}
+
+<div class="customer account section-{{ section.id }}-padding">
+  <div class="page-width">
+    <div class="grid">
+      <div class="grid__item medium-up--one-half medium-up--push-one-quarter">
+        <header class="customer__header">
+          <h1 class="customer__title">Create Account</h1>
+          <p class="customer__subtext">Create an account to access your orders, manage subscriptions, and more.</p>
+        </header>
+
+        <div class="form-vertical">
+          {%- form 'create_customer', novalidate: 'novalidate' -%}
+            {%- if form.errors -%}
+              <div class="form-message form-message--error">
+                <h2 class="h3 form-message__title" tabindex="-1" data-form-status>
+                  Please adjust the following:
+                </h2>
+                <ul class="form-message__list">
+                  {%- for field in form.errors -%}
+                    <li>
+                      {%- if field == 'form' -%}
+                        {{ form.errors.messages[field] }}
+                      {%- else -%}
+                        <a href="#RegisterForm-{{ field }}">
+                          {{ form.errors.translated_fields[field] | capitalize }}
+                          {{ form.errors.messages[field] }}
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            <div class="form__input-wrapper">
+              <label for="RegisterForm-FirstName">First Name</label>
+              <input
+                type="text"
+                name="customer[first_name]"
+                id="RegisterForm-FirstName"
+                {% if form.first_name %}
+                  value="{{ form.first_name }}"
+                {% endif %}
+                autocomplete="given-name"
+                placeholder="First Name"
+                required
+              >
+            </div>
+
+            <div class="form__input-wrapper">
+              <label for="RegisterForm-LastName">Last Name</label>
+              <input
+                type="text"
+                name="customer[last_name]"
+                id="RegisterForm-LastName"
+                {% if form.last_name %}
+                  value="{{ form.last_name }}"
+                {% endif %}
+                autocomplete="family-name"
+                placeholder="Last Name"
+                required
+              >
+            </div>
+
+            <div class="form__input-wrapper">
+              <label for="RegisterForm-email">Email</label>
+              <input
+                type="email"
+                name="customer[email]"
+                id="RegisterForm-email"
+                {% if form.email %}
+                  value="{{ form.email }}"
+                {% endif %}
+                autocorrect="off"
+                autocapitalize="off"
+                autocomplete="email"
+                {% if form.errors contains 'email' %}
+                  aria-invalid="true"
+                  aria-describedby="RegisterForm-email-error"
+                {%- endif -%}
+                placeholder="Email"
+                required
+              >
+              {%- if form.errors contains 'email' -%}
+                <span id="RegisterForm-email-error" class="form__message">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation">
+                    <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm-1-8h2v6H7V6zm0-4h2v2H7V2z"/>
+                  </svg>
+                  {{ form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email }}.
+                </span>
+              {%- endif -%}
+            </div>
+
+            <div class="form__input-wrapper">
+              <label for="RegisterForm-password">Password</label>
+              <input
+                type="password"
+                name="customer[password]"
+                id="RegisterForm-password"
+                autocomplete="new-password"
+                {% if form.errors contains 'password' %}
+                  aria-invalid="true"
+                  aria-describedby="RegisterForm-password-error"
+                {%- endif -%}
+                placeholder="Password"
+                required
+              >
+              {%- if form.errors contains 'password' -%}
+                <span id="RegisterForm-password-error" class="form__message">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true" focusable="false" role="presentation">
+                    <path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm-1-8h2v6H7V6zm0-4h2v2H7V2z"/>
+                  </svg>
+                  {{ form.errors.translated_fields.password | capitalize }}
+                  {{ form.errors.messages.password }}.
+                </span>
+              {%- endif -%}
+            </div>
+
+            <div class="form__input-wrapper">
+              <button type="submit" class="button button--full-width">Create Account</button>
+            </div>
+
+            <div class="form__input-wrapper">
+              <p>Already have an account?</p>
+              <a href="{{ routes.account_login_url }}" class="form__link">Log in instead</a>
+            </div>
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form__input-wrapper {
+    margin-bottom: 1.5rem;
+  }
+
+  .form__input-wrapper label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .form__input-wrapper input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(var(--color-foreground), 0.2);
+    border-radius: var(--inputs-radius);
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+  }
+
+  .button {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background-color: rgb(var(--color-button));
+    color: rgb(var(--color-button-text));
+    border: none;
+    border-radius: var(--buttons-radius);
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+  }
+
+  .button--full-width {
+    width: 100%;
+  }
+
+  .form__link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: rgb(var(--color-foreground));
+    text-decoration: underline;
+  }
+
+  .form-message {
+    padding: 1rem;
+    border-radius: var(--inputs-radius);
+    margin-bottom: 1.5rem;
+  }
+
+  .form-message--error {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    color: rgb(var(--color-foreground));
+  }
+
+  .form-message__title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+  }
+
+  .form-message__list {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .form__message {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    color: rgb(var(--color-foreground));
+  }
+
+  .form__message svg {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+</style>
