@@ -76,33 +76,45 @@ class DjangoIntegration {
     async loadLocationData() {
         try {
             console.log('Django Integration: Loading location data...');
+            console.log('Backend URL:', this.baseUrl);
             
             // Load countries with states and cities
             const countriesData = await this.makeRequest('/locations/countries/');
             if (countriesData) {
                 this.countries = countriesData;
-                console.log(`Loaded ${this.countries.length} countries`);
+                console.log(`✅ Loaded ${this.countries.length} countries`);
+            } else {
+                console.error('❌ Failed to load countries - no data returned');
+                console.log('Tip: Ensure Django backend is running at:', this.baseUrl);
             }
             
             // Load phone codes
             const phoneCodesData = await this.makeRequest('/locations/phone_codes/');
             if (phoneCodesData) {
                 this.phoneCodes = phoneCodesData;
-                console.log(`Loaded ${this.phoneCodes.length} phone codes`);
+                console.log(`✅ Loaded ${this.phoneCodes.length} phone codes`);
+            } else {
+                console.error('❌ Failed to load phone codes');
             }
             
             // Populate country dropdowns on the page
-            this.populateCountryDropdowns();
+            if (this.countries.length > 0) {
+                this.populateCountryDropdowns();
+                console.log('✅ Country dropdowns populated');
+            } else {
+                console.warn('⚠️ No countries available to populate dropdowns');
+            }
             
         } catch (error) {
-            console.error('Error loading location data:', error);
+            console.error('❌ Error loading location data:', error);
+            console.log('Django backend might not be running. Start with: python manage.py runserver 8003');
         }
     }
     
     populateCountryDropdowns() {
-        // Find all country dropdowns including the change address modal
-        const countryDropdowns = document.querySelectorAll('select[name="country"], select[name="address[country]"], select[id="change_addr_country"]');
-        const phoneCodeDropdowns = document.querySelectorAll('select[name="phone_country_code"], select[name="country_code"], select[id="change_addr_country_code"]');
+        // Find all country dropdowns including add/edit address modals
+        const countryDropdowns = document.querySelectorAll('select[name="country"], select[name="address[country]"], select[id="change_addr_country"], select[id="addr_country"], select[id="edit_addr_country"]');
+        const phoneCodeDropdowns = document.querySelectorAll('select[name="phone_country_code"], select[name="country_code"], select[id="change_addr_country_code"], select[id="addr_country_code"], select[id="edit_addr_country_code"]');
         
         countryDropdowns.forEach(dropdown => {
             // Clear existing options except the default
@@ -184,7 +196,7 @@ class DjangoIntegration {
     }
     
     async updateStateDropdown(countryId) {
-        const stateDropdowns = document.querySelectorAll('select[name="province"], select[name="address[province]"]');
+        const stateDropdowns = document.querySelectorAll('select[name="province"], select[name="address[province]"], select[id="addr_province"], select[id="edit_addr_province"], select[id="change_addr_province"]');
         
         if (!countryId) return;
         
@@ -242,7 +254,7 @@ class DjangoIntegration {
         });
     }
     async updateCityDropdown(stateId) {
-        const cityDropdowns = document.querySelectorAll('select[name="city"], select[name="address[city]"]');
+        const cityDropdowns = document.querySelectorAll('select[name="city"], select[name="address[city]"], select[id="addr_city"], select[id="edit_addr_city"], select[id="change_addr_city"]');
         
         if (!stateId) return;
         
@@ -286,15 +298,20 @@ class DjangoIntegration {
         }
         
         try {
+            console.log(`🌐 API Request: ${method} ${url}`);
             const response = await fetch(url, options);
             
             if (!response.ok) {
+                console.error(`❌ API Error: ${response.status} ${response.statusText}`);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            return await response.json();
+            const jsonData = await response.json();
+            console.log(`✅ API Response received for ${endpoint}`);
+            return jsonData;
         } catch (error) {
-            console.error('Django Integration API Error:', error);
+            console.error(`❌ Django Integration API Error for ${endpoint}:`, error);
+            console.log('Ensure Django backend is running and CORS is configured');
             return null;
         }
     }

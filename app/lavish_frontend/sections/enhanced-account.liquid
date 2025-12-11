@@ -524,91 +524,18 @@
           </div>
           
           <div class="addresses-grid" style="display: grid; gap: 2rem;">
-            <!-- Sample Address 1 - Default -->
-            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem; position: relative; border: 0.2rem solid rgba(var(--color-button), 0.3);">
-              <div style="position: absolute; top: 1rem; right: 1rem;">
-                <span style="background-color: #FFF6EA; color: #4C5151; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1rem; font-weight: 600;">DEFAULT</span>
+            {% comment %} Real addresses from Shopify customer data {% endcomment %}
+            {% if customer.addresses.size == 0 %}
+              <div style="text-align: center; padding: 4rem 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">No Addresses Yet</h3>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 2rem;">Add your first address to manage deliveries</p>
+                <button onclick="openAddressWizard()" style="background-color: rgb(var(--color-button)); color: rgb(var(--color-button-text)); border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.4rem; font-weight: 600;">
+                  ✚ Add Your First Address
+                </button>
               </div>
-              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Home Address</h3>
-              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
-                <p style="margin: 0.3rem 0;">*** ****** ******* ****</p>
-                <p style="margin: 0.3rem 0;">********* **</p>
-                <p style="margin: 0.3rem 0;">London, England SW** ***</p>
-                <p style="margin: 0.3rem 0;">United Kingdom</p>
-                <p style="margin: 0.3rem 0;"><strong>Phone:</strong> +** ** **** 0958</p>
-              </div>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div>
-                  <button onclick="editAddress('addr_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                    ✏️ Edit
-                  </button>
-                  <button onclick="setDefaultAddress('addr_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;" disabled>
-                    ⭐ Default
-                  </button>
-                </div>
-                <div>
-                  <button onclick="showDeleteModal('address', 'addr_1', 'Home Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sample Address 2 -->
-            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
-              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Work Address</h3>
-              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
-                <p style="margin: 0.3rem 0;">*** ******** ********</p>
-                <p style="margin: 0.3rem 0;">***** ***</p>
-                <p style="margin: 0.3rem 0;">Manchester, England M* ***</p>
-                <p style="margin: 0.3rem 0;">United Kingdom</p>
-                <p style="margin: 0.3rem 0;">Phone: +** *** *** 4567</p>
-              </div>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div>
-                  <button onclick="editAddress('addr_2')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
-                    ✏️ Edit
-                  </button>
-                  <button onclick="setDefaultAddress('addr_2')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 01rem;">
-                    ⭐ Set Default
-                  </button>
-                </div>
-                <div>
-                  <button onclick="showDeleteModal('address', 'addr_2', 'Work Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1rem;">
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sample Address 3 -->
-            <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
-              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem; font-size: 1.6rem;">Gift Address</h3>
-              <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
-                <p style="margin: 0.3rem 0;">*** ****** ******</p>
-                <p style="margin: 0.3rem 0;">Birmingham, England B* ***</p>
-                <p style="margin: 0.3rem 0;">United Kingdom</p>
-                <p style="margin: 0.3rem 0;">Phone: +** *** *** 7890</p>
-              </div>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div>
-                  <button onclick="editAddress('addr_3')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
-                    ✏️ Edit
-                  </button>
-                  <button onclick="setDefaultAddress('addr_3')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
-                    ⭐ Set Default
-                  </button>
-                </div>
-                <div>
-                  <button onclick="showDeleteModal('address', 'addr_3', 'Gift Address')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 0.8rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.7rem;">
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {% comment %} Dynamic addresses from Shopify {% endcomment %}
-            {% for address in customer.addresses %}
+            {% else %}
+              {% for address in customer.addresses %}
               <div class="address-card" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
                 <h4 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">{{ address.first_name }} {{ address.last_name }}</h4>
                 <div style="color: rgba(var(--color-foreground), 0.8); line-height: 1.6; margin-bottom: 1.5rem;">
@@ -638,7 +565,8 @@
                   </div>
                 </div>
               </div>
-            {% endfor %}
+              {% endfor %}
+            {% endif %}
           </div>
         </div>
 
@@ -652,112 +580,16 @@
           </div>
 
           <div style="display: grid; gap: 2rem;" class="payment-methods-grid">
-            <!-- Sample Payment Method 1 - Default -->
-            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem; position: relative; border: 0.2rem solid rgba(var(--color-button), 0.3);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 1.5rem;">
-                  <!-- Visa Card Icon -->
-                  <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #1a1f71 0%, #0f4c75 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
-                    VISA
-                  </div>
-                  <div>
-                    <div style="text-align: right;">
-                    <span style="background-color: #FFF6EA; color: #4C5151; padding: 0.3rem 0.8rem; border-radius: var(--buttons-radius); font-size: 1rem; font-weight: 600;">DEFAULT</span>
-                </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div style="margin-bottom: 1.5rem;">
-              ` <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">•••• •••• •••• 4242</h4>
-                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">Expires 12/28</p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Cardholder:</strong> John Doe
-                </p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Billing Address:</strong> 123 Lavish ******, London, SW** ***
-                </p>
-              </div>
-              
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="openPaymentModal('edit', 'card_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  ✏️ Edit
-                </button>
-                <button onclick="setDefaultPayment('card_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;" disabled>
-                  ⭐ Default
-                </button>
-                <button onclick="showDeleteModal('payment', 'card_1', 'Visa ending in 4242')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-
-            <!-- Sample Payment Method 2 -->
-            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-                <div style="display: flex; align-items: center; gap: 1.5rem;">
-                  <!-- Mastercard Icon -->
-                  <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #eb001b 0%, #f79e1b 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                    MC
-                  </div>
-                </div>
-              </div>
-              
-              <div style="margin-bottom: 1.5rem;">
-                <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">•••• •••• •••• 5555</h4>
-                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">Expires 08/27</p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Cardholder:</strong> John Doe
-                </p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Billing Address:</strong> 456 Business ******, Manchester, M* ***
-                </p>
-              </div>
-              
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="openPaymentModal('edit', 'card_2')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  ✏️ Edit
-                </button>
-                <button onclick="setDefaultPayment('card_2')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  ⭐ Set Default
-                </button>
-                <button onclick="showDeleteModal('payment', 'card_2', 'Mastercard ending in 5555')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-
-            <!-- Sample Payment Method 3 - PayPal -->
-            <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2rem;">
-              <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
-                <!-- PayPal Icon -->
-                <div style="width: 60px; height: 40px; background: linear-gradient(135deg, #0070ba 0%, #003087 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px;">
-                  PayPal
-                </div>
-              </div>
-              
-              <div style="margin-bottom: 1.5rem;">
-                <h4 style="color: rgb(var(--color-foreground)); margin: 0 0 0.5rem 0; font-size: 1.6rem;">john.doe@email.com</h4>
-                <p style="color: rgba(var(--color-foreground), 0.75); margin: 0; font-size: 1.2rem;">PayPal Account</p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Account Status:</strong> <span style="color: #28a745;">✓ Verified</span>
-                </p>
-                <p style="color: rgba(var(--color-foreground), 0.8); margin: 0.3rem 0; font-size: 1.3rem;">
-                  <strong>Connected:</strong> March 15, 2024
-                </p>
-              </div>
-              
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button onclick="openPaymentModal('edit', 'paypal_1')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  ✏️ Edit
-                </button>
-                <button onclick="setDefaultPayment('paypal_1')" style="background-color: transparent; color: #4C5151; border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  ⭐ Set Default
-                </button>
-                <button onclick="showDeleteModal('payment', 'paypal_1', 'PayPal Account')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">
-                  🗑️ Delete
-                </button>
-              </div>
+            {% comment %} Payment methods are managed through Shopify's checkout - show informational message {% endcomment %}
+            <div style="text-align: center; padding: 4rem 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">💳</div>
+              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">Payment Methods</h3>
+              <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                Payment methods are securely managed through Shopify's checkout. Your saved payment information will be available when you make a purchase or manage your subscriptions.
+              </p>
+              <a href="/cart" style="background-color: rgb(var(--color-button)); color: rgb(var(--color-button-text)); border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.4rem; font-weight: 600; text-decoration: none; display: inline-block;">
+                Continue Shopping
+              </a>
             </div>
           </div>
         </div>
@@ -769,13 +601,33 @@
           </div>
           
           <div style="display: grid; gap: 2rem;">
-            <!-- Active Subscriptions -->
-            <div style="background-color: rgba(var(--color-foreground), 0.04); padding: 0;">
-              <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; padding: 1rem;">
-                ✅ Active Subscriptions
-              </h3>
-              
-              <!-- Subscription Item 1 -->
+            {% comment %} Check for active subscriptions from Django backend or Shopify {% endcomment %}
+            {% assign has_active_subscriptions = false %}
+            
+            {% if has_active_subscriptions %}
+              <!-- Active Subscriptions -->
+              <div style="background-color: rgba(var(--color-foreground), 0.04); padding: 0;">
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; padding: 1rem;">
+                  ✅ Active Subscriptions
+                </h3>
+              </div>
+            {% else %}
+              <!-- No Subscriptions Empty State -->
+              <div style="text-align: center; padding: 4rem 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">No Active Subscriptions</h3>
+                <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                  Start a subscription to receive your favorite books regularly and save on every delivery!
+                </p>
+                <a href="/collections/all" style="background-color: rgb(var(--color-button)); color: rgb(var(--color-button-text)); border: none; padding: 1rem 2rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.4rem; font-weight: 600; text-decoration: none; display: inline-block;">
+                  Browse Subscription Options
+                </a>
+              </div>
+            {% endif %}
+            
+            {% comment %} Demo subscription removed - replace with real data from Django API
+            <!--
+            Subscription Item 1 -->
               <div style="background-color: rgb(var(--color-background)); padding: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                   <div style="flex: 1;">
@@ -975,13 +827,7 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Empty State -->
-          <div class="empty-state">
-            <div class="empty-icon">✅</div>
-            <h4>All Caught Up!</h4>
-            <p>You have no other cancelled orders.</p>
+          {% endcomment %}
           </div>
         </div>
 
@@ -1017,19 +863,18 @@
             <!-- Upcoming Orders -->
             <div id="upcoming-orders" class="order-subtab-content active">
               <div class="orders-grid">
-                <!-- Sample Upcoming Order 1 -->
-                <div class="order-card upcoming subscription-card">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <div style="flex: 1;">
-                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1004 - July Monthly Box</h5>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: July 15, 2025 • Processing in 3 days</p>
-                    </div>
-                    <div style="text-align: right;">
-                      <span class="order-status upcoming">UPCOMING</span>
-                    </div>
+                {% comment %} Real upcoming orders - replace with API call to Django backend {% endcomment %}
+                {% assign upcoming_orders_count = 0 %}
+                
+                {% if upcoming_orders_count == 0 %}
+                  <div style="text-align: center; padding: 4rem 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">No Upcoming Orders</h3>
+                    <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 2rem;">You don't have any upcoming orders at the moment</p>
                   </div>
-                  
-                  <div class="subscription-grid">
+                {% endif %}
+                
+                {% comment %} Demo orders removed - all upcoming order demo data deleted {% endcomment %}
                     <div>
                       <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
                       <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Standard (3-5 days)</div>
@@ -1071,153 +916,7 @@
                   </div>
                 </div>
 
-                <!-- Sample Upcoming Order 2 -->
-                <div class="order-card scheduled subscription-card">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <div style="flex: 1;">
-                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1005 - August Deluxe Box</h5>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: August 15, 2025</p>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Scheduled for next month</p>
-                    </div>
-                    <div style="text-align: right;">
-                      <span class="order-status scheduled">SCHEDULED</span>
-                    </div>
-                  </div>
-                  
-                  <div class="subscription-grid">
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Express (1-2 days)</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£57.50</div>
-                    </div>
-                  </div>
-
-                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
-                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
-                        <li>Mystery Thriller Collection (4 books)</li>
-                        <li>Exclusive hardcover edition</li>
-                        <li>Premium leather bookmark set</li>
-                        <li>Author interview magazine</li>
-                        <li>Limited edition book sleeve</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="order-actions">
-                    <div>
-                      <button onclick="editUpcomingOrder('upcoming-2')" class="btn-primary">✏️ Edit</button>
-                      <button onclick="skipUpcomingOrder('upcoming-2')" class="btn-secondary">⏭️ Skip This Box</button>
-                    </div>
-                    <div>
-                      <button onclick="viewOrderDetails('upcoming-2')" class="btn-outline">👁️ View</button>
-                      <button onclick="cancelUpcomingOrder('upcoming-2')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Sample Upcoming Order 3 -->
-                <div class="order-card pending subscription-card">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <div style="flex: 1;">
-                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.3rem;">📦 Order #1006 - September Special Edition</h5>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: September 15, 2025 </p>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Awaiting confirmation</p>
-                    </div>
-                    <div style="text-align: right;">
-                      <span class="order-status pending">PENDING</span>
-                    </div>
-                  </div>
-                  
-                  <div class="subscription-grid">
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Standard (3-5 days)</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£42.90</div>
-                    </div>
-                  </div>
-
-                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
-                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
-                        <li>Sci-Fi Adventure Pack (3 books)</li>
-                        <li>Limited edition poster set</li>
-                        <li>Collectible character pins</li>
-                        <li>Digital audiobook access</li>
-                        <li>Exclusive author Q&A video</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="order-actions">
-                    <div>
-                      <button onclick="editUpcomingOrder('upcoming-3')" class="btn-primary">✏️ Edit</button>
-                      <button onclick="skipUpcomingOrder('upcoming-3')" class="btn-secondary">⏭️ Skip This Box</button>
-                    </div>
-                    <div>
-                      <button onclick="viewOrderDetails('upcoming-3')" class="btn-outline">👁️ View</button>
-                      <button onclick="cancelUpcomingOrder('upcoming-3')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Sample Upcoming Order 4 -->
-                <div class="order-card upcoming">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <div style="flex: 1;">
-                      <h5 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">📦 Order #1415</h5>
-                      <p style="color: rgba(var(--color-foreground), 0.75); margin-bottom: 1rem;">Expected: July 20, 2025</p>
-                    </div>
-                    <div style="text-align: right;">
-                      <span class="order-status upcoming">UPCOMING</span>
-                    </div>
-                  </div>
-                  
-                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
-                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
-                      <li>Ice Planet Barbarians Holographic Bookmarks - by CONKY (x1)</li>
-                      <li>Ice Planet Barbarians Stickers - by CONKY (x1)</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="order-actions">
-                    <div>
-                      <button onclick="editUpcomingOrder('upcoming-4')" class="btn-primary">✏️ Edit</button>
-                      <button onclick="viewOrderDetails('upcoming-4')" class="btn-outline">👁️ View</button>
-                    </div>
-                    <div>
-                      <button onclick="cancelUpcomingOrder('upcoming-4')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Empty State -->
-              <div class="empty-state">
-                <div class="empty-icon">📅</div>
-                <h4>All Caught Up!</h4>
-                <p>These are all your upcoming orders. New orders will appear here as they're scheduled.</p>
+                {% comment %} Demo upcoming orders removed - Orders #1005, #1006, #1415 have been deleted {% endcomment %}
               </div>
             </div>
 
@@ -1263,11 +962,47 @@
                       </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                      <!-- Sample Order 1 -->
-                      <tr class="order-row" data-order-id="1003">
-                        <td data-label="Order"><a href="#" class="order-link">#1003</a></td>
-                        <td data-label="Date" class="order-date">June 15, 2025</td>
-                        <td data-label="Items" class="order-items">Lavish Library Monthly Box</td>
+                      {% comment %} Real Shopify customer orders {% endcomment %}
+                      {% for order in customer.orders %}
+                        <tr class="order-row" data-order-id="{{ order.order_number }}">
+                          <td data-label="Order"><a href="{{ order.customer_url }}" class="order-link">#{{ order.order_number }}</a></td>
+                          <td data-label="Date" class="order-date">{{ order.created_at | date: '%B %d, %Y' }}</td>
+                          <td data-label="Items" class="order-items">
+                            {% for line_item in order.line_items limit:1 %}
+                              {{ line_item.title }}{% if order.line_items.size > 1 %} +{{ order.line_items.size | minus: 1 }} more{% endif %}
+                            {% endfor %}
+                          </td>
+                          <td data-label="Status"><span class="status-badge {{ order.financial_status }}">{{ order.financial_status }}</span></td>
+                          <td data-label="Fulfillment"><span class="status-badge {{ order.fulfillment_status }}">{{ order.fulfillment_status | default: 'unfulfilled' }}</span></td>
+                          <td data-label="Total" class="order-total">{{ order.total_price | money }}</td>
+                          <td class="actions-cell">
+                            <div class="action-dropdown">
+                              <div class="action-toggle" onclick="toggleActionDropdown('actions-{{ order.order_number }}')">
+                                <i class="more-icon">⋯</i>
+                              </div>
+                              <div id="actions-{{ order.order_number }}" class="action-menu">
+                                <a href="{{ order.customer_url }}" class="action-item">
+                                  <i class="action-icon">👁️</i> View Details
+                                </a>
+                                <a href="#" onclick="downloadInvoice('{{ order.order_number }}')" class="action-item">
+                                  <i class="action-icon">📄</i> Download Invoice
+                                </a>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                      
+                      {% if customer.orders.size == 0 %}
+                        <tr>
+                          <td colspan="7" style="text-align: center; padding: 3rem;">
+                            <div style="font-size: 2rem; margin-bottom: 1rem;">📦</div>
+                            <p style="color: rgba(var(--color-foreground), 0.75);">No orders yet</p>
+                          </td>
+                        </tr>
+                      {% endif %}
+                      
+                      {% comment %} Demo orders removed - all sample orders have been replaced with real Shopify data above {% endcomment %}
                         <td data-label="Status"><span class="status-badge paid">Paid</span></td>
                         <td data-label="Fulfillment"><span class="status-badge processing">Processing</span></td>
                         <td data-label="Total" class="order-total">£37.90</td>
@@ -1294,122 +1029,7 @@
                         </td>
                       </tr>
 
-                      <!-- Sample Order 2 -->
-                      <tr class="order-row" data-order-id="1002">
-                        <td data-label="Order"><a href="#" class="order-link">#1002</a></td>
-                        <td data-label="Date" class="order-date">May 20, 2025</td>
-                        <td data-label="Items" class="order-items">Fantasy Deluxe Package</td>
-                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
-                        <td data-label="Fulfillment"><span class="status-badge fulfilled">Fulfilled</span></td>
-                        <td data-label="Total" class="order-total">£57.50</td>
-                        <td class="actions-cell">
-                          <div class="action-dropdown">
-                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1002')">
-                              <i class="more-icon">⋯</i>
-                            </div>
-                            <div id="actions-1002" class="action-menu">
-                              <a href="#" onclick="viewOrderDetails('1002')" class="action-item">
-                                <i class="action-icon">👁️</i> View Details
-                              </a>
-                              <a href="#" onclick="writeReview('1002')" class="action-item">
-                                <i class="action-icon">⭐</i> Write Review
-                              </a>
-                              <a href="#" onclick="trackOrder('1002')" class="action-item">
-                                <i class="action-icon">📦</i> Track Order
-                              </a>
-                              <a href="#" onclick="downloadInvoice('1002')" class="action-item">
-                                <i class="action-icon">📄</i> Download Invoice
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-
-                      <!-- Sample Order 3 -->
-                      <tr class="order-row" data-order-id="1001">
-                        <td data-label="Order"><a href="#" class="order-link">#1001</a></td>
-                        <td data-label="Date" class="order-date">April 25, 2025</td>
-                        <td data-label="Items" class="order-items">Romance Collection + Extras</td>
-                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
-                        <td data-label="Fulfillment"><span class="status-badge delivered">Delivered</span></td>
-                        <td data-label="Total" class="order-total">£42.90</td>
-                        <td class="actions-cell">
-                          <div class="action-dropdown">
-                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1001')">
-                              <i class="more-icon">⋯</i>
-                            </div>
-                            <div id="actions-1001" class="action-menu">
-                              <a href="#" onclick="viewOrderDetails('1001')" class="action-item">
-                                <i class="action-icon">👁️</i> View Details
-                              </a>
-                              <a href="#" onclick="writeReview('1001')" class="action-item">
-                                <i class="action-icon">⭐</i> Write Review
-                              </a>
-                              <a href="#" onclick="reorderItems('1001')" class="action-item">
-                                <i class="action-icon">🔄</i> Reorder Items
-                              </a>
-                              <a href="#" onclick="downloadInvoice('1001')" class="action-item">
-                                <i class="action-icon">📄</i> Download Invoice
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-
-                      <!-- Sample Order 4 -->
-                      <tr class="order-row" data-order-id="1000">
-                        <td data-label="Order"><a href="#" class="order-link">#1000</a></td>
-                        <td data-label="Date" class="order-date">March 30, 2025</td>
-                        <td data-label="Items" class="order-items">Starter Bundle</td>
-                        <td data-label="Status"><span class="status-badge pending">Pending</span></td>
-                        <td data-label="Fulfillment"><span class="status-badge unfulfilled">Unfulfilled</span></td>
-                        <td data-label="Total" class="order-total">£29.90</td>
-                        <td class="actions-cell">
-                          <div class="action-dropdown">
-                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1000')">
-                              <i class="more-icon">⋯</i>
-                            </div>
-                            <div id="actions-1000" class="action-menu">
-                              <a href="#" onclick="viewOrderDetails('1000')" class="action-item">
-                                <i class="action-icon">👁️</i> View Details
-                              </a>
-                              <a href="#" onclick="cancelOrder('1000')" class="action-item">
-                                <i class="action-icon">❌</i> Cancel Order
-                              </a>
-                              <a href="#" onclick="downloadInvoice('1000')" class="action-item">
-                                <i class="action-icon">📄</i> Download Invoice
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-
-                      <!-- Sample Cancelled Order -->
-                      <tr class="order-row" data-order-id="998">
-                        <td data-label="Order"><a href="#" class="order-link">#998</a></td>
-                        <td data-label="Date" class="order-date">February 15, 2025</td>
-                        <td data-label="Items" class="order-items">Lavish Library Monthly Box</td>
-                        <td data-label="Status"><span class="status-badge cancelled">Cancelled</span></td>
-                        <td data-label="Fulfillment"><span class="status-badge unfulfilled">Unfulfilled</span></td>
-                        <td data-label="Total" class="order-total">£37.90</td>
-                        <td class="actions-cell">
-                          <div class="action-dropdown">
-                            <div class="action-toggle" onclick="toggleActionDropdown('actions-998')">
-                              <i class="more-icon">⋯</i>
-                            </div>
-                            <div id="actions-998" class="action-menu">
-                              <a href="#" onclick="viewOrderDetails('998')" class="action-item">
-                                <i class="action-icon">👁️</i> View Details
-                              </a>
-                              <a href="#" onclick="downloadInvoice('998')" class="action-item">
-                                <i class="action-icon">📄</i> Download Invoice
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {% comment %} Dynamic orders from Shopify {% endcomment %}
+                      {% comment %} Demo orders #1002, #1001, #1000 removed - All showing real Shopify data only {% endcomment %}
                       {% for order in customer.orders %}
                         <tr class="order-row" data-order-id="{{ order.id }}">
                           <td data-label="Order"><a href="{{ order.customer_url }}" class="order-link">#{{ order.name }}</a></td>
@@ -1460,12 +1080,33 @@
             <!-- Cancelled Orders -->
             <div id="cancelled-orders" class="order-subtab-content">
               <div class="orders-grid">
-                <!-- Cancelled Order 1 -->
-                <div class="order-card cancelled">
-                  <div class="order-header">
-                    <div class="order-info">
-                      <h4>Order #998 - February 15, 2025</h4>
-                      <p>Lavish Library Monthly Box - £37.90</p>
+                {% comment %} Real cancelled orders from Shopify {% endcomment %}
+                {% assign cancelled_orders = customer.orders | where: "cancelled", true %}
+                
+                {% if cancelled_orders.size == 0 %}
+                  <div style="text-align: center; padding: 4rem 2rem; background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">No Cancelled Orders</h3>
+                    <p style="color: rgba(var(--color-foreground), 0.75);">You haven't cancelled any orders</p>
+                  </div>
+                {% else %}
+                  {% for order in cancelled_orders %}
+                    <div class="order-card cancelled">
+                      <div class="order-header">
+                        <div class="order-info">
+                          <h4>Order #{{ order.order_number }} - {{ order.created_at | date: '%B %d, %Y' }}</h4>
+                          <p>{{ order.total_price | money }}</p>
+                        </div>
+                        <span class="order-status cancelled">CANCELLED</span>
+                      </div>
+                      <div class="order-actions">
+                        <a href="{{ order.customer_url }}" class="btn-outline">View Details</a>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                
+                {% comment %} Demo cancelled orders removed - all demo data deleted {% endcomment %}
                     </div>
                     <span class="order-status cancelled">CANCELLED</span>
                   </div>
@@ -1484,36 +1125,6 @@
                   </div>
                 </div>
 
-                <!-- Cancelled Order 2 -->
-                <div class="order-card cancelled">
-                  <div class="order-header">
-                    <div class="order-info">
-                      <h4>Order #1004 - July 15, 2025</h4>
-                      <p>Lavish Library Monthly Box - £37.90</p>
-                    </div>
-                    <span class="order-status cancelled">CANCELLED</span>
-                  </div>
-                  <div class="order-meta">
-                    <div class="meta-item">
-                      <span class="meta-label">Cancelled Date</span>
-                      <span class="meta-value">July 1, 2025</span>
-                    </div>
-                    <div class="meta-item">
-                      <span class="meta-label">Reason</span>
-                      <span class="meta-value">Skipped</span>
-                    </div>
-                  </div>
-                  <div class="order-actions">
-                    <button onclick="viewOrderDetails('1004')" class="btn-primary">👁️ View Details</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Empty State -->
-              <div class="empty-state">
-                <div class="empty-icon">✅</div>
-                <h4>All Caught Up!</h4>
-                <p>You have no other cancelled orders.</p>
               </div>
             </div>
           </div>
@@ -2084,7 +1695,7 @@
                   PayPal
                 </div>
                 <div>
-                  <div style="color: rgb(var(--color-foreground)); font-weight: 600;">john.doe@email.com</div>
+                  <div style="color: rgb(var(--color-foreground)); font-weight: 600;">{{ customer.email }}</div>
                   <div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.1rem;">PayPal Account</div>
                 </div>
               </div>
@@ -2567,8 +2178,8 @@
       <div class="modal-body">
         <div class="tracking-info">
           <div class="tracking-header">
-            <h3>Order #1003</h3>
-            <p class="tracking-status">In Transit</p>
+            <h3 id="tracking-order-number">Order #</h3>
+            <p class="tracking-status" id="tracking-status">Tracking Status</p>
           </div>
           
           <div class="tracking-timeline">
@@ -2819,4 +2430,5 @@
 }
 {% endschema %}
 
+<script src="{{ 'django-integration.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'enhanced-account.js' | asset_url }}" defer="defer"></script>
