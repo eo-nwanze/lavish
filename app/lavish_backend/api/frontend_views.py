@@ -7,16 +7,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from customers.models import ShopifyCustomer, ShopifyCustomerAddress
 from orders.models import ShopifyOrder, ShopifyOrderAddress
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_customer_profile(request):
@@ -27,9 +22,9 @@ def update_customer_profile(request):
         customer_id = data.get('customer_id')
         
         if not customer_id:
-            return JsonResponse(
+            return Response(
                 {'success': False, 'error': 'Customer ID required'}, 
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         customer = ShopifyCustomer.objects.get(shopify_id=customer_id)
@@ -48,7 +43,7 @@ def update_customer_profile(request):
         
         customer.save()
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Profile updated successfully',
             'customer': {
@@ -62,19 +57,17 @@ def update_customer_profile(request):
         })
         
     except ShopifyCustomer.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Customer not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_customer_address(request):
@@ -85,9 +78,9 @@ def create_customer_address(request):
         customer_id = data.get('customer_id')
         
         if not customer_id:
-            return JsonResponse(
+            return Response(
                 {'success': False, 'error': 'Customer ID required'}, 
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         customer = ShopifyCustomer.objects.get(shopify_id=customer_id)
@@ -108,27 +101,25 @@ def create_customer_address(request):
             is_default=data.get('is_default', False)
         )
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Address created successfully',
             'address_id': address.id,
             'shopify_id': address.shopify_id
-        })
+        }, status=status.HTTP_201_CREATED)
         
     except ShopifyCustomer.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Customer not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["PUT", "PATCH"])
 @api_view(['PUT', 'PATCH'])
 @permission_classes([AllowAny])
 def update_customer_address(request, address_id):
@@ -164,25 +155,23 @@ def update_customer_address(request, address_id):
         
         address.save()
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Address updated successfully'
         })
         
     except ShopifyCustomerAddress.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Address not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["DELETE"])
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def delete_customer_address(request, address_id):
@@ -191,25 +180,23 @@ def delete_customer_address(request, address_id):
         address = ShopifyCustomerAddress.objects.get(pk=address_id)
         address.delete()
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Address deleted successfully'
-        })
+        }, status=status.HTTP_204_NO_CONTENT)
         
     except ShopifyCustomerAddress.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Address not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_order_address(request, order_id):
@@ -263,25 +250,23 @@ def update_order_address(request, order_id):
         
         shipping_address.save()
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Order shipping address updated successfully'
         })
         
     except ShopifyOrder.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Order not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def cancel_order(request, order_id):
@@ -291,9 +276,9 @@ def cancel_order(request, order_id):
         
         # Check if order can be cancelled
         if order.financial_status in ['paid', 'fulfilled']:
-            return JsonResponse(
+            return Response(
                 {'success': False, 'error': 'Order cannot be cancelled in current status'}, 
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         # Update order status
@@ -303,25 +288,23 @@ def cancel_order(request, order_id):
         order.cancel_reason = request.data.get('reason', 'Customer requested cancellation')
         order.save()
         
-        return JsonResponse({
+        return Response({
             'success': True,
             'message': 'Order cancelled successfully'
         })
         
     except ShopifyOrder.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Order not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
-@csrf_exempt
-@require_http_methods(["GET"])
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def download_order_invoice(request, order_id):
@@ -341,19 +324,19 @@ def download_order_invoice(request, order_id):
         }
         
         # For now, return JSON data instead of PDF
-        return JsonResponse({
+        return Response({
             'success': True,
             'invoice_data': invoice_data,
             'message': 'Invoice data retrieved successfully'
         })
         
     except ShopifyOrder.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': 'Order not found'}, 
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {'success': False, 'error': str(e)}, 
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
