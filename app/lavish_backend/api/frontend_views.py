@@ -13,7 +13,6 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from customers.models import ShopifyCustomer, ShopifyCustomerAddress
 from orders.models import ShopifyOrder, ShopifyOrderAddress
-import json
 
 
 @csrf_exempt
@@ -23,7 +22,8 @@ import json
 def update_customer_profile(request):
     """Update customer profile information"""
     try:
-        data = json.loads(request.body)
+        # Use request.data for DRF Request objects
+        data = request.data
         customer_id = data.get('customer_id')
         
         if not customer_id:
@@ -80,7 +80,8 @@ def update_customer_profile(request):
 def create_customer_address(request):
     """Create new customer address"""
     try:
-        data = json.loads(request.body)
+        # Use request.data for DRF Request objects
+        data = request.data
         customer_id = data.get('customer_id')
         
         if not customer_id:
@@ -133,7 +134,8 @@ def create_customer_address(request):
 def update_customer_address(request, address_id):
     """Update customer address"""
     try:
-        data = json.loads(request.body)
+        # Use request.data for DRF Request objects
+        data = request.data
         address = ShopifyCustomerAddress.objects.get(pk=address_id)
         
         # Update address fields
@@ -213,7 +215,8 @@ def delete_customer_address(request, address_id):
 def update_order_address(request, order_id):
     """Update order shipping address"""
     try:
-        data = json.loads(request.body)
+        # Use request.data for DRF Request objects
+        data = request.data
         order = ShopifyOrder.objects.get(shopify_id=order_id)
         
         # Get or create shipping address
@@ -296,7 +299,8 @@ def cancel_order(request, order_id):
         # Update order status
         order.financial_status = 'cancelled'
         order.cancelled_at = timezone.now()
-        order.cancel_reason = request.POST.get('reason', 'Customer requested cancellation')
+        # Use request.data for DRF Request objects (not request.POST)
+        order.cancel_reason = request.data.get('reason', 'Customer requested cancellation')
         order.save()
         
         return JsonResponse({
