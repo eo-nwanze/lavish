@@ -275,22 +275,44 @@ def cancel_order(request, order_id):
         order = ShopifyOrder.objects.get(shopify_id=order_id)
         
         # Check if order can be cancelled
-        if order.financial_status in ['paid', 'fulfilled']:
+        # Orders that are already refunded or voided cannot be cancelled
+        if order.financial_status in ['refunded', 'voided', 'partially_refunded']:
             return Response(
-                {'success': False, 'error': 'Order cannot be cancelled in current status'}, 
+                {'success': False, 'error': 'Order cannot be cancelled - already refunded or voided'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Update order status
-        order.financial_status = 'cancelled'
-        order.cancelled_at = timezone.now()
-        # Use request.data for DRF Request objects (not request.POST)
-        order.cancel_reason = request.data.get('reason', 'Customer requested cancellation')
+        # Check fulfillment status - cannot cancel fulfilled orders
+        if order.fulfillment_status == 'fulfilled':
+            return Response(
+                {'success': False, 'error': 'Order cannot be cancelled - already fulfilled'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update order status to 'voided' (correct financial_status for cancelled orders)
+        order.financial_status = 'voided'
+        
+        # Store cancellation reason in notes field (cancelled_at and cancel_reason don't exist in model)
+        cancellation_reason = request.data.get('reason', 'Customer requested cancellation')
+        cancellation_note = f"[CANCELLED {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}] {cancellation_reason}"
+        
+        # Append to existing notes if any
+        if order.note:
+            order.note = f"{order.note}\n\n{cancellation_note}"
+        else:
+            order.note = cancellation_note
+        
         order.save()
         
         return Response({
             'success': True,
-            'message': 'Order cancelled successfully'
+            'message': 'Order cancelled successfully',
+            'order': {
+                'shopify_id': order.shopify_id,
+                'name': order.name,
+                'financial_status': order.financial_status,
+                'updated_at': order.updated_at.isoformat()
+            }
         })
         
     except ShopifyOrder.DoesNotExist:
