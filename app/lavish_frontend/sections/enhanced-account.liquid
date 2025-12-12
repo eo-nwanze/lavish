@@ -25,7 +25,7 @@
     <h3>{{ customer.first_name | default: 'My' }} Account</h3>
     <ul class="sidebar-nav">
       <li>
-        <a href="#overview" class="nav-link active" data-tab="overview" onclick="closeMobileSidebar(); showTab('overview');">
+        <a href="#overview" class="nav-link active" data-tab="overview" onclick="event.preventDefault(); closeMobileSidebar(); showTab('overview');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
           </svg>
@@ -33,7 +33,7 @@
         </a>
       </li>
       <li>
-        <a href="#orders" class="nav-link" data-tab="orders" onclick="closeMobileSidebar(); showTab('orders');">
+        <a href="#orders" class="nav-link" data-tab="orders" onclick="event.preventDefault(); closeMobileSidebar(); showTab('orders');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
           </svg>
@@ -41,7 +41,7 @@
         </a>
       </li>
       <li>
-        <a href="#subscriptions" class="nav-link" data-tab="subscriptions" onclick="closeMobileSidebar(); showTab('subscriptions');">
+        <a href="#subscriptions" class="nav-link" data-tab="subscriptions" onclick="event.preventDefault(); closeMobileSidebar(); showTab('subscriptions');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
@@ -49,7 +49,7 @@
         </a>
       </li>
       <li>
-        <a href="#addresses" class="nav-link" data-tab="addresses" onclick="closeMobileSidebar(); showTab('addresses');">
+        <a href="#addresses" class="nav-link" data-tab="addresses" onclick="event.preventDefault(); closeMobileSidebar(); showTab('addresses');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
           </svg>
@@ -57,7 +57,7 @@
         </a>
       </li>
       <li>
-        <a href="#payment-methods" class="nav-link" data-tab="payment-methods" onclick="closeMobileSidebar(); showTab('payment-methods');">
+        <a href="#payment-methods" class="nav-link" data-tab="payment-methods" onclick="event.preventDefault(); closeMobileSidebar(); showTab('payment-methods');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
           </svg>
@@ -65,7 +65,7 @@
         </a>
       </li>
       <li>
-        <a href="#personal-info" class="nav-link" data-tab="personal-info" onclick="closeMobileSidebar(); showTab('personal-info');">
+        <a href="#personal-info" class="nav-link" data-tab="personal-info" onclick="event.preventDefault(); closeMobileSidebar(); showTab('personal-info');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 2h2v2h-2V4zm1 16c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5S10.83 20 10 20z"/>
           </svg>
@@ -73,7 +73,7 @@
         </a>
       </li>
       <li>
-        <a href="#password" class="nav-link" data-tab="password" onclick="closeMobileSidebar(); showTab('password');">
+        <a href="#password" class="nav-link" data-tab="password" onclick="event.preventDefault(); closeMobileSidebar(); showTab('password');">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
           </svg>
@@ -324,28 +324,29 @@
               </div>
             </div>
             
-            <!-- Active Subscription 1 -->
-            <div class="subscription-card" data-subscription-id="{{ customer.subscriptions.first.id }}" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            {% for subscription in customer.subscriptions %}
+            <!-- Active Subscription -->
+            <div class="subscription-card" data-subscription-id="{{ subscription.id }}" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
               <div style="flex: 1; min-width: 250px;">
-                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">{{ customer.subscriptions.first.name }}</h3>
+                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">{{ subscription.name }}</h3>
                 <div class="subscription-dates">
                   <div class="renewal-display-enhanced">
                     <div class="renewal-header">
                       <h4 style="margin: 0; font-size: 1.4rem; color: rgb(var(--color-foreground));">📅 Next Renewal</h4>
-                      <span class="renewal-urgency" id="renewal-urgency-{{ customer.subscriptions.first.id }}">Calculating...</span>
+                      <span class="renewal-urgency" id="renewal-urgency-{{ subscription.id }}">Calculating...</span>
                     </div>
                     <div class="renewal-date-main" style="font-size: 1.6rem; font-weight: 600; color: rgb(var(--color-foreground)); margin: 0.5rem 0;">
-                      {{ customer.subscriptions.first.nextBillingDate | date: "%B %d, %Y" }}
+                      {{ subscription.nextBillingDate | date: "%B %d, %Y" }}
                     </div>
                     <div class="renewal-details" style="display: flex; gap: 1rem; align-items: center; margin: 0.5rem 0;">
-                      <span class="billing-amount" style="font-size: 1.3rem; color: rgba(var(--color-foreground), 0.8);">${{ customer.subscriptions.first.price | money }}</span>
-                      <span class="billing-frequency" style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.6);">{{ customer.subscriptions.first.billingPolicyIntervalCount }} {{ customer.subscriptions.first.billingPolicyInterval | downcase }}ly</span>
+                      <span class="billing-amount" style="font-size: 1.3rem; color: rgba(var(--color-foreground), 0.8);">${{ subscription.price | money }}</span>
+                      <span class="billing-frequency" style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.6);">{{ subscription.billingPolicyIntervalCount }} {{ subscription.billingPolicyInterval | downcase }}ly</span>
                     </div>
-                    <div class="renewal-progress" id="renewal-progress-{{ customer.subscriptions.first.id }}" style="margin-top: 1rem;">
+                    <div class="renewal-progress" id="renewal-progress-{{ subscription.id }}" style="margin-top: 1rem;">
                       <div class="progress-bar" style="background-color: rgba(var(--color-foreground), 0.1); border-radius: var(--buttons-radius); height: 6px; overflow: hidden; margin-bottom: 0.5rem;">
-                        <div class="progress-fill" id="renewal-progress-fill-{{ customer.subscriptions.first.id }}" style="height: 100%; background: linear-gradient(90deg, #4CAF50, #66bb6a); border-radius: var(--buttons-radius); transition: width 0.3s ease; width: 0%;"></div>
+                        <div class="progress-fill" id="renewal-progress-fill-{{ subscription.id }}" style="height: 100%; background: linear-gradient(90deg, #4CAF50, #66bb6a); border-radius: var(--buttons-radius); transition: width 0.3s ease; width: 0%;"></div>
                       </div>
-                      <span class="progress-label" id="renewal-progress-label-{{ customer.subscriptions.first.id }}" style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.6);">Calculating cycle progress...</span>
+                      <span class="progress-label" id="renewal-progress-label-{{ subscription.id }}" style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.6);">Calculating cycle progress...</span>
                     </div>
                   </div>
                   <p style="color: rgba(var(--color-foreground), 0.75); margin: 1rem 0 0 0; font-size: 1.4rem;" class="cutoff-date-container"><strong>⏰ Order cutoff:</strong> <span class="cutoff-date">Loading...</span></p>
@@ -362,55 +363,12 @@
                 <button onclick="showTab('subscriptions')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
                   ⚙️ Manage
                 </button>
-                <button onclick="skipNextPayment('{{ customer.subscriptions.first.id | default: '' }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
+                <button onclick="skipNextPayment('{{ subscription.id | default: '' }}')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
                   ⏭️ Skip
                 </button>
               </div>
             </div>
-            
-            <!-- Active Subscription 2 -->
-            <div class="subscription-card" data-subscription-id="1944521" style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 2.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-              <div style="flex: 1; min-width: 250px;">
-                <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 0.5rem; font-size: 1.6rem;">Fantasy Deluxe Package</h3>
-                <div class="subscription-dates">
-                  <div class="renewal-display-enhanced">
-                    <div class="renewal-header">
-                      <h4 style="margin: 0; font-size: 1.4rem; color: rgb(var(--color-foreground));">📅 Next Renewal</h4>
-                      <span class="renewal-urgency" id="renewal-urgency-1944521">Calculating...</span>
-                    </div>
-                    <div class="renewal-date-main" style="font-size: 1.6rem; font-weight: 600; color: rgb(var(--color-foreground)); margin: 0.5rem 0;">
-                      August 15, 2025
-                    </div>
-                    <div class="renewal-details" style="display: flex; gap: 1rem; align-items: center; margin: 0.5rem 0;">
-                      <span class="billing-amount" style="font-size: 1.3rem; color: rgba(var(--color-foreground), 0.8);">$45.00</span>
-                      <span class="billing-frequency" style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.6);">Monthly</span>
-                    </div>
-                    <div class="renewal-progress" id="renewal-progress-1944521" style="margin-top: 1rem;">
-                      <div class="progress-bar" style="background-color: rgba(var(--color-foreground), 0.1); border-radius: var(--buttons-radius); height: 6px; overflow: hidden; margin-bottom: 0.5rem;">
-                        <div class="progress-fill" id="renewal-progress-fill-1944521" style="height: 100%; background: linear-gradient(90deg, #4CAF50, #66bb6a); border-radius: var(--buttons-radius); transition: width 0.3s ease; width: 0%;"></div>
-                      </div>
-                      <span class="progress-label" id="renewal-progress-label-1944521" style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.6);">Calculating cycle progress...</span>
-                    </div>
-                  </div>
-                  <p style="color: rgba(var(--color-foreground), 0.75); margin: 1rem 0 0 0; font-size: 1.4rem;" class="cutoff-date-container"><strong>⏰ Order cutoff:</strong> <span class="cutoff-date">Loading...</span></p>
-                  <p style="color: rgba(var(--color-foreground), 0.75); margin: 0.5rem 0 0 0; font-size: 1.4rem;"><strong>Skips Reset On:</strong> January 1, 2026</p>
-                </div>
-                <div class="cutoff-progress-bar" style="margin-top: 1rem; display: none;">
-                  <div class="progress-label" style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.5rem;"></div>
-                  <div class="progress-bar" style="background-color: rgba(var(--color-foreground), 0.1); border-radius: var(--buttons-radius); height: 8px; overflow: hidden;">
-                    <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722); border-radius: var(--buttons-radius); transition: width 0.3s ease;"></div>
-                  </div>
-                </div>
-              </div>
-              <div style="display: flex; gap: 0.6rem; flex-wrap: nowrap; justify-content: flex-end; flex-shrink: 0;">
-                <button onclick="showTab('subscriptions')" style="background-color: #FFF6EA; color: #4C5151; border: none; padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
-                  ⚙️ Manage
-                </button>
-                <button onclick="skipNextPayment('1944521')" style="background-color: transparent; color: rgba(var(--color-foreground), 0.75); border: 0.1rem solid rgba(var(--color-foreground), 0.3); padding: 0.6rem 0.9rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 0.95rem; white-space: nowrap;">
-                  ⏭️ Skip
-                </button>
-              </div>
-            </div>
+            {% endfor %}
           </div>
         </div>
 
@@ -875,48 +833,6 @@
                 {% endif %}
                 
                 {% comment %} Demo orders removed - all upcoming order demo data deleted {% endcomment %}
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Delivery</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Standard (3-5 days)</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Payment</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">Visa **** 4242</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Shipping To</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">London, UK</div>
-                    </div>
-                    <div>
-                      <div style="font-size: 1.1rem; color: rgba(var(--color-foreground), 0.75); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05rem;">Total</div>
-                      <div style="font-size: 1.3rem; color: rgb(var(--color-foreground)); font-weight: 500;">£37.90</div>
-                    </div>
-                  </div>
-
-                  <div style="background-color: rgba(var(--color-foreground), 0.04); border-radius: var(--media-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <h3 style="color: rgb(var(--color-foreground)); margin-bottom: 1rem;">📚 Items Included</h3>
-                    <ul style="margin: 0; padding-left: 1.5rem; color: rgba(var(--color-foreground), 0.8); font-size: 1.3rem; list-style-position: inside;">
-                      <li>Fantasy Romance Collection (3 books)</li>
-                      <li>Exclusive Lavish Library Bookmark</li>
-                      <li>Author-signed postcard</li>
-                      <li>Monthly reading guide</li>
-                      <li>Surprise bonus item</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="order-actions">
-                    <div>
-                      <button onclick="editUpcomingOrder('upcoming-1')" class="btn-primary">✏️ Edit</button>
-                      <button onclick="skipUpcomingOrder('upcoming-1')" class="btn-secondary">⏭️ Skip This Box</button>
-                    </div>
-                    <div>
-                      <button onclick="viewOrderDetails('upcoming-1')" class="btn-outline">👁️ View</button>
-                      <button onclick="cancelUpcomingOrder('upcoming-1')" style="background-color: #910F3F; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: var(--buttons-radius); cursor: pointer; font-size: 1.2rem;">❌ Cancel</button>
-                    </div>
-                  </div>
-                </div>
-
-                {% comment %} Demo upcoming orders removed - Orders #1005, #1006, #1415 have been deleted {% endcomment %}
               </div>
             </div>
 
@@ -1003,33 +919,7 @@
                       {% endif %}
                       
                       {% comment %} Demo orders removed - all sample orders have been replaced with real Shopify data above {% endcomment %}
-                        <td data-label="Status"><span class="status-badge paid">Paid</span></td>
-                        <td data-label="Fulfillment"><span class="status-badge processing">Processing</span></td>
-                        <td data-label="Total" class="order-total">£37.90</td>
-                        <td class="actions-cell">
-                          <div class="action-dropdown">
-                            <div class="action-toggle" onclick="toggleActionDropdown('actions-1003')">
-                              <i class="more-icon">⋯</i>
-                            </div>
-                            <div id="actions-1003" class="action-menu">
-                              <a href="#" onclick="viewOrderDetails('1003')" class="action-item">
-                                <i class="action-icon">👁️</i> View Details
-                              </a>
-                              <a href="#" onclick="editOrder('1003')" class="action-item">
-                                <i class="action-icon">✏️</i> Edit Order
-                              </a>
-                              <a href="#" onclick="trackOrder('1003')" class="action-item">
-                                <i class="action-icon">📦</i> Track Order
-                              </a>
-                              <a href="#" onclick="downloadInvoice('1003')" class="action-item">
-                                <i class="action-icon">📄</i> Download Invoice
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {% comment %} Demo orders #1002, #1001, #1000 removed - All showing real Shopify data only {% endcomment %}
+                      
                       {% for order in customer.orders %}
                         <tr class="order-row" data-order-id="{{ order.id }}">
                           <td data-label="Order"><a href="{{ order.customer_url }}" class="order-link">#{{ order.name }}</a></td>
@@ -1107,23 +997,6 @@
                 {% endif %}
                 
                 {% comment %} Demo cancelled orders removed - all demo data deleted {% endcomment %}
-                    </div>
-                    <span class="order-status cancelled">CANCELLED</span>
-                  </div>
-                  <div class="order-meta">
-                    <div class="meta-item">
-                      <span class="meta-label">Cancelled Date</span>
-                      <span class="meta-value">February 10, 2025</span>
-                    </div>
-                    <div class="meta-item">
-                      <span class="meta-label">Reason</span>
-                      <span class="meta-value">Customer Request</span>
-                    </div>
-                  </div>
-                  <div class="order-actions">
-                    <button onclick="viewOrderDetails('998')" class="btn-primary">👁️ View Details</button>
-                  </div>
-                </div>
 
               </div>
             </div>
