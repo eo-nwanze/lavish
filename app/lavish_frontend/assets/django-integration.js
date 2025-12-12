@@ -112,14 +112,32 @@ class DjangoIntegration {
     }
     
     populateCountryDropdowns() {
+        console.log('🌍 Attempting to populate country dropdowns...');
+        
         // Find all country dropdowns including add/edit address modals
         const countryDropdowns = document.querySelectorAll('select[name="country"], select[name="address[country]"], select[id="change_addr_country"], select[id="addr_country"], select[id="edit_addr_country"]');
         const phoneCodeDropdowns = document.querySelectorAll('select[name="phone_country_code"], select[name="country_code"], select[id="change_addr_country_code"], select[id="addr_country_code"], select[id="edit_addr_country_code"]');
         
+        console.log(`Found ${countryDropdowns.length} country dropdowns and ${phoneCodeDropdowns.length} phone code dropdowns`);
+        
+        if (countryDropdowns.length === 0) {
+            console.warn('⚠️ No country dropdowns found in DOM. Will retry when modals open.');
+            return;
+        }
+        
+        let populatedCount = 0;
+        
         countryDropdowns.forEach(dropdown => {
-            // Clear existing options except the default
+            if (!dropdown) return;
+            
+            // Clear existing options except the first one (placeholder)
             while (dropdown.options.length > 1) {
                 dropdown.remove(1);
+            }
+            
+            // Update placeholder text
+            if (dropdown.options[0]) {
+                dropdown.options[0].textContent = 'Select Country...';
             }
             
             // Add countries from API
@@ -128,20 +146,34 @@ class DjangoIntegration {
                 option.value = country.id;
                 option.textContent = `${country.flag_emoji} ${country.name} (+${country.phone_code})`;
                 option.dataset.phoneCode = country.phone_code;
+                option.dataset.countryId = country.id;
                 dropdown.appendChild(option);
             });
             
-            // Add change event listener to update phone code
-            dropdown.addEventListener('change', (e) => {
-                this.updatePhoneCode(e.target);
-            });
+            populatedCount++;
+            console.log(`✅ Populated ${dropdown.id || 'unnamed'} with ${this.countries.length} countries`);
+            
+            // Add change event listener to update phone code (only once)
+            if (!dropdown.dataset.listenerAdded) {
+                dropdown.addEventListener('change', (e) => {
+                    this.handleCountryChange(e.target);
+                });
+                dropdown.dataset.listenerAdded = 'true';
+            }
         });
         
         // Populate phone code dropdowns
         phoneCodeDropdowns.forEach(dropdown => {
-            // Clear existing options except the default
+            if (!dropdown) return;
+            
+            // Clear existing options except the first one
             while (dropdown.options.length > 1) {
                 dropdown.remove(1);
+            }
+            
+            // Update placeholder text
+            if (dropdown.options[0]) {
+                dropdown.options[0].textContent = 'Select Code...';
             }
             
             // Add phone codes from API
@@ -153,11 +185,33 @@ class DjangoIntegration {
                 dropdown.appendChild(option);
             });
             
-            // Add change event listener to update country dropdown
-            dropdown.addEventListener('change', (e) => {
-                this.updateCountryFromPhoneCode(e.target);
-            });
+            // Add change event listener (only once)
+            if (!dropdown.dataset.listenerAdded) {
+                dropdown.addEventListener('change', (e) => {
+                    this.updateCountryFromPhoneCode(e.target);
+                });
+                dropdown.dataset.listenerAdded = 'true';
+            }
         });
+        
+        console.log(`✅ Successfully populated ${populatedCount} country dropdowns`);
+    }
+    
+    // New method to handle country selection
+    handleCountryChange(countryDropdown) {
+        const selectedOption = countryDropdown.options[countryDropdown.selectedIndex];
+        const phoneCode = selectedOption.dataset.phoneCode;
+        const countryId = countryDropdown.value;
+        
+        console.log(`Country changed to: ${selectedOption.textContent}, ID: ${countryId}`);
+        
+        // Update phone code dropdown
+        this.updatePhoneCode(countryDropdown);
+        
+        // Load states for selected country
+        if (countryId) {
+            this.updateStateDropdown(countryId);
+        }
     }
     
     updatePhoneCode(countryDropdown) {
@@ -545,7 +599,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!window.djangoIntegration) {
         window.djangoIntegration = new DjangoIntegration();
     }
+    
+    // Also try to populate dropdowns after a short delay to ensure modals are ready
+    setTimeout(function() {
+        if (window.djangoIntegration && window.djangoIntegration.countries.length > 0) {
+            console.log('🔄 Re-attempting dropdown population after delay...');
+            window.djangoIntegration.populateCountryDropdowns();
+        }
+    }, 1000);
+    
+    // Listen for modal open events and populate dropdowns
+    document.addEventListener('click', function(e) {
+        // Check if a modal-related button was clicked
+        if (e.target.closest('[onclick*="openModal"]') || 
+            e.target.closest('.add-address-btn') ||
+            e.target.closest('.edit-address-btn')) {
+            
+            setTimeout(function() {
+                if (window.djangoIntegration && window.djangoIntegration.countries.length > 0) {
+                    console.log('🔄 Populating dropdowns after modal open...');
+                    window.djangoIntegration.populateCountryDropdowns();
+                }
+            }, 100);
+        }
+    });
 });
 
 // Export for use in other scripts
 window.DjangoIntegration = DjangoIntegration;
+
+// Global helper function to manually trigger dropdown population
+window.populateLocationDropdowns = function() {
+    if (window.djangoIntegration && window.djangoIntegration.countries.length > 0) {
+        console.log('🔄 Manual dropdown population triggered...');
+        window.djangoIntegration.populateCountryDropdowns();
+    } else {
+        console.warn('⚠️ Django Integration not ready or no countries loaded');
+    }
+};

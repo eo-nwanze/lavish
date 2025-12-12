@@ -954,9 +954,41 @@ function getApiBaseUrl() {
 }
 
 function loadCountries() {
+  console.log('🌍 loadCountries() called for Add Address modal');
   const countrySelect = document.getElementById('addr_country');
   const countryCodeSelect = document.getElementById('addr_country_code');
 
+  if (!countrySelect || !countryCodeSelect) {
+    console.error('❌ Country select elements not found');
+    return;
+  }
+
+  // First try to use django-integration.js if available
+  if (window.djangoIntegration && window.djangoIntegration.countries && window.djangoIntegration.countries.length > 0) {
+    console.log(`✅ Using Django Integration data (${window.djangoIntegration.countries.length} countries)`);
+    
+    countrySelect.innerHTML = '<option value="">Select a country...</option>';
+    countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+    
+    window.djangoIntegration.countries.forEach(country => {
+      const option = document.createElement('option');
+      option.value = country.id;
+      option.textContent = `${country.flag_emoji} ${country.name} (+${country.phone_code})`;
+      option.dataset.phoneCode = country.phone_code;
+      countrySelect.appendChild(option);
+
+      const codeOption = document.createElement('option');
+      codeOption.value = `+${country.phone_code}`;
+      codeOption.textContent = `${country.flag_emoji} +${country.phone_code}`;
+      countryCodeSelect.appendChild(codeOption);
+    });
+    
+    console.log(`✅ Populated Add Address dropdowns with ${window.djangoIntegration.countries.length} countries`);
+    return;
+  }
+
+  // Fallback: Fetch directly from API
+  console.log('⚠️ Django Integration not available, fetching from API...');
   fetch(`${getApiBaseUrl()}/locations/countries/`)
     .then(response => {
       if (!response.ok) {
@@ -970,7 +1002,8 @@ function loadCountries() {
       data.forEach(country => {
         const option = document.createElement('option');
         option.value = country.id;
-        option.textContent = country.name;
+        option.textContent = `${country.flag_emoji || ''} ${country.name} (+${country.phone_code})`;
+        option.dataset.phoneCode = country.phone_code;
         countrySelect.appendChild(option);
 
         const codeOption = document.createElement('option');
@@ -1056,9 +1089,41 @@ function loadCities(stateId) {
 }
 
 function loadEditCountries() {
+  console.log('🌍 loadEditCountries() called for Edit Address modal');
   const countrySelect = document.getElementById('edit_addr_country');
   const countryCodeSelect = document.getElementById('edit_addr_country_code');
 
+  if (!countrySelect || !countryCodeSelect) {
+    console.error('❌ Edit country select elements not found');
+    return;
+  }
+
+  // First try to use django-integration.js if available
+  if (window.djangoIntegration && window.djangoIntegration.countries && window.djangoIntegration.countries.length > 0) {
+    console.log(`✅ Using Django Integration data (${window.djangoIntegration.countries.length} countries)`);
+    
+    countrySelect.innerHTML = '<option value="">Select a country...</option>';
+    countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+    
+    window.djangoIntegration.countries.forEach(country => {
+      const option = document.createElement('option');
+      option.value = country.id;
+      option.textContent = `${country.flag_emoji} ${country.name} (+${country.phone_code})`;
+      option.dataset.phoneCode = country.phone_code;
+      countrySelect.appendChild(option);
+
+      const codeOption = document.createElement('option');
+      codeOption.value = `+${country.phone_code}`;
+      codeOption.textContent = `${country.flag_emoji} +${country.phone_code}`;
+      countryCodeSelect.appendChild(codeOption);
+    });
+    
+    console.log(`✅ Populated Edit Address dropdowns with ${window.djangoIntegration.countries.length} countries`);
+    return;
+  }
+
+  // Fallback: Fetch directly from API
+  console.log('⚠️ Django Integration not available, fetching from API...');
   fetch(`${getApiBaseUrl()}/locations/countries/`)
     .then(response => {
       if (!response.ok) {
@@ -1072,7 +1137,8 @@ function loadEditCountries() {
       data.forEach(country => {
         const option = document.createElement('option');
         option.value = country.id;
-        option.textContent = country.name;
+        option.textContent = `${country.flag_emoji || ''} ${country.name} (+${country.phone_code})`;
+        option.dataset.phoneCode = country.phone_code;
         countrySelect.appendChild(option);
 
         const codeOption = document.createElement('option');
@@ -1158,23 +1224,59 @@ function loadEditCities(stateId) {
 }
 
 function loadCountriesForChangeAddress() {
+  console.log('🌍 loadCountriesForChangeAddress() called for Change Address modal');
   const countrySelect = document.getElementById('change_addr_country');
   const countryCodeSelect = document.getElementById('change_addr_country_code');
 
-  console.log('loadCountriesForChangeAddress called');
   console.log('countrySelect element:', countrySelect);
   console.log('countryCodeSelect element:', countryCodeSelect);
 
   if (!countrySelect || !countryCodeSelect) {
-    console.error('Required elements not found in the DOM');
+    console.error('❌ Change address elements not found in the DOM');
     // Retry after a short delay in case the DOM is still loading
     setTimeout(() => {
-      console.log('Retrying loadCountriesForChangeAddress...');
+      console.log('🔄 Retrying loadCountriesForChangeAddress...');
       loadCountriesForChangeAddress();
     }, 500);
     return;
   }
 
+  // First try to use django-integration.js if available
+  if (window.djangoIntegration && window.djangoIntegration.countries && window.djangoIntegration.countries.length > 0) {
+    console.log(`✅ Using Django Integration data (${window.djangoIntegration.countries.length} countries)`);
+    
+    countrySelect.innerHTML = '<option value="">Select a country...</option>';
+    countryCodeSelect.innerHTML = '<option value="">Select...</option>';
+    
+    window.djangoIntegration.countries.forEach(country => {
+      const option = document.createElement('option');
+      option.value = country.id;
+      option.textContent = `${country.flag_emoji} ${country.name} (+${country.phone_code})`;
+      option.dataset.phoneCode = country.phone_code;
+      countrySelect.appendChild(option);
+
+      const codeOption = document.createElement('option');
+      codeOption.value = `+${country.phone_code}`;
+      codeOption.textContent = `${country.flag_emoji} +${country.phone_code}`;
+      countryCodeSelect.appendChild(codeOption);
+    });
+    
+    // Add change event listener
+    countrySelect.addEventListener('change', () => {
+      loadStatesForChangeAddress(countrySelect.value);
+      const selectedCountry = window.djangoIntegration.countries.find(c => c.id == countrySelect.value);
+      if (selectedCountry) {
+        countryCodeSelect.value = `+${selectedCountry.phone_code}`;
+      }
+    });
+    
+    console.log(`✅ Populated Change Address dropdowns with ${window.djangoIntegration.countries.length} countries`);
+    return;
+  }
+
+  // Fallback: Fetch directly from API
+  console.log('⚠️ Django Integration not available, fetching from API...');
+  
   // Show loading state
   countrySelect.innerHTML = '<option value="">Loading countries...</option>';
   countryCodeSelect.innerHTML = '<option value="">Loading...</option>';
@@ -1198,12 +1300,13 @@ function loadCountriesForChangeAddress() {
       data.forEach(country => {
         const option = document.createElement('option');
         option.value = country.id;
-        option.textContent = country.name;
+        option.textContent = `${country.flag_emoji || ''} ${country.name} (+${country.phone_code})`;
+        option.dataset.phoneCode = country.phone_code;
         countrySelect.appendChild(option);
 
         const codeOption = document.createElement('option');
         codeOption.value = `+${country.phone_code}`;
-        codeOption.textContent = `(+${country.phone_code})`;
+        codeOption.textContent = `${country.flag_emoji || ''} (+${country.phone_code})`;
         countryCodeSelect.appendChild(codeOption);
       });
       
