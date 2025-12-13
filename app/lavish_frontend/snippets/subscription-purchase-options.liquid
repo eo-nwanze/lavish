@@ -64,9 +64,23 @@
                     {%- if selling_plan.price_adjustments.size > 0 -%}
                       {%- assign price_adjustment = selling_plan.price_adjustments | first -%}
                       {%- if price_adjustment.value_type == 'percentage' -%}
-                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value }}% off</span>
+                        {%- comment -%} Shopify stores percentage as negative decimal (e.g., -10.0 for 10% off) {%- endcomment -%}
+                        {%- assign discount_value = price_adjustment.value | abs -%}
+                        {%- comment -%} DEBUG: Show raw values {%- endcomment -%}
+                        <script>console.log('[Lavish Frontend] Plan:', '{{ selling_plan.name | escape }}', 'Raw:', {{ price_adjustment.value }}, 'Abs:', {{ discount_value }}, 'Less than 1?', {{ discount_value | default: 0 }} < 1);</script>
+                        {%- if discount_value < 1 -%}
+                          {%- comment -%} If less than 1, it's decimal format (0.10 = 10%), multiply by 100 {%- endcomment -%}
+                          {%- assign discount_percent = discount_value | times: 100 | round -%}
+                          <script>console.log('[Lavish Frontend] DECIMAL format - Calculated percent:', {{ discount_percent }});</script>
+                        {%- else -%}
+                          {%- comment -%} If greater than 1, it's whole number format (10 = 10%) {%- endcomment -%}
+                          {%- assign discount_percent = discount_value | round -%}
+                          <script>console.log('[Lavish Frontend] WHOLE NUMBER format - Calculated percent:', {{ discount_percent }});</script>
+                        {%- endif -%}
+                        <script>console.log('[Lavish Frontend] FINAL DISPLAY:', '{{ discount_percent }}% off');</script>
+                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ discount_percent}}% off</span>
                       {%- elsif price_adjustment.value_type == 'fixed_amount' -%}
-                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value | money }} off</span>
+                        <span class="subscription-discount" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value | abs | money }} off</span>
                       {%- elsif price_adjustment.value_type == 'price' -%}
                         <span class="subscription-price" style="color: #c41e3a; font-weight: 600; font-size: 14px;">{{ price_adjustment.value | money }}</span>
                       {%- endif -%}

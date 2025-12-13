@@ -52,7 +52,7 @@ def get_selling_plans(request):
         
         # Get product to verify it exists
         try:
-            product = ShopifyProduct.objects.get(shopify_product_id=product_id)
+            product = ShopifyProduct.objects.get(shopify_id=product_id)
         except ShopifyProduct.DoesNotExist:
             return Response({
                 'error': f'Product with id {product_id} not found'
@@ -62,7 +62,7 @@ def get_selling_plans(request):
         # For now, return all active plans - you can add product-specific filtering later
         selling_plans = SellingPlan.objects.filter(
             is_active=True
-        ).order_by('interval_count', 'interval')
+        ).order_by('billing_interval_count', 'billing_interval')
         
         plans_data = []
         for plan in selling_plans:
@@ -72,12 +72,11 @@ def get_selling_plans(request):
                 'description': plan.description or '',
                 'billing_policy': plan.billing_policy,
                 'delivery_policy': plan.delivery_policy,
-                'interval_count': plan.billing_interval_count,
-                'interval': plan.billing_interval,
+                'billing_interval_count': plan.billing_interval_count,
+                'billing_interval': plan.billing_interval,
                 'price_adjustment_type': plan.price_adjustment_type,
                 'price_adjustment_value': float(plan.price_adjustment_value) if plan.price_adjustment_value else 0,
                 'is_active': plan.is_active,
-                'cutoff_days_before_delivery': plan.cutoff_days_before_delivery,
             }
             plans_data.append(plan_data)
         
@@ -98,36 +97,42 @@ def get_selling_plans(request):
 @api_view(['POST'])
 def create_subscription_checkout(request):
     """
-    Create a subscription checkout session
+    Create a subscription checkout session using Shopify native checkout
     
     POST /api/subscriptions/checkout/create/
     Body:
     {
-        "customer_id": "123456",
         "selling_plan_id": 1,
-        "variant_id": "gid://shopify/ProductVariant/...",
+        "variant_id": "123456",  # Shopify variant ID (numeric or GID)
+        "product_id": "789",     # Optional: for validation
         "quantity": 1
     }
     
     Returns:
     {
-        "checkout_url": "https://...",
-        "subscription_id": 123
+        "success": true,
+        "checkout_method": "native",
+        "cart_data": {
+            "variant_id": "123456",
+            "selling_plan": "shopify_plan_id",
+            "quantity": 1
+        },
+        "selling_plan": {...}
     }
     """
     try:
-        customer_id = request.data.get('customer_id')
         selling_plan_id = request.data.get('selling_plan_id')
         variant_id = request.data.get('variant_id')
+        product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
         
-        # Validate required fields
-        if not all([customer_id, selling_plan_id, variant_id]):
+        # Validate required fields (relaxed - only need selling_plan_id and variant_id)
+        if not selling_plan_id:
             return Response({
-                'error': 'customer_id, selling_plan_id, and variant_id are required'
+                'error': 'selling_plan_id is required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Verify selling plan exists
+        # Verify selling plan exists in Django
         try:
             selling_plan = SellingPlan.objects.get(id=selling_plan_id, is_active=True)
         except SellingPlan.DoesNotExist:
@@ -135,23 +140,39 @@ def create_subscription_checkout(request):
                 'error': f'Selling plan with id {selling_plan_id} not found'
             }, status=status.HTTP_404_NOT_FOUND)
         
-        # TODO: Implement Shopify checkout creation
-        # This would create a subscription contract draft in Shopify
-        # and return a checkout URL for the customer
+        # Check if selling plan has been synced to Shopify
+        if not selling_plan.shopify_id:
+            logger.warning(f"Selling plan {selling_plan_id} not synced to Shopify yet")
+            return Response({
+                'error': 'This subscription plan is not yet available. Please contact support.',
+                'detail': 'Selling plan not synced to Shopify'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        logger.info(f"Subscription checkout requested - Customer: {customer_id}, Plan: {selling_plan_id}, Variant: {variant_id}")
+        # Extract Shopify selling plan ID from GID
+        shopify_selling_plan_id = selling_plan.shopify_id
+        if 'gid://shopify/SellingPlan/' in shopify_selling_plan_id:
+            shopify_selling_plan_id = shopify_selling_plan_id.split('/')[-1]
         
+        logger.info(f"Subscription checkout requested - Plan: {selling_plan_id} (Shopify: {shopify_selling_plan_id}), Variant: {variant_id}, Quantity: {quantity}")
+        
+        # Return data for frontend to use with Shopify native checkout
         return Response({
-            'message': 'Subscription checkout creation is not yet implemented',
+            'success': True,
+            'checkout_method': 'native',
+            'cart_data': {
+                'variant_id': variant_id,
+                'selling_plan': shopify_selling_plan_id,
+                'quantity': quantity
+            },
             'selling_plan': {
                 'id': selling_plan.id,
                 'name': selling_plan.name,
-                'interval': f"{selling_plan.billing_interval_count} {selling_plan.billing_interval}"
+                'shopify_id': shopify_selling_plan_id,
+                'interval': f"{selling_plan.billing_interval_count} {selling_plan.billing_interval}",
+                'discount': f"{selling_plan.price_adjustment_value}%" if selling_plan.price_adjustment_type == 'PERCENTAGE' else str(selling_plan.price_adjustment_value)
             },
-            'customer_id': customer_id,
-            'variant_id': variant_id,
-            'quantity': quantity
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+            'message': 'Subscription data prepared for checkout'
+        }, status=status.HTTP_200_OK)
     
     except Exception as e:
         logger.error(f"Error creating subscription checkout: {str(e)}")

@@ -5,7 +5,10 @@
 {%- endcomment -%}
 
 <!-- Always show subscription options container - will be populated via JavaScript -->
-<div class="product-subscription-options" data-product-id="{{ product.id }}" data-product-handle="{{ product.handle }}">
+<div class="product-subscription-options" 
+     data-product-id="{{ product.id }}" 
+     data-product-handle="{{ product.handle }}"
+     data-variant-id="{{ product.selected_or_first_available_variant.id }}">
   <div class="subscription-loading">
     <div class="loading-spinner"></div>
     <p>Loading subscription options...</p>
@@ -344,16 +347,38 @@ document.addEventListener('DOMContentLoaded', function() {
       
       fetch(endpoint)
         .then(response => {
+          console.log('[Subscription Plans] API Response Status:', response.status);
           if (!response.ok) {
             throw new Error('HTTP ' + response.status + ': ' + response.statusText);
           }
           return response.json();
         })
         .then(data => {
-          if (data.success && data.selling_plans && data.selling_plans.length > 0) {
+          console.log('[Subscription Plans] API Response Data:', data);
+          console.log('[Subscription Plans] Has selling_plans?', !!data.selling_plans);
+          console.log('[Subscription Plans] Plans count:', data.selling_plans ? data.selling_plans.length : 0);
+          
+          // Log first plan details if available
+          if (data.selling_plans && data.selling_plans.length > 0) {
+            console.log('[Subscription Plans] First plan sample:', {
+              name: data.selling_plans[0].name,
+              type: data.selling_plans[0].price_adjustment_type,
+              value: data.selling_plans[0].price_adjustment_value
+            });
+          }
+          
+          // Check if we have selling plans data
+          // API returns: { product_id, product_name, selling_plans: [...] }
+          if (data.selling_plans && data.selling_plans.length > 0) {
+            console.log('[Subscription Plans] Rendering', data.selling_plans.length, 'plans');
             // Render subscription options
             renderSubscriptionOptions(container, data.selling_plans, productId, productHandle);
+          } else if (data.error) {
+            console.error('[Subscription Plans] API Error:', data.error);
+            // API returned an error
+            showSubscriptionError(container, data.error);
           } else {
+            console.warn('[Subscription Plans] No plans available, hiding container');
             // No plans available, hide container
             container.style.display = 'none';
           }
@@ -382,16 +407,60 @@ function showSubscriptionError(container, message) {
 }
 
 function renderSubscriptionOptions(container, plans, productId, productHandle) {
+  console.log('[Render Plans] Starting render with', plans.length, 'plans');
+  console.log('[Render Plans] All plans data:', plans);
+  
   var optionsHTML = plans.map(function(plan) {
+    console.log('[Render Plan] Processing:', plan.name);
+    console.log('[Render Plan] Price adjustment type:', plan.price_adjustment_type);
+    console.log('[Render Plan] Price adjustment value:', plan.price_adjustment_value);
+    console.log('[Render Plan] Value type:', typeof plan.price_adjustment_value);
+    
+    // Format interval text
+    var intervalText = plan.billing_interval_count + ' ' + plan.billing_interval.toLowerCase();
+    if (plan.billing_interval_count == 1) {
+      // Remove 's' for singular (1 month, not 1 months)
+      intervalText = plan.billing_interval.toLowerCase();
+      if (intervalText === 'month') intervalText = 'month';
+      if (intervalText === 'week') intervalText = 'week';
+      if (intervalText === 'day') intervalText = 'day';
+      if (intervalText === 'year') intervalText = 'year';
+    } else {
+      // Add 's' for plural (2 months, 3 months, etc.)
+      intervalText = plan.billing_interval_count + ' ' + plan.billing_interval.toLowerCase() + 's';
+    }
+    
+    // Format discount text
+    var discountText = '';
+    console.log('[Render Plan] Checking discount - Type:', plan.price_adjustment_type, 'Value:', plan.price_adjustment_value, 'Value > 0?', plan.price_adjustment_value > 0);
+    
+    if (plan.price_adjustment_type === 'PERCENTAGE' && plan.price_adjustment_value > 0) {
+      discountText = 'Save ' + plan.price_adjustment_value + '%';
+      console.log('[Render Plan] PERCENTAGE discount text:', discountText);
+    } else if (plan.price_adjustment_type === 'FIXED_AMOUNT' && plan.price_adjustment_value > 0) {
+      discountText = 'Save $' + plan.price_adjustment_value;
+      console.log('[Render Plan] FIXED_AMOUNT discount text:', discountText);
+    } else if (plan.price_adjustment_type === 'PRICE') {
+      discountText = '$' + plan.price_adjustment_value + ' per delivery';
+      console.log('[Render Plan] PRICE discount text:', discountText);
+    } else {
+      console.warn('[Render Plan] NO DISCOUNT TEXT GENERATED!', {
+        type: plan.price_adjustment_type,
+        value: plan.price_adjustment_value,
+        typeMatch: plan.price_adjustment_type === 'PERCENTAGE',
+        valueCheck: plan.price_adjustment_value > 0
+      });
+    }
+    
+    console.log('[Render Plan] Final discount text:', discountText || '(none)');
+    
     return '<div class="subscription-option">' +
       '<div class="subscription-info">' +
         '<h4>' + plan.name + '</h4>' +
-        '<p class="subscription-description">' + plan.description + '</p>' +
+        '<p class="subscription-description">' + (plan.description || '') + '</p>' +
         '<div class="subscription-details">' +
-          '<span class="billing-interval">' +
-            'Every ' + plan.billing_interval_count + ' ' + plan.billing_interval.toLowerCase() +
-          '</span>' +
-          '<span class="discount">Save ' + plan.price_adjustment_value + '%</span>' +
+          '<span class="billing-interval">Every ' + intervalText + '</span>' +
+          (discountText ? '<span class="discount">' + discountText + '</span>' : '<span class="discount">DEBUG: No discount</span>') +
         '</div>' +
       '</div>' +
       '<div class="subscription-action">' +
@@ -405,6 +474,9 @@ function renderSubscriptionOptions(container, plans, productId, productHandle) {
       '</div>' +
     '</div>';
   }).join('');
+  
+  console.log('[Render Plans] Generated HTML length:', optionsHTML.length);
+  console.log('[Render Plans] HTML preview:', optionsHTML.substring(0, 200));
   
   container.innerHTML = 
     '<div class="subscription-header">' +
@@ -451,6 +523,23 @@ function initializeSubscriptionButtons(container) {
 }
 
 function createSubscriptionCheckout(planId, planName, productId, productHandle, button) {
+  // Get variant ID from container
+  var container = button.closest('.product-subscription-options');
+  var variantId = container.dataset.variantId;
+  
+  console.log('[Subscription Checkout] Starting checkout process', {
+    planId: planId,
+    planName: planName,
+    productId: productId,
+    variantId: variantId
+  });
+  
+  if (!variantId) {
+    console.error('[Subscription Checkout] No variant ID found');
+    showCheckoutError(button, 'Product variant not found. Please refresh the page.');
+    return;
+  }
+  
   // Try multiple checkout endpoints
   var checkoutEndpoints = [
     'http://127.0.0.1:8003/api/subscriptions/checkout/create/',
@@ -463,11 +552,13 @@ function createSubscriptionCheckout(planId, planName, productId, productHandle, 
   function tryNextCheckoutEndpoint() {
     if (endpointIndex >= checkoutEndpoints.length) {
       // All endpoints failed
+      console.error('[Subscription Checkout] All API endpoints failed');
       showCheckoutError(button, 'Unable to process subscription. Please try again.');
       return;
     }
     
     var endpoint = checkoutEndpoints[endpointIndex];
+    console.log('[Subscription Checkout] Trying endpoint:', endpoint);
     
     fetch(endpoint, {
       method: 'POST',
@@ -476,23 +567,35 @@ function createSubscriptionCheckout(planId, planName, productId, productHandle, 
       },
       body: JSON.stringify({
         selling_plan_id: planId,
+        variant_id: variantId,
         product_id: productId,
         quantity: 1
       })
     })
     .then(function(response) {
+      console.log('[Subscription Checkout] API response status:', response.status);
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
       return response.json();
     })
     .then(function(data) {
-      if (data.success) {
-        // Show success message
+      console.log('[Subscription Checkout] API response data:', data);
+      
+      if (data.success && data.checkout_method === 'native') {
+        // Use Shopify native checkout with cart
+        console.log('[Subscription Checkout] Using native checkout method');
+        addToCartAndCheckout(data.cart_data, planName, button);
+      } else if (data.success) {
+        // Legacy success response
+        console.log('[Subscription Checkout] Using legacy success handler');
         showCheckoutSuccess(button, planName, data);
       } else {
         throw new Error(data.error || 'Checkout failed');
       }
     })
     .catch(function(error) {
-      console.warn('Checkout failed on ' + endpoint + ':', error);
+      console.warn('[Subscription Checkout] Failed on ' + endpoint + ':', error);
       endpointIndex++;
       tryNextCheckoutEndpoint();
     });
@@ -501,24 +604,110 @@ function createSubscriptionCheckout(planId, planName, productId, productHandle, 
   tryNextCheckoutEndpoint();
 }
 
+function addToCartAndCheckout(cartData, planName, button) {
+  console.log('[Cart API] Adding item to cart with data:', cartData);
+  
+  // Add item to cart with subscription using Shopify Cart API
+  fetch('/cart/add.js', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: cartData.variant_id,
+      quantity: cartData.quantity,
+      selling_plan: cartData.selling_plan
+    })
+  })
+  .then(function(response) {
+    console.log('[Cart API] Response status:', response.status);
+    
+    if (!response.ok) {
+      return response.text().then(function(text) {
+        console.error('[Cart API] Error response:', text);
+        throw new Error('Failed to add to cart: ' + response.status);
+      });
+    }
+    return response.json();
+  })
+  .then(function(item) {
+    console.log('[Cart API] Item added successfully:', item);
+    
+    // Check if we're in local development (port 9292 or localhost dev)
+    var isLocalDev = window.location.port === '9292' || 
+                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname === 'localhost';
+    
+    console.log('[Cart API] Environment check - isLocalDev:', isLocalDev);
+    
+    if (isLocalDev) {
+      // In development: Show success message with manual checkout link
+      console.log('[Cart API] Showing cart success message (local dev mode)');
+      showCartSuccessMessage(button, planName, item);
+    } else {
+      // In production: Redirect to checkout
+      console.log('[Cart API] Redirecting to checkout (production mode)');
+      button.textContent = 'Redirecting to checkout...';
+      setTimeout(function() {
+        var checkoutUrl = window.Shopify && window.Shopify.routes && window.Shopify.routes.root 
+          ? window.Shopify.routes.root + 'checkout' 
+          : '/checkout';
+        console.log('[Cart API] Redirecting to:', checkoutUrl);
+        window.location.href = checkoutUrl;
+      }, 500);
+    }
+  })
+  .catch(function(error) {
+    console.error('[Cart API] Error:', error);
+    showCheckoutError(button, 'Unable to add subscription to cart. Please try again.');
+  });
+}
+
+function showCartSuccessMessage(button, planName, cartItem) {
+  // Show success message with cart/checkout options
+  var container = button.closest('.product-subscription-options');
+  var successHTML = 
+    '<div class="subscription-success">' +
+      '<h4 style="color: #008060; margin: 0 0 1rem 0;">✓ Subscription Added to Cart!</h4>' +
+      '<p style="margin: 0 0 1.5rem 0;">Subscription <strong>' + planName + '</strong> has been added to your cart.</p>' +
+      '<div class="subscription-details" style="background: rgba(0,128,96,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">' +
+        '<p style="margin: 0.5rem 0;"><strong>Variant ID:</strong> ' + (cartItem.variant_id || cartItem.id) + '</p>' +
+        '<p style="margin: 0.5rem 0;"><strong>Quantity:</strong> ' + (cartItem.quantity || 1) + '</p>' +
+        '<p style="margin: 0.5rem 0;"><strong>Selling Plan:</strong> ' + (cartItem.selling_plan_allocation ? cartItem.selling_plan_allocation.selling_plan.id : 'Included') + '</p>' +
+      '</div>' +
+      '<div class="subscription-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">' +
+        '<a href="/cart" class="button button--primary" style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; text-decoration: none;">' +
+          'View Cart' +
+        '</a>' +
+        '<button class="button" onclick="location.reload()" style="flex: 1; min-width: 150px;">' +
+          'Continue Shopping' +
+        '</button>' +
+      '</div>' +
+      '<p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">' +
+        '<strong>Note:</strong> To complete your subscription purchase, go to your cart and proceed to checkout.' +
+      '</p>' +
+    '</div>';
+  
+  container.innerHTML = successHTML;
+}
+
 function showCheckoutSuccess(button, planName, data) {
   var container = button.closest('.product-subscription-options');
   var successHTML = 
     '<div class="subscription-success">' +
-      '<h4>Subscription Created!</h4>' +
-      '<p>You have successfully subscribed to <strong>' + planName + '</strong>.</p>' +
-      '<div class="subscription-details">' +
-        '<p><strong>Subscription ID:</strong> ' + (data.subscription_id || 'Processing...') + '</p>' +
-        '<p><strong>Next Billing:</strong> ' + (data.next_billing_date || 'Processing...') + '</p>' +
-      '</div>' +
-      '<div class="subscription-actions">' +
-        '<button class="manage-subscription-btn" onclick="window.open('/account/subscriptions', '_blank')">' +
-          'Manage Subscription' +
-        '</button>' +
-        '<button class="continue-shopping-btn" onclick="location.reload()">' +
+      '<h4 style="color: #008060; margin: 0 0 1rem 0;">✓ Subscription Added to Cart!</h4>' +
+      '<p style="margin: 0 0 1.5rem 0;">Subscription <strong>' + planName + '</strong> has been added to your cart.</p>' +
+      '<div class="subscription-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">' +
+        '<a href="/cart" class="button button--primary" style="flex: 1; min-width: 150px; text-align: center; padding: 1rem; text-decoration: none;">' +
+          'View Cart' +
+        '</a>' +
+        '<button class="button" onclick="location.reload()" style="flex: 1; min-width: 150px;">' +
           'Continue Shopping' +
         '</button>' +
       '</div>' +
+      '<p style="margin-top: 1rem; font-size: 0.9rem; color: #666; text-align: center;">' +
+        'Complete your purchase by going to your cart and checking out.' +
+      '</p>' +
     '</div>';
   
   container.innerHTML = successHTML;

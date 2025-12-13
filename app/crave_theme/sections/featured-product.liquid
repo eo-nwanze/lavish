@@ -372,6 +372,10 @@
                   product_form_id: product_form_id,
                   section_id: section.id
                 -%}
+                
+                {%- comment -%} Subscription Options - Load subscription plans via API {%- endcomment -%}
+                {%- render 'product-subscription-options', product: product -%}
+                
               {%- when 'custom_liquid' -%}
                 {{ block.settings.custom_liquid }}
               {%- when 'rating' -%}

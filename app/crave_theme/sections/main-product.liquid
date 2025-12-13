@@ -460,6 +460,10 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+                
+                {%- comment -%} Subscription Options - Load subscription plans via API {%- endcomment -%}
+                {%- render 'product-subscription-options', product: product -%}
+                
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">
