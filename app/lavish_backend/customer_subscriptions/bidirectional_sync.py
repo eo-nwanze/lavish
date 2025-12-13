@@ -220,6 +220,134 @@ class SubscriptionBidirectionalSync:
                 "message": f"Failed to create selling plan: {e}"
             }
     
+    def add_products_to_selling_plan_group(self, group_id: str, product_ids: List[str]) -> Dict:
+        """
+        Add products to an existing selling plan group in Shopify
+        
+        Args:
+            group_id: Shopify SellingPlanGroup GID
+            product_ids: List of Shopify Product GIDs
+            
+        Returns:
+            Dict with success status and details
+        """
+        if not product_ids:
+            return {
+                "success": False,
+                "message": "No product IDs provided"
+            }
+        
+        mutation = """
+        mutation sellingPlanGroupAddProducts($id: ID!, $productIds: [ID!]!) {
+          sellingPlanGroupAddProducts(id: $id, productIds: $productIds) {
+            sellingPlanGroup {
+              id
+              name
+              products(first: 50) {
+                edges {
+                  node {
+                    id
+                    title
+                  }
+                }
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        """
+        
+        variables = {
+            "id": group_id,
+            "productIds": product_ids
+        }
+        
+        try:
+            result = self.client.execute_graphql_query(mutation, variables)
+            
+            if "errors" in result:
+                logger.error(f"Product association failed: {result['errors']}")
+                return {
+                    "success": False,
+                    "errors": result["errors"],
+                    "message": "GraphQL errors occurred"
+                }
+            
+            data = result.get("data", {}).get("sellingPlanGroupAddProducts", {})
+            user_errors = data.get("userErrors", [])
+            
+            if user_errors:
+                logger.error(f"Product association validation errors: {user_errors}")
+                return {
+                    "success": False,
+                    "errors": user_errors,
+                    "message": "Validation errors occurred"
+                }
+            
+            selling_plan_group = data.get("sellingPlanGroup")
+            if selling_plan_group:
+                products = selling_plan_group.get("products", {}).get("edges", [])
+                product_count = len(products)
+                logger.info(f"Successfully added {len(product_ids)} products to group. Total products now: {product_count}")
+                return {
+                    "success": True,
+                    "group_id": group_id,
+                    "products_added": len(product_ids),
+                    "total_products": product_count,
+                    "message": f"Added {len(product_ids)} products to selling plan group"
+                }
+            
+            return {
+                "success": False,
+                "message": "No selling plan group data in response"
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception adding products to selling plan group: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to add products: {e}"
+            }
+    
+    def sync_selling_plan_products(self, selling_plan) -> Dict:
+        """
+        Sync product associations from Django to Shopify for a selling plan
+        
+        Args:
+            selling_plan: SellingPlan instance
+            
+        Returns:
+            Dict with success status and details
+        """
+        if not selling_plan.shopify_selling_plan_group_id:
+            return {
+                "success": False,
+                "message": "Selling plan has no Shopify group ID. Create it first."
+            }
+        
+        # Get all associated products with valid Shopify IDs
+        product_ids = [
+            p.shopify_id for p in selling_plan.products.all() 
+            if p.shopify_id and not p.shopify_id.startswith('temp_')
+        ]
+        
+        if not product_ids:
+            return {
+                "success": False,
+                "message": "No products with valid Shopify IDs associated with this plan"
+            }
+        
+        logger.info(f"Syncing {len(product_ids)} products to selling plan group {selling_plan.shopify_selling_plan_group_id}")
+        
+        return self.add_products_to_selling_plan_group(
+            selling_plan.shopify_selling_plan_group_id,
+            product_ids
+        )
+    
     # ==================== SUBSCRIPTION CONTRACT SYNC ====================
     
     def create_subscription_in_shopify(self, subscription) -> Dict:

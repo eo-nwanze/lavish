@@ -106,10 +106,15 @@ class SellingPlanAdmin(ImportExportModelAdmin):
         }),
     )
     
-    actions = ['push_to_shopify', 'mark_for_push', 'publish_products_to_store']
+    actions = ['push_to_shopify', 'mark_for_push', 'publish_products_to_store', 'sync_products_to_shopify']
     
     def save_model(self, request, obj, form, change):
         """Auto-push to Shopify on create/update"""
+        # Track if products changed
+        products_changed = False
+        if change and 'products' in form.changed_data:
+            products_changed = True
+        
         super().save_model(request, obj, form, change)
         
         # Auto-push to Shopify if flagged
@@ -127,6 +132,15 @@ class SellingPlanAdmin(ImportExportModelAdmin):
                     self.message_user(request, f"✅ Published {published_count} associated product(s) to Online Store", level=messages.SUCCESS)
             else:
                 self.message_user(request, f"⚠️ Selling Plan saved locally but Shopify sync failed: {result.get('message', 'Unknown error')}", level=messages.WARNING)
+        
+        # If products were changed and plan already exists in Shopify, sync the product associations
+        elif products_changed and obj.shopify_selling_plan_group_id:
+            sync_result = subscription_sync.sync_selling_plan_products(obj)
+            if sync_result.get('success'):
+                products_added = sync_result.get('products_added', 0)
+                self.message_user(request, f"✅ Synced {products_added} product(s) to Shopify selling plan group", level=messages.SUCCESS)
+            else:
+                self.message_user(request, f"⚠️ Product sync failed: {sync_result.get('message', 'Unknown error')}", level=messages.WARNING)
     
     def _publish_products_to_online_store(self, selling_plan):
         """Publish all associated products to the Online Store channel"""
@@ -292,6 +306,37 @@ class SellingPlanAdmin(ImportExportModelAdmin):
             self.message_user(request, f"ℹ️ No products needed publishing (already published or no products associated)", level=messages.INFO)
     
     publish_products_to_store.short_description = "🌐 Publish associated products to Online Store"
+    
+    def sync_products_to_shopify(self, request, queryset):
+        """Sync product associations to Shopify for selected selling plans"""
+        results = {"successful": 0, "failed": 0, "total_products": 0, "errors": []}
+        
+        for plan in queryset:
+            if not plan.shopify_selling_plan_group_id:
+                results["failed"] += 1
+                results["errors"].append(f"{plan.name}: No Shopify group ID (not synced yet)")
+                continue
+            
+            sync_result = subscription_sync.sync_selling_plan_products(plan)
+            if sync_result.get("success"):
+                results["successful"] += 1
+                results["total_products"] += sync_result.get("products_added", 0)
+            else:
+                results["failed"] += 1
+                results["errors"].append(f"{plan.name}: {sync_result.get('message', 'Unknown error')}")
+        
+        if results["successful"] > 0:
+            self.message_user(
+                request, 
+                f"✅ Successfully synced products for {results['successful']} selling plans ({results['total_products']} total products)", 
+                level=messages.SUCCESS
+            )
+        
+        if results["failed"] > 0:
+            error_msg = f"❌ Failed to sync {results['failed']} plans. Errors: " + "; ".join(results["errors"][:3])
+            self.message_user(request, error_msg, level=messages.WARNING)
+    
+    sync_products_to_shopify.short_description = "🔄 Sync product associations to Shopify"
 
 
 @admin.register(CustomerSubscription)

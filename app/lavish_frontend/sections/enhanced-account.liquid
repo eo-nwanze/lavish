@@ -339,7 +339,7 @@
                       {{ subscription.nextBillingDate | date: "%B %d, %Y" }}
                     </div>
                     <div class="renewal-details" style="display: flex; gap: 1rem; align-items: center; margin: 0.5rem 0;">
-                      <span class="billing-amount" style="font-size: 1.3rem; color: rgba(var(--color-foreground), 0.8);">${{ subscription.price | money }}</span>
+                      <span class="billing-amount" style="font-size: 1.3rem; color: rgba(var(--color-foreground), 0.8);">{{ subscription.price | money }}</span>
                       <span class="billing-frequency" style="font-size: 1.2rem; color: rgba(var(--color-foreground), 0.6);">{{ subscription.billingPolicyIntervalCount }} {{ subscription.billingPolicyInterval | downcase }}ly</span>
                     </div>
                     <div class="renewal-progress" id="renewal-progress-{{ subscription.id }}" style="margin-top: 1rem;">
@@ -919,40 +919,6 @@
                       {% endif %}
                       
                       {% comment %} Demo orders removed - all sample orders have been replaced with real Shopify data above {% endcomment %}
-                      
-                      {% for order in customer.orders %}
-                        <tr class="order-row" data-order-id="{{ order.id }}">
-                          <td data-label="Order"><a href="{{ order.customer_url }}" class="order-link">#{{ order.name }}</a></td>
-                          <td data-label="Date" class="order-date">{{ order.created_at | date: format: 'date' }}</td>
-                          <td data-label="Items" class="order-items">{{ order.line_items.size }} items</td>
-                          <td data-label="Status">
-                            <span class="status-badge {% if order.financial_status == 'paid' %}paid{% elsif order.financial_status == 'pending' %}pending{% else %}other{% endif %}">
-                              {{ order.financial_status_label }}
-                            </span>
-                          </td>
-                          <td data-label="Fulfillment">
-                            <span class="status-badge {% if order.fulfillment_status == 'fulfilled' %}fulfilled{% elsif order.fulfillment_status == 'partial' %}partial{% else %}unfulfilled{% endif %}">
-                              {{ order.fulfillment_status_label | default: 'Unfulfilled' }}
-                            </span>
-                          </td>
-                          <td data-label="Total" class="order-total">{{ order.total_price | money }}</td>
-                          <td class="actions-cell">
-                            <div class="action-dropdown">
-                              <div class="action-toggle" onclick="toggleActionDropdown('actions-{{ order.id | default: '' }}')">
-                                <i class="more-icon">⋯</i>
-                              </div>
-                              <div id="actions-{{ order.id }}" class="action-menu">
-                                <a href="#" onclick="viewOrderDetails('{{ order.id | default: '' }}')" class="action-item">
-                                  <i class="action-icon">👁️</i> View Details
-                                </a>
-                                <a href="#" onclick="downloadInvoice('{{ order.id | default: '' }}')" class="action-item">
-                                  <i class="action-icon">📄</i> Download Invoice
-                                </a>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      {% endfor %}
                     </tbody>
                   </table>
                 </div>
